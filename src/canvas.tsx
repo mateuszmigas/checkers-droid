@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { CheckersBoard } from "./game-objects/checkersBoard";
 import { Checker } from "./game-objects/checker";
 import { MoveIndicator } from "./game-objects/moveIndicator";
+import { TurnIndicator } from "./game-objects/turnIndicator";
 import {
   GameState,
   createInitialGameState,
@@ -57,6 +58,7 @@ export const GameCanvas = () => {
       />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
       <CheckersBoard />
+      <TurnIndicator player={gameState.currentPlayer} />
       {gameState.pieces.map((piece) => (
         <Checker
           key={piece.id}
