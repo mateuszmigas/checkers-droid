@@ -88,7 +88,14 @@ export const getValidMoves = (
   const moves: Position[] = [];
   const direction = piece.player === "PLAYER_ONE" ? 1 : -1;
 
-  // Regular moves
+  // Check for jump moves first
+  const jumpMoves = getJumpMoves(piece, gameState);
+  if (jumpMoves.length > 0) {
+    // If jumps are available, only return jump moves (jumps are mandatory)
+    return jumpMoves;
+  }
+
+  // Regular moves (only if no jumps are available)
   const leftMove = {
     row: piece.position.row + direction,
     col: piece.position.col - 1,
@@ -106,9 +113,63 @@ export const getValidMoves = (
     moves.push(rightMove);
   }
 
-  // TODO: Add jump moves and king moves later
-
   return moves;
+};
+
+const getJumpMoves = (
+  piece: CheckerPiece,
+  gameState: GameState
+): Position[] => {
+  const jumpMoves: Position[] = [];
+  const direction = piece.player === "PLAYER_ONE" ? 1 : -1;
+
+  // Check left jump
+  const leftJumpOver = {
+    row: piece.position.row + direction,
+    col: piece.position.col - 1,
+  };
+  const leftJumpTarget = {
+    row: piece.position.row + direction * 2,
+    col: piece.position.col - 2,
+  };
+
+  // Check right jump
+  const rightJumpOver = {
+    row: piece.position.row + direction,
+    col: piece.position.col + 1,
+  };
+  const rightJumpTarget = {
+    row: piece.position.row + direction * 2,
+    col: piece.position.col + 2,
+  };
+
+  // Check if jumps are valid
+  if (canJumpOver(piece, leftJumpOver, leftJumpTarget, gameState)) {
+    jumpMoves.push(leftJumpTarget);
+  }
+  if (canJumpOver(piece, rightJumpOver, rightJumpTarget, gameState)) {
+    jumpMoves.push(rightJumpTarget);
+  }
+
+  return jumpMoves;
+};
+
+const canJumpOver = (
+  piece: CheckerPiece,
+  jumpOver: Position,
+  target: Position,
+  gameState: GameState
+): boolean => {
+  // Check if target position is valid and empty
+  if (!isValidPosition(target) || getPieceAtPosition(gameState, target)) {
+    return false;
+  }
+
+  // Get the piece being jumped over
+  const jumpedPiece = getPieceAtPosition(gameState, jumpOver);
+
+  // Check if there's an opponent's piece to jump over
+  return jumpedPiece !== undefined && jumpedPiece.player !== piece.player;
 };
 
 export const movePiece = (
@@ -116,13 +177,36 @@ export const movePiece = (
   piece: CheckerPiece,
   targetPosition: Position
 ): GameState => {
-  const newPieces = gameState.pieces.map((p) =>
+  let newPieces = [...gameState.pieces];
+  let capturedPieces = [...gameState.capturedPieces];
+
+  // Check if this is a jump move
+  const rowDiff = Math.abs(targetPosition.row - piece.position.row);
+  if (rowDiff === 2) {
+    // This is a jump move - remove the jumped piece
+    const jumpedRow = (piece.position.row + targetPosition.row) / 2;
+    const jumpedCol = (piece.position.col + targetPosition.col) / 2;
+    const jumpedPiece = getPieceAtPosition(gameState, {
+      row: jumpedRow,
+      col: jumpedCol,
+    });
+
+    if (jumpedPiece) {
+      // Remove the jumped piece from the board
+      newPieces = newPieces.filter((p) => p.id !== jumpedPiece.id);
+      capturedPieces.push(jumpedPiece);
+    }
+  }
+
+  // Update the moving piece's position
+  newPieces = newPieces.map((p) =>
     p.id === piece.id ? { ...p, position: targetPosition } : p
   );
 
   return {
     ...gameState,
     pieces: newPieces,
+    capturedPieces,
     currentPlayer:
       gameState.currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE",
     selectedPiece: null,
