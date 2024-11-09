@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { useEffect, useState } from "react";
+import { Canvas, useThree } from "@react-three/fiber";
 import { CheckersBoard } from "./game-objects/checkersBoard";
 import { Checker } from "./game-objects/checker";
 import { MoveIndicator } from "./game-objects/moveIndicator";
@@ -14,8 +14,9 @@ import {
   getValidMoves,
   movePiece,
 } from "./gameState";
+import { PerspectiveCamera, Vector3 } from "three";
 
-export const GameCanvas = () => {
+export const GameCanvas = (props: { isOrthographic?: boolean }) => {
   const [gameState, setGameState] = useState<GameState>(
     createInitialGameState()
   );
@@ -46,8 +47,27 @@ export const GameCanvas = () => {
     }
   };
 
+  const { camera } = useThree();
+
+  useEffect(() => {
+    if (props.isOrthographic) {
+      camera.position.set(0, 20, 0);
+      camera.lookAt(new Vector3(0, 0, 0));
+      camera.zoom = 2;
+      camera.updateProjectionMatrix();
+    } else {
+      camera.position.set(0, 10, 10);
+      camera.lookAt(new Vector3(0, 0, 0));
+      camera.zoom = 1;
+      if ("fov" in camera) {
+        (camera as PerspectiveCamera).fov = 45;
+        camera.updateProjectionMatrix();
+      }
+    }
+  }, [props.isOrthographic, camera]);
+
   return (
-    <Canvas className="size-full" camera={{ position: [0, 10, -10], fov: 45 }}>
+    <>
       <ambientLight intensity={Math.PI / 2} />
       <spotLight
         position={[10, 10, 10]}
@@ -75,7 +95,7 @@ export const GameCanvas = () => {
           onClick={() => handleMoveClick(move)}
         />
       ))}
-    </Canvas>
+    </>
   );
 };
 
