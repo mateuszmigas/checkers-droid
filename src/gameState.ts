@@ -81,3 +81,70 @@ export const coordinatesToPosition = (
   return { row, col };
 };
 
+export const getValidMoves = (
+  piece: CheckerPiece,
+  gameState: GameState
+): Position[] => {
+  const moves: Position[] = [];
+  const direction = piece.player === "PLAYER_ONE" ? 1 : -1;
+
+  // Regular moves
+  const leftMove = {
+    row: piece.position.row + direction,
+    col: piece.position.col - 1,
+  };
+  const rightMove = {
+    row: piece.position.row + direction,
+    col: piece.position.col + 1,
+  };
+
+  // Check if moves are within board bounds and target square is empty
+  if (isValidPosition(leftMove) && !getPieceAtPosition(gameState, leftMove)) {
+    moves.push(leftMove);
+  }
+  if (isValidPosition(rightMove) && !getPieceAtPosition(gameState, rightMove)) {
+    moves.push(rightMove);
+  }
+
+  // TODO: Add jump moves and king moves later
+
+  return moves;
+};
+
+export const movePiece = (
+  gameState: GameState,
+  piece: CheckerPiece,
+  targetPosition: Position
+): GameState => {
+  const newPieces = gameState.pieces.map((p) =>
+    p.id === piece.id ? { ...p, position: targetPosition } : p
+  );
+
+  return {
+    ...gameState,
+    pieces: newPieces,
+    currentPlayer:
+      gameState.currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE",
+    selectedPiece: null,
+    possibleMoves: [],
+  };
+};
+
+const isValidPosition = (position: Position): boolean => {
+  return (
+    position.row >= 0 &&
+    position.row < 8 &&
+    position.col >= 0 &&
+    position.col < 8
+  );
+};
+
+const getPieceAtPosition = (
+  gameState: GameState,
+  position: Position
+): CheckerPiece | undefined => {
+  return gameState.pieces.find(
+    (p) => p.position.row === position.row && p.position.col === position.col
+  );
+};
+
