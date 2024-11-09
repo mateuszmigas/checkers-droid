@@ -3,7 +3,7 @@ import { GameCanvas } from "./canvas";
 import { useState } from "react";
 
 export const App = () => {
-  const [isOrthographic, setIsOrthographic] = useState(true);
+  const [isOrthographic, setIsOrthographic] = useState(false);
 
   return (
     <div className="size-full relative">
@@ -13,18 +13,7 @@ export const App = () => {
       >
         {isOrthographic ? "Perspective View" : "Top View"}
       </button>
-      <Canvas
-        camera={
-          !isOrthographic
-            ? {
-                fov: 45,
-                position: [0, 10, 10],
-                near: 0.1,
-                far: 1000,
-              }
-            : undefined
-        }
-      >
+      <Canvas className="size-full bg-gray-900">
         <GameCanvas isOrthographic={isOrthographic} />
       </Canvas>
     </div>

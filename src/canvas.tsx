@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import { CheckersBoard } from "./game-objects/checkersBoard";
 import { Checker } from "./game-objects/checker";
 import { MoveIndicator } from "./game-objects/moveIndicator";
