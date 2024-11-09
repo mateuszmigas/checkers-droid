@@ -1,16 +1,26 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Mesh } from "three";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
 
 export const RobotHead = () => {
   const robotRef = useRef<Mesh>(null);
+  const [isBlinking, setIsBlinking] = useState(false);
 
   useFrame((state) => {
     if (robotRef.current) {
       robotRef.current.position.y = 2 + Math.sin(state.clock.elapsedTime) * 0.1;
     }
   });
+
+  useEffect(() => {
+    const blinkInterval = setInterval(() => {
+      setIsBlinking(true);
+      setTimeout(() => setIsBlinking(false), 500); // Keep eye closed for 200ms
+    }, 3000); // Blink every 3 seconds
+
+    return () => clearInterval(blinkInterval);
+  }, []);
 
   return (
     <group position={[0, 2, 0]}>
@@ -35,9 +45,9 @@ export const RobotHead = () => {
           <meshStandardMaterial color="#333333" />
         </mesh>
 
-        {/* Eyes and smile remain unchanged... */}
+        {/* Right eye (blinking) */}
         <mesh position={[0.2, 0.2, 0.51]}>
-          <boxGeometry args={[0.2, 0.1, 0.01]} />
+          <boxGeometry args={[0.2, isBlinking ? 0.01 : 0.1, 0.01]} />
           <meshStandardMaterial
             color="#00ffff"
             emissive="#00ffff"
@@ -45,6 +55,7 @@ export const RobotHead = () => {
           />
         </mesh>
 
+        {/* Left eye (static) */}
         <mesh position={[-0.2, 0.2, 0.51]}>
           <boxGeometry args={[0.2, 0.1, 0.01]} />
           <meshStandardMaterial
