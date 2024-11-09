@@ -1,4 +1,10 @@
+import { GameCanvas } from "./canvas";
+
 export const App = () => {
-  return <div className="bg-red-500">Hello World</div>;
+  return (
+    <div className="size-full">
+      <GameCanvas />
+    </div>
+  );
 };
 
