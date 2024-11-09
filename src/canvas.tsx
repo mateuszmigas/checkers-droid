@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { CheckersBoard } from "./game-objects/checkersBoard";
 import { Checker } from "./game-objects/checker";
@@ -10,9 +10,7 @@ import {
 } from "./gameState";
 
 export const GameCanvas = () => {
-  const [gameState, setGameState] = useState<GameState>(
-    createInitialGameState()
-  );
+  const [gameState] = useState<GameState>(createInitialGameState());
 
   const getPlayerColor = (player: PlayerType): string => {
     return player === "PLAYER_ONE" ? "#cc0000" : "#00cc00";
