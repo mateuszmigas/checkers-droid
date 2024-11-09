@@ -1,6 +1,5 @@
 import { useSpring, animated } from "@react-spring/three";
 import { ThreeEvent } from "@react-three/fiber";
-import { Vector3 } from "three";
 import { easings } from "@react-spring/three";
 
 interface CheckerProps {
