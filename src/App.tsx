@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import { GameCanvas } from "./canvas";
+import { GameScene } from "./game-objects/gameScene";
 import { useState } from "react";
 import { Button } from "./components/ui/button";
 
@@ -9,7 +9,7 @@ export const App = () => {
   return (
     <div className="size-full relative">
       <Canvas className="size-full bg-gray-900">
-        <GameCanvas isOrthographic={isOrthographic} />
+        <GameScene isOrthographic={isOrthographic} />
       </Canvas>
       <Button
         className="absolute top-4 right-4"

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useThree } from "@react-three/fiber";
-import { CheckersBoard } from "./game-objects/checkersBoard";
-import { Checker } from "./game-objects/checker";
-import { MoveIndicator } from "./game-objects/moveIndicator";
-import { TurnIndicator } from "./game-objects/turnIndicator";
+import { CheckersBoard } from "./checkersBoard";
+import { Checker } from "./checker";
+import { MoveIndicator } from "./moveIndicator";
+import { TurnIndicator } from "./turnIndicator";
 import {
   GameState,
   createInitialGameState,
@@ -13,10 +13,11 @@ import {
   Position,
   getValidMoves,
   movePiece,
-} from "./gameState";
+} from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
+import { RobotHead } from "./robotHead";
 
-export const GameCanvas = (props: { isOrthographic?: boolean }) => {
+export const GameScene = (props: { isOrthographic?: boolean }) => {
   const [gameState, setGameState] = useState<GameState>(
     createInitialGameState()
   );
@@ -95,6 +96,7 @@ export const GameCanvas = (props: { isOrthographic?: boolean }) => {
           onClick={() => handleMoveClick(move)}
         />
       ))}
+      <RobotHead />
     </>
   );
 };
