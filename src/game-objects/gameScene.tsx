@@ -17,7 +17,12 @@ import {
 import { PerspectiveCamera, Vector3 } from "three";
 import { RobotHead } from "./robotHead";
 
-export const GameScene = (props: { isOrthographic?: boolean }) => {
+interface GameSceneProps {
+  isOrthographic?: boolean;
+  expression: "happy" | "sad" | "focused";
+}
+
+export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
   const [gameState, setGameState] = useState<GameState>(
     createInitialGameState()
   );
@@ -51,7 +56,7 @@ export const GameScene = (props: { isOrthographic?: boolean }) => {
   const { camera } = useThree();
 
   useEffect(() => {
-    if (props.isOrthographic) {
+    if (isOrthographic) {
       camera.position.set(0, 20, 0);
       camera.lookAt(new Vector3(0, 0, 0));
       camera.zoom = 2;
@@ -65,7 +70,7 @@ export const GameScene = (props: { isOrthographic?: boolean }) => {
         camera.updateProjectionMatrix();
       }
     }
-  }, [props.isOrthographic, camera]);
+  }, [isOrthographic, camera]);
 
   return (
     <>
@@ -96,7 +101,7 @@ export const GameScene = (props: { isOrthographic?: boolean }) => {
           onClick={() => handleMoveClick(move)}
         />
       ))}
-      <RobotHead />
+      <RobotHead expression={expression} />
     </>
   );
 };
