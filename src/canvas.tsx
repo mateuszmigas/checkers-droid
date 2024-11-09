@@ -1,34 +1,25 @@
-import React, { useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Mesh, TextureLoader, Group } from "three";
-
-function Box(props: { position: [number, number, number] }) {
-  // This reference will give us direct access to the mesh
-  const meshRef = useRef<Mesh>();
-  // Set up state for the hovered and active state
-  const [hovered, setHover] = useState(false);
-  const [active, setActive] = useState(false);
-  // Subscribe this component to the render-loop, rotate the mesh every frame
-  useFrame((state, delta) => (meshRef.current!.rotation.x += delta));
-  // Return view, these are regular three.js elements expressed in JSX
-  return (
-    <mesh
-      {...props}
-      ref={meshRef as any}
-      scale={active ? 1.5 : 1}
-      onClick={(event) => setActive(!active)}
-      onPointerOver={(event) => setHover(true)}
-      onPointerOut={(event) => setHover(false)}
-    >
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color={hovered ? "hotpink" : "orange"} />
-    </mesh>
-  );
-}
+import React, { useEffect, useState } from "react";
+import { Canvas } from "@react-three/fiber";
+import { CheckersBoard } from "./game-objects/checkersBoard";
+import { Checker } from "./game-objects/checker";
+import {
+  GameState,
+  createInitialGameState,
+  positionToCoordinates,
+  PlayerType,
+} from "./gameState";
 
 export const GameCanvas = () => {
+  const [gameState, setGameState] = useState<GameState>(
+    createInitialGameState()
+  );
+
+  const getPlayerColor = (player: PlayerType): string => {
+    return player === "PLAYER_ONE" ? "#cc0000" : "#00cc00";
+  };
+
   return (
-    <Canvas className="size-full">
+    <Canvas className="size-full" camera={{ position: [0, 10, 10], fov: 45 }}>
       <ambientLight intensity={Math.PI / 2} />
       <spotLight
         position={[10, 10, 10]}
@@ -38,8 +29,14 @@ export const GameCanvas = () => {
         intensity={Math.PI}
       />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
-      <Box position={[-1.2, 0, 0]} />
-      <Box position={[1.2, 0, 0]} />
+      <CheckersBoard />
+      {gameState.pieces.map((piece) => (
+        <Checker
+          key={piece.id}
+          position={positionToCoordinates(piece.position)}
+          color={getPlayerColor(piece.player)}
+        />
+      ))}
     </Canvas>
   );
 };
