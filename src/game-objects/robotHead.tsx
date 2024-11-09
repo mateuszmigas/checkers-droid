@@ -52,27 +52,108 @@ export const RobotHead = ({ expression = "happy" }: RobotHeadProps) => {
   });
 
   return (
-    <group position={[0, 2, -3]}>
+    <group position={[0, 1.5, -5]}>
+      {/* Robot Torso */}
+      <group position={[0, -1.2, 0]}>
+        {/* Main body */}
+        <RoundedBox args={[0.8, 1.2, 0.6]} radius={0.1} smoothness={4}>
+          <meshStandardMaterial
+            color="#4a4a4a"
+            metalness={0.8}
+            roughness={0.2}
+          />
+        </RoundedBox>
+
+        {/* Chest plate */}
+        <mesh position={[0, 0.2, 0.31]}>
+          <boxGeometry args={[0.4, 0.3, 0.01]} />
+          <meshStandardMaterial
+            color="#6e6e6e"
+            metalness={0.9}
+            roughness={0.1}
+          />
+        </mesh>
+
+        {/* Arms */}
+        <group position={[-0.6, 0.2, 0]}>
+          {/* Left arm */}
+          <RoundedBox args={[0.2, 0.8, 0.2]} radius={0.05} smoothness={4}>
+            <meshStandardMaterial
+              color="#3d3d3d"
+              metalness={0.8}
+              roughness={0.2}
+            />
+          </RoundedBox>
+          {/* Left hand */}
+          <mesh position={[0, -0.5, 0]}>
+            <sphereGeometry args={[0.15, 16, 16]} />
+            <meshStandardMaterial
+              color="#2a2a2a"
+              metalness={0.9}
+              roughness={0.1}
+            />
+          </mesh>
+        </group>
+
+        {/* Right arm */}
+        <group position={[0.6, 0.2, 0]}>
+          {/* Right arm */}
+          <RoundedBox args={[0.2, 0.8, 0.2]} radius={0.05} smoothness={4}>
+            <meshStandardMaterial
+              color="#3d3d3d"
+              metalness={0.8}
+              roughness={0.2}
+            />
+          </RoundedBox>
+          {/* Right hand */}
+          <mesh position={[0, -0.5, 0]}>
+            <sphereGeometry args={[0.15, 16, 16]} />
+            <meshStandardMaterial
+              color="#2a2a2a"
+              metalness={0.9}
+              roughness={0.1}
+            />
+          </mesh>
+        </group>
+      </group>
+
+      {/* Existing robot head components */}
       <RoundedBox ref={robotRef} args={[1, 1, 1]} radius={0.1} smoothness={4}>
-        <meshStandardMaterial color="#ff8888" />
+        <meshStandardMaterial color="#4a4a4a" metalness={0.8} roughness={0.2} />
 
         {/* Hair spikes - removed animation */}
         <group>
           <mesh position={[-0.35, 0.55, 0]} rotation={[0, 0, Math.PI / 6]}>
             <boxGeometry args={[0.1, 0.3, 0.1]} />
-            <meshStandardMaterial color="#333333" />
+            <meshStandardMaterial
+              color="#2a2a2a"
+              metalness={0.9}
+              roughness={0.1}
+            />
           </mesh>
           <mesh position={[-0.15, 0.6, 0]} rotation={[0, 0, 0]}>
             <boxGeometry args={[0.1, 0.35, 0.1]} />
-            <meshStandardMaterial color="#333333" />
+            <meshStandardMaterial
+              color="#2a2a2a"
+              metalness={0.9}
+              roughness={0.1}
+            />
           </mesh>
           <mesh position={[0.05, 0.63, 0]} rotation={[0, 0, -Math.PI / 12]}>
             <boxGeometry args={[0.1, 0.4, 0.1]} />
-            <meshStandardMaterial color="#333333" />
+            <meshStandardMaterial
+              color="#2a2a2a"
+              metalness={0.9}
+              roughness={0.1}
+            />
           </mesh>
           <mesh position={[0.25, 0.58, 0]} rotation={[0, 0, -Math.PI / 6]}>
             <boxGeometry args={[0.1, 0.3, 0.1]} />
-            <meshStandardMaterial color="#333333" />
+            <meshStandardMaterial
+              color="#2a2a2a"
+              metalness={0.9}
+              roughness={0.1}
+            />
           </mesh>
         </group>
 
@@ -115,7 +196,11 @@ export const RobotHead = ({ expression = "happy" }: RobotHeadProps) => {
           rotation={[Math.PI / 2, 0, 0]}
         >
           <primitive object={createMouthShape(mouthCurve.get())} />
-          <meshStandardMaterial color="#333333" />
+          <meshStandardMaterial
+            color="#00ffff"
+            emissive="#00ffff"
+            emissiveIntensity={expression === "focused" ? 0.8 : 0.5}
+          />
         </animated.mesh>
       </RoundedBox>
     </group>
