@@ -1,44 +1,38 @@
+import { useSpring, animated } from "@react-spring/three";
+import { ThreeEvent } from "@react-three/fiber";
+import { Vector3 } from "three";
+import { easings } from "@react-spring/three";
+
 interface CheckerProps {
-  position?: [number, number, number];
-  color?: string;
-  isSelected?: boolean;
-  onClick?: () => void;
+  position: [number, number, number];
+  color: string;
+  isSelected: boolean;
+  onClick: (event: ThreeEvent<MouseEvent>) => void;
 }
 
-export const Checker: React.FC<CheckerProps> = ({
-  position = [0, 0, 0],
-  color = "#ff0000",
-  isSelected = false,
+export const Checker = ({
+  position,
+  color,
+  isSelected,
   onClick,
-}) => {
-  return (
-    <group position={position}>
-      {/* Outer glow/outline cylinder - only visible when selected */}
-      {isSelected && (
-        <mesh position={[0, 0, 0]}>
-          <cylinderGeometry args={[0.45, 0.45, 0.14, 32]} />
-          <meshStandardMaterial
-            color={color}
-            transparent={true}
-            opacity={0.6}
-            emissive={color}
-            emissiveIntensity={1}
-          />
-        </mesh>
-      )}
+}: CheckerProps) => {
+  const { position: animatedPosition } = useSpring({
+    position,
+    config: {
+      duration: 150,
+      easing: easings.easeInOutQuad,
+    },
+  });
 
-      {/* Main checker piece */}
-      <mesh onClick={onClick}>
-        <cylinderGeometry args={[0.4, 0.4, 0.15, 32]} />
-        <meshStandardMaterial
-          color={color}
-          metalness={0.5}
-          roughness={0.2}
-          emissive={isSelected ? color : "#000000"}
-          emissiveIntensity={isSelected ? 0.3 : 0}
-        />
-      </mesh>
-    </group>
+  return (
+    <animated.mesh
+      position={animatedPosition}
+      onClick={onClick}
+      scale={isSelected ? 1.1 : 1}
+    >
+      <cylinderGeometry args={[0.4, 0.4, 0.2, 32]} />
+      <meshStandardMaterial color={color} />
+    </animated.mesh>
   );
 };
 
