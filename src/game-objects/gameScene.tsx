@@ -11,6 +11,7 @@ import {
   CheckerPiece,
   Position,
   updateGameState,
+  getAllPiecesWithCaptures,
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { RobotHead } from "./robotHead";
@@ -126,6 +127,14 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     });
   });
 
+  // Add this function to check if a piece must capture
+  const mustCapture = (position: Position): boolean => {
+    const piecesWithCaptures = getAllPiecesWithCaptures(gameState);
+    return piecesWithCaptures.some(
+      (pos) => pos.row === position.row && pos.col === position.col
+    );
+  };
+
   return (
     <>
       <ambientLight intensity={Math.PI / 2} />
@@ -148,6 +157,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
             piece.position.row === gameState.selectedPosition?.row &&
             piece.position.col === gameState.selectedPosition?.col
           }
+          mustCapture={mustCapture(piece.position)}
           onClick={() => handlePieceClick(piece.position)}
         />
       ))}
@@ -162,3 +172,4 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     </>
   );
 };
+

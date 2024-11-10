@@ -43,7 +43,7 @@ describe("Initial Board Setup", () => {
 });
 
 describe("Basic Movement Rules", () => {
-  test("men can only move diagonally forward", () => {
+  test("can only move diagonally forward", () => {
     const gameState = createInitialGameState();
     const position: Position = { row: 2, col: 1 };
 
@@ -55,7 +55,7 @@ describe("Basic Movement Rules", () => {
     expect(validMoves.length).toBe(2);
   });
 
-  test("men cannot move backward", () => {
+  test("cannot move backward", () => {
     const gameState = createInitialGameState();
     const position: Position = { row: 2, col: 1 };
 

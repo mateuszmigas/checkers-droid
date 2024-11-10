@@ -80,16 +80,43 @@ const getPieceAtPosition = (
 // Helper function to get all pieces that can capture for the current player
 export const getAllPiecesWithCaptures = (gameState: GameState): Position[] => {
   const positions: Position[] = [];
+  let maxCaptures = 0;
 
-  // Scan the board for pieces that can capture
+  // First pass: find the maximum number of captures possible
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       const piece = gameState.grid[row][col];
       if (piece?.player === gameState.currentPlayer) {
-        // Check if this piece has any capture moves
         const captureMoves = getCaptureMoves({ row, col }, gameState);
         if (captureMoves.length > 0) {
-          positions.push({ row, col });
+          const maxCapturesForPiece = Math.max(
+            ...captureMoves.map((move) =>
+              countCapturesInPath({ row, col }, move, gameState)
+            )
+          );
+          maxCaptures = Math.max(maxCaptures, maxCapturesForPiece);
+        }
+      }
+    }
+  }
+
+  // Second pass: collect only pieces that can achieve the maximum number of captures
+  if (maxCaptures > 0) {
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = gameState.grid[row][col];
+        if (piece?.player === gameState.currentPlayer) {
+          const captureMoves = getCaptureMoves({ row, col }, gameState);
+          if (captureMoves.length > 0) {
+            const maxCapturesForPiece = Math.max(
+              ...captureMoves.map((move) =>
+                countCapturesInPath({ row, col }, move, gameState)
+              )
+            );
+            if (maxCapturesForPiece === maxCaptures) {
+              positions.push({ row, col });
+            }
+          }
         }
       }
     }
@@ -139,8 +166,8 @@ const isCompletelyBlocked = (
   return regularMoves.length === 0 && captureMoves.length === 0;
 };
 
-// Enhanced getValidMoves to handle all scenarios
-export const getValidMoves = (
+// New helper function to get all valid moves for a player
+const getAllValidMovesForPosition = (
   position: Position,
   gameState: GameState
 ): Position[] => {
@@ -169,6 +196,31 @@ export const getValidMoves = (
 
   // If no captures available, get regular moves
   return getRegularMoves(position, gameState);
+};
+
+// Modified getValidMoves to check all pieces
+export const getValidMoves = (
+  position: Position,
+  gameState: GameState
+): Position[] => {
+  // First, check if any piece has capture moves
+  const piecesWithCaptures = getAllPiecesWithCaptures(gameState);
+
+  if (piecesWithCaptures.length > 0) {
+    // If the selected piece can capture, return its capture moves
+    if (
+      piecesWithCaptures.some(
+        (pos) => pos.row === position.row && pos.col === position.col
+      )
+    ) {
+      return getAllValidMovesForPosition(position, gameState);
+    }
+    // If other pieces can capture, this piece cannot move
+    return [];
+  }
+
+  // If no captures are available, return regular moves for this piece
+  return getAllValidMovesForPosition(position, gameState);
 };
 
 // Helper function to count captures in a move path
@@ -551,3 +603,4 @@ export interface GameStateUpdate {
   state: GameState;
   events: GameEvent[];
 }
+
