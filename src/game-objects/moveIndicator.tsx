@@ -1,6 +1,7 @@
 interface MoveIndicatorProps {
   position: [number, number, number];
   onClick: () => void;
+  isCapture?: boolean;
 }
 
 export const MoveIndicator: React.FC<MoveIndicatorProps> = ({
@@ -37,4 +38,3 @@ export const MoveIndicator: React.FC<MoveIndicatorProps> = ({
     </group>
   );
 };
-

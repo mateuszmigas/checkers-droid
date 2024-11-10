@@ -14,6 +14,8 @@ import {
   getAllPiecesWithCaptures,
   getValidMoves,
   ValidMovesMap,
+  PositionMap,
+  ValidMove,
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { RobotHead } from "./robotHead";
@@ -46,9 +48,11 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(
     null
   );
-  const [possibleMoves, setPossibleMoves] = useState<Position[]>([]);
+  // const [possibleMoves, setPossibleMoves] = useState<ValidMove[]>([]);
 
-  const [validMoves, setValidMoves] = useState<ValidMovesMap>(new Map());
+  const [validMoves, setValidMoves] = useState<ValidMovesMap>(
+    new PositionMap<ValidMove[]>()
+  );
 
   const handlePieceClick = (position: Position) => {
     const piece = gameState.grid[position.row][position.col];
@@ -61,11 +65,11 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
         selectedPosition?.col === position.col
       ) {
         setSelectedPosition(null);
-        setPossibleMoves([]);
+        // setPossibleMoves([]);
       } else {
-        const moves = validMoves.get(position) || [];
+        // const moves = validMoves.get(position) || [];
         setSelectedPosition(position);
-        setPossibleMoves(moves);
+        // setPossibleMoves(moves);
       }
     }
   };
@@ -81,15 +85,13 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
       setGameState(state);
 
-      // Only clear selection if player changed
       if (state.gameStatus !== previousPlayer) {
         setSelectedPosition(null);
-        setPossibleMoves([]);
+        // setPossibleMoves([]);
       } else {
-        // Update selected position to new position and get new possible moves
         setSelectedPosition(targetPosition);
-        const newValidMoves = validMoves.get(targetPosition) || [];
-        setPossibleMoves(newValidMoves);
+        // const newValidMoves = validMoves.get(targetPosition) || [];
+        // setPossibleMoves(newValidMoves);
       }
 
       console.log(events);
@@ -131,9 +133,12 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
   useEffect(() => {
     if (gameState.gameStatus !== "GAME_OVER") {
-      setValidMoves(getValidMoves(gameState.gameStatus, gameState));
+      const newLocal = getValidMoves(gameState.gameStatus, gameState);
+      console.log({ newLocal });
+      console.log({ gameState });
+      setValidMoves(newLocal);
     } else {
-      setValidMoves(new Map());
+      setValidMoves(new PositionMap<ValidMove[]>());
     }
   }, [gameState]);
 
@@ -160,6 +165,12 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
       )
     );
   };
+
+  const possibleMoves = selectedPosition
+    ? validMoves.get(selectedPosition) || []
+    : [];
+
+  console.log({ possibleMoves, validMoves, selectedPosition });
 
   return (
     <>
@@ -192,8 +203,9 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
       {possibleMoves.map((move, index) => (
         <MoveIndicator
           key={`move-${index}`}
-          position={positionToCoordinates(move)}
-          onClick={() => handleMoveClick(move)}
+          position={positionToCoordinates(move.position)}
+          onClick={() => handleMoveClick(move.position)}
+          isCapture={move.isCapture}
         />
       ))}
       <RobotHead expression={expression} />

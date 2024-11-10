@@ -22,6 +22,195 @@ export interface GameState {
 }
 
 export const createInitialGameState = (): GameState => {
+  return {
+    grid: [
+      [
+        null,
+        {
+          id: "p1-0-1",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p1-0-3",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p1-0-5",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p1-0-7",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+      ],
+      [
+        {
+          id: "p1-1-0",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p1-1-2",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p1-1-4",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p1-1-6",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+        null,
+      ],
+      [
+        null,
+        null,
+        null,
+        null,
+        null,
+        {
+          id: "p1-2-5",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p1-2-7",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+      ],
+      [
+        null,
+        null,
+        {
+          id: "p1-2-1",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p1-2-3",
+          player: "PLAYER_ONE",
+          isKing: false,
+        },
+        null,
+        null,
+        null,
+      ],
+      [
+        null,
+        {
+          id: "p2-5-2",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+      [
+        {
+          id: "p2-5-0",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+        null,
+        null,
+        {
+          id: "p2-5-4",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p2-5-6",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+      ],
+      [
+        null,
+        {
+          id: "p2-6-1",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p2-6-3",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p2-6-5",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p2-6-7",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+      ],
+      [
+        {
+          id: "p2-7-0",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p2-7-2",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p2-7-4",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+        {
+          id: "p2-7-6",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        null,
+      ],
+    ],
+    gameStatus: "PLAYER_TWO",
+    movesSinceLastCaptureOrPromotion: 3,
+    positionHistory: [
+      '[[null,{"id":"p1-0-1","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-0-3","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-0-5","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-0-7","player":"PLAYER_ONE","isKing":false}],[{"id":"p1-1-0","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-1-2","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-1-4","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-1-6","player":"PLAYER_ONE","isKing":false},null],[null,null,null,{"id":"p1-2-3","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-2-5","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-2-7","player":"PLAYER_ONE","isKing":false}],[null,null,{"id":"p1-2-1","player":"PLAYER_ONE","isKing":false},null,null,null,null,null],[null,null,null,null,null,null,null,null],[{"id":"p2-5-0","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-5-2","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-5-4","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-5-6","player":"PLAYER_TWO","isKing":false},null],[null,{"id":"p2-6-1","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-6-3","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-6-5","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-6-7","player":"PLAYER_TWO","isKing":false}],[{"id":"p2-7-0","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-7-2","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-7-4","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-7-6","player":"PLAYER_TWO","isKing":false},null]]',
+      '[[null,{"id":"p1-0-1","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-0-3","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-0-5","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-0-7","player":"PLAYER_ONE","isKing":false}],[{"id":"p1-1-0","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-1-2","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-1-4","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-1-6","player":"PLAYER_ONE","isKing":false},null],[null,null,null,{"id":"p1-2-3","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-2-5","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-2-7","player":"PLAYER_ONE","isKing":false}],[null,null,{"id":"p1-2-1","player":"PLAYER_ONE","isKing":false},null,null,null,null,null],[null,{"id":"p2-5-2","player":"PLAYER_TWO","isKing":false},null,null,null,null,null,null],[{"id":"p2-5-0","player":"PLAYER_TWO","isKing":false},null,null,null,{"id":"p2-5-4","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-5-6","player":"PLAYER_TWO","isKing":false},null],[null,{"id":"p2-6-1","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-6-3","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-6-5","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-6-7","player":"PLAYER_TWO","isKing":false}],[{"id":"p2-7-0","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-7-2","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-7-4","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-7-6","player":"PLAYER_TWO","isKing":false},null]]',
+      '[[null,{"id":"p1-0-1","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-0-3","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-0-5","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-0-7","player":"PLAYER_ONE","isKing":false}],[{"id":"p1-1-0","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-1-2","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-1-4","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-1-6","player":"PLAYER_ONE","isKing":false},null],[null,null,null,null,null,{"id":"p1-2-5","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-2-7","player":"PLAYER_ONE","isKing":false}],[null,null,{"id":"p1-2-1","player":"PLAYER_ONE","isKing":false},null,{"id":"p1-2-3","player":"PLAYER_ONE","isKing":false},null,null,null],[null,{"id":"p2-5-2","player":"PLAYER_TWO","isKing":false},null,null,null,null,null,null],[{"id":"p2-5-0","player":"PLAYER_TWO","isKing":false},null,null,null,{"id":"p2-5-4","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-5-6","player":"PLAYER_TWO","isKing":false},null],[null,{"id":"p2-6-1","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-6-3","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-6-5","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-6-7","player":"PLAYER_TWO","isKing":false}],[{"id":"p2-7-0","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-7-2","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-7-4","player":"PLAYER_TWO","isKing":false},null,{"id":"p2-7-6","player":"PLAYER_TWO","isKing":false},null]]',
+    ],
+  } as any;
+};
+export const createInitialGameState2 = (): GameState => {
   // Initialize empty 8x8 grid
   const grid: GridCell[][] = Array(8)
     .fill(null)
@@ -61,7 +250,6 @@ export const createInitialGameState = (): GameState => {
   };
 };
 
-// Helper function to get piece at position
 const getPieceAtPosition = (
   gameState: GameState,
   position: Position
@@ -127,130 +315,31 @@ const isThreefoldRepetition = (gameState: GameState): boolean => {
   );
 };
 
-// Add this helper function
-const isCompletelyBlocked = (
-  position: Position,
-  gameState: GameState
-): boolean => {
-  const piece = getPieceAtPosition(gameState, position);
-  if (!piece) return true;
-
-  // Check all possible directions
-  const directions = piece.isKing
-    ? [
-        [1, 1],
-        [1, -1],
-        [-1, 1],
-        [-1, -1],
-      ]
-    : piece.player === "PLAYER_ONE"
-    ? [
-        [1, 1],
-        [1, -1],
-      ]
-    : [
-        [-1, 1],
-        [-1, -1],
-      ];
-
-  for (const [rowDir, colDir] of directions) {
-    // Check for regular moves
-    const moveTarget = {
-      row: position.row + rowDir,
-      col: position.col + colDir,
-    };
-    if (
-      isValidPosition(moveTarget) &&
-      !getPieceAtPosition(gameState, moveTarget)
-    ) {
-      return false;
-    }
-
-    // Check for captures
-    const jumpOver = {
-      row: position.row + rowDir,
-      col: position.col + colDir,
-    };
-    const captureTarget = {
-      row: position.row + rowDir * 2,
-      col: position.col + colDir * 2,
-    };
-    if (canJumpOver(position, jumpOver, captureTarget, gameState)) {
-      return false;
-    }
-  }
-
-  return true;
-};
-
-// New helper function to get all valid moves for a player
-const getAllValidMovesForPosition = (
-  position: Position,
-  gameState: GameState
-): Position[] => {
-  const piece = getPieceAtPosition(gameState, position);
-  if (
-    !piece ||
-    piece.player !== gameState.gameStatus ||
-    isCompletelyBlocked(position, gameState)
-  ) {
-    return [];
-  }
-
-  // Check for capture moves first
-  const captureMoves = getCaptureMoves(position, gameState);
-  if (captureMoves.length > 0) {
-    // If there are multiple capture sequences, return the ones with maximum captures
-    const maxCaptures = Math.max(
-      ...captureMoves.map((move) =>
-        countCapturesInPath(position, move, gameState)
-      )
-    );
-    return captureMoves.filter(
-      (move) => countCapturesInPath(position, move, gameState) === maxCaptures
-    );
-  }
-
-  // If no captures available, get regular moves
-  return getRegularMoves(position, gameState);
-};
-
 // Update the ValidMovesMap type to use Position as key
-export type ValidMovesMap = Map<Position, Position[]>;
-
-// Helper function to create position key (for Map comparison)
-const positionsEqual = (a: Position, b: Position): boolean => {
-  return a.row === b.row && a.col === b.col;
-};
+export type ValidMovesMap = PositionMap<ValidMove[]>;
 
 // Custom Map class that uses position equality for keys
-export class PositionMap<T> extends Map<Position, T> {
-  set(key: Position, value: T): this {
-    for (const existingKey of this.keys()) {
-      if (positionsEqual(existingKey, key)) {
-        super.delete(existingKey);
-        break;
-      }
-    }
-    return super.set(key, value);
+export class PositionMap<T> {
+  private map: Map<string, T> = new Map();
+
+  private positionToKey(position: Position): string {
+    return `${position.row}-${position.col}`;
   }
 
-  get(key: Position): T | undefined {
-    for (const existingKey of this.keys()) {
-      if (positionsEqual(existingKey, key)) {
-        return super.get(existingKey);
-      }
-    }
-    return undefined;
+  set(key: Position, value: T) {
+    this.map.set(this.positionToKey(key), value);
+  }
+
+  get(key: Position) {
+    return this.map.get(this.positionToKey(key));
   }
 
   has(key: Position): boolean {
-    for (const existingKey of this.keys()) {
-      if (positionsEqual(existingKey, key)) {
-        return true;
-      }
-    }
-    return false;
+    return this.map.has(this.positionToKey(key));
+  }
+
+  size() {
+    return this.map.size;
   }
 }
 
@@ -259,20 +348,33 @@ export const getValidMoves = (
   player: PlayerType,
   gameState: GameState
 ): ValidMovesMap => {
-  const movesMap = new PositionMap<Position[]>();
+  const movesMap = new PositionMap<ValidMove[]>();
 
   // First check for pieces that can capture
-  const piecesWithCaptures = getAllPiecesWithCaptures(gameState);
+  let hasCaptures = false;
+  const piecesWithCaptures = new PositionMap<ValidMove[]>();
 
-  // If there are pieces that can capture, only they can move
-  if (piecesWithCaptures.length > 0) {
-    piecesWithCaptures.forEach((position) => {
-      const moves = getAllValidMovesForPosition(position, gameState);
-      if (moves.length > 0) {
-        movesMap.set(position, moves);
+  // First pass: find all capture moves
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const piece = gameState.grid[row][col];
+      if (piece?.player === player) {
+        const position = { row, col };
+        const captureMoves = getCaptureMoves(position, gameState);
+        if (captureMoves.length > 0) {
+          hasCaptures = true;
+          piecesWithCaptures.set(
+            position,
+            captureMoves.map((pos) => ({ position: pos, isCapture: true }))
+          );
+        }
       }
-    });
-    return movesMap;
+    }
+  }
+
+  // If there are captures available, only they are valid
+  if (hasCaptures) {
+    return piecesWithCaptures;
   }
 
   // If no captures available, check all pieces for regular moves
@@ -281,9 +383,12 @@ export const getValidMoves = (
       const piece = gameState.grid[row][col];
       if (piece?.player === player) {
         const position = { row, col };
-        const moves = getAllValidMovesForPosition(position, gameState);
-        if (moves.length > 0) {
-          movesMap.set(position, moves);
+        const regularMoves = getRegularMoves(position, gameState);
+        if (regularMoves.length > 0) {
+          movesMap.set(
+            position,
+            regularMoves.map((pos) => ({ position: pos, isCapture: false }))
+          );
         }
       }
     }
@@ -487,7 +592,9 @@ export const updateGameState = (
       // Check if the target position is in the valid moves
       if (
         !validMovesForPiece.some(
-          (move) => move.row === action.to.row && move.col === action.to.col
+          (move) =>
+            move.position.row === action.to.row &&
+            move.position.col === action.to.col
         )
       ) {
         return { state, events: [{ type: "INVALID_MOVE" }] };
@@ -549,50 +656,56 @@ export const updateGameState = (
         to: action.to,
       });
 
-      // Check if there are additional captures available for the same piece
-      const additionalCaptures = getCaptureMoves(action.to, {
-        ...state,
-        grid: newGrid,
-      });
+      // Check if this move was a capture move
+      const wasCapture = events.some(
+        (event) => event.type === "PIECE_CAPTURED"
+      );
 
-      // Only change turns if there are no additional captures available
-      if (additionalCaptures.length === 0) {
-        const nextPlayer =
-          state.gameStatus === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
-        events.push({
-          type: "TURN_CHANGED",
-          player: nextPlayer,
+      // Only check for additional captures if this move was a capture
+      if (wasCapture) {
+        const additionalCaptures = getCaptureMoves(action.to, {
+          ...state,
+          grid: newGrid,
         });
 
-        // Check win condition
-        const opponentPlayer =
-          piece.player === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
-        const opponentHasPieces = newGrid.some((row) =>
-          row.some((cell) => cell?.player === opponentPlayer)
-        );
-
-        if (!opponentHasPieces) {
+        // Only continue the turn if there are additional captures available
+        if (additionalCaptures.length > 0) {
           return {
             state: {
               ...state,
               grid: newGrid,
-              gameStatus: "GAME_OVER",
-              movesSinceLastCaptureOrPromotion:
-                state.movesSinceLastCaptureOrPromotion + 1,
+              movesSinceLastCaptureOrPromotion: 0, // Reset counter since we had a capture
               positionHistory: [
                 ...state.positionHistory,
                 JSON.stringify(newGrid),
               ],
             },
-            events: [...events, { type: "GAME_OVER", winner: piece.player }],
+            events,
           };
         }
+      }
 
+      // If it wasn't a capture move, or there are no additional captures, change turns
+      const nextPlayer =
+        state.gameStatus === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+      events.push({
+        type: "TURN_CHANGED",
+        player: nextPlayer,
+      });
+
+      // Check win condition
+      const opponentPlayer =
+        piece.player === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+      const opponentHasPieces = newGrid.some((row) =>
+        row.some((cell) => cell?.player === opponentPlayer)
+      );
+
+      if (!opponentHasPieces) {
         return {
           state: {
             ...state,
             grid: newGrid,
-            gameStatus: nextPlayer,
+            gameStatus: "GAME_OVER",
             movesSinceLastCaptureOrPromotion:
               state.movesSinceLastCaptureOrPromotion + 1,
             positionHistory: [
@@ -600,16 +713,17 @@ export const updateGameState = (
               JSON.stringify(newGrid),
             ],
           },
-          events,
+          events: [...events, { type: "GAME_OVER", winner: piece.player }],
         };
       }
 
-      // If there are additional captures, don't change turns
       return {
         state: {
           ...state,
           grid: newGrid,
-          movesSinceLastCaptureOrPromotion: 0, // Reset counter since we had a capture
+          gameStatus: nextPlayer,
+          movesSinceLastCaptureOrPromotion:
+            state.movesSinceLastCaptureOrPromotion + 1,
           positionHistory: [...state.positionHistory, JSON.stringify(newGrid)],
         },
         events,
@@ -699,9 +813,15 @@ const hasValidMovesLeft = (
       const piece = gameState.grid[row][col];
       if (piece?.player === player) {
         const moves = getValidMoves(player, gameState);
-        if (moves.size > 0) return true;
+        if (moves.size() > 0) return true;
       }
     }
   }
   return false;
 };
+
+// Add this near the top with the other type definitions
+export interface ValidMove {
+  position: Position;
+  isCapture: boolean;
+}
