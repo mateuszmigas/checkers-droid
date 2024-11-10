@@ -15,6 +15,7 @@ import {
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { Robot } from "./robot";
+import { OrbitControls } from "@react-three/drei";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -189,7 +190,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
         />
       ))}
       <Robot expression={expression} />
+      <OrbitControls target={[0, 1.42, 0]} />
     </>
   );
 };
-

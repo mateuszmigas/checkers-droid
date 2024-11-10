@@ -17,7 +17,7 @@ export const Checker = (props: CheckerProps) => {
   const { player, isKing } = piece;
 
   const color = player === "PLAYER_ONE" ? "#ff2020" : "#f0f0f0";
-  const materialProps = { color };
+  const materialProps = { color, roughness: 0.1 };
 
   useFrame((state) => {
     if (groupRef.current) {
@@ -45,19 +45,18 @@ export const Checker = (props: CheckerProps) => {
     >
       <mesh castShadow receiveShadow>
         <cylinderGeometry args={[0.4, 0.4, 0.15, 32]} />
-        <meshPhysicalMaterial {...materialProps} />
+        <meshStandardMaterial {...materialProps} />
       </mesh>
       <mesh castShadow receiveShadow position={[0, 0.075, 0]}>
         <cylinderGeometry args={[0.35, 0.35, 0.1, 32]} />
-        <meshPhysicalMaterial {...materialProps} />
+        <meshStandardMaterial {...materialProps} />
       </mesh>
       {isKing && (
         <mesh castShadow receiveShadow position={[0, 0.2, 0]}>
           <sphereGeometry args={[0.15, 32, 32]} />
-          <meshPhysicalMaterial {...materialProps} />
+          <meshStandardMaterial {...materialProps} />
         </mesh>
       )}
     </group>
   );
 };
-
