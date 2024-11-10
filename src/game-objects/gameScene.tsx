@@ -9,17 +9,17 @@ import {
   createInitialGameState,
   PlayerType,
   CheckerPiece,
-  Position,
+  CheckerPosition,
   updateGameState,
-  getValidMoves,
-  ValidMovesMap,
+  getPlayerValidMoves,
+  CheckerValidMoveMap,
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { RobotHead } from "./robotHead";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
-  position: Position
+  position: CheckerPosition
 ): [number, number, number] => {
   const size = 1;
   const x = position.col * size - 3.5 * size;
@@ -42,13 +42,14 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     return player === "PLAYER_ONE" ? "#cc0000" : "#00cc00";
   };
 
-  const [selectedPosition, setSelectedPosition] = useState<Position | null>(
+  const [selectedPosition, setSelectedPosition] =
+    useState<CheckerPosition | null>(null);
+
+  const [validMoves, setValidMoves] = useState<CheckerValidMoveMap | null>(
     null
   );
 
-  const [validMoves, setValidMoves] = useState<ValidMovesMap | null>(null);
-
-  const handlePieceClick = (position: Position) => {
+  const handlePieceClick = (position: CheckerPosition) => {
     const piece = gameState.grid[position.row][position.col];
 
     if (!piece) return;
@@ -68,7 +69,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     }
   };
 
-  const handleMoveClick = (targetPosition: Position) => {
+  const handleMoveClick = (targetPosition: CheckerPosition) => {
     if (selectedPosition) {
       const previousPlayer = gameState.gameStatus;
       const { state, events } = updateGameState(gameState, {
@@ -127,7 +128,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
   useEffect(() => {
     if (gameState.gameStatus !== "GAME_OVER") {
-      const validMoves = getValidMoves(gameState.gameStatus, gameState);
+      const validMoves = getPlayerValidMoves(gameState.gameStatus, gameState);
       setValidMoves(validMoves);
     } else {
       setValidMoves(null);
@@ -135,7 +136,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
   }, [gameState]);
 
   // Convert grid to pieces array for rendering
-  const pieces: (CheckerPiece & { position: Position })[] = [];
+  const pieces: (CheckerPiece & { position: CheckerPosition })[] = [];
   gameState.grid.forEach((row, rowIndex) => {
     row.forEach((piece, colIndex) => {
       if (piece) {
@@ -147,7 +148,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     });
   });
 
-  const mustCapture = (position: Position): boolean =>
+  const mustCapture = (position: CheckerPosition): boolean =>
     (validMoves?.get(position) ?? []).some((move) => move.isCapture);
 
   const possibleMoves = selectedPosition
@@ -185,8 +186,8 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
       {possibleMoves.map((move, index) => (
         <MoveIndicator
           key={`move-${index}`}
-          position={positionToCoordinates(move.position)}
-          onClick={() => handleMoveClick(move.position)}
+          position={positionToCoordinates(move.targetPosition)}
+          onClick={() => handleMoveClick(move.targetPosition)}
           isCapture={move.isCapture}
         />
       ))}
