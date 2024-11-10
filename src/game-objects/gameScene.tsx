@@ -72,6 +72,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
   const handleMoveClick = (targetPosition: Position) => {
     if (selectedPosition) {
+      const previousPlayer = gameState.gameStatus;
       const { state, events } = updateGameState(gameState, {
         type: "MOVE_PIECE",
         from: selectedPosition,
@@ -79,8 +80,17 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
       });
 
       setGameState(state);
-      setSelectedPosition(null);
-      setPossibleMoves([]);
+
+      // Only clear selection if player changed
+      if (state.gameStatus !== previousPlayer) {
+        setSelectedPosition(null);
+        setPossibleMoves([]);
+      } else {
+        // Update selected position to new position and get new possible moves
+        setSelectedPosition(targetPosition);
+        const newValidMoves = validMoves.get(targetPosition) || [];
+        setPossibleMoves(newValidMoves);
+      }
 
       console.log(events);
 

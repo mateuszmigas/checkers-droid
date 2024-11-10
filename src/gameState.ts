@@ -496,14 +496,14 @@ export const updateGameState = (
       const events: GameEvent[] = [];
       const newGrid = state.grid.map((row) => [...row]);
 
-      // Handle multiple captures by checking each step in the path
+      // Handle the capture sequence
       const rowDiff = action.to.row - action.from.row;
       const colDiff = action.to.col - action.from.col;
       const steps = Math.abs(rowDiff);
       const rowStep = Math.sign(rowDiff);
       const colStep = Math.sign(colDiff);
 
-      // For each step in the path, check if we're jumping over a piece
+      // Capture pieces along the path
       for (let i = 1; i < steps; i++) {
         const jumpedRow = action.from.row + i * rowStep;
         const jumpedCol = action.from.col + i * colStep;
@@ -522,11 +522,11 @@ export const updateGameState = (
         }
       }
 
-      // Move the piece first, then check for crowning
+      // Move the piece
       newGrid[action.to.row][action.to.col] = piece;
       newGrid[action.from.row][action.from.col] = null;
 
-      // Check if piece becomes king after completing all captures
+      // Check if piece becomes king
       const becomesKing =
         !piece.isKing &&
         ((piece.player === "PLAYER_ONE" && action.to.row === 7) ||
@@ -549,26 +549,50 @@ export const updateGameState = (
         to: action.to,
       });
 
-      const nextPlayer =
-        state.gameStatus === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
-      events.push({
-        type: "TURN_CHANGED",
-        player: nextPlayer,
+      // Check if there are additional captures available for the same piece
+      const additionalCaptures = getCaptureMoves(action.to, {
+        ...state,
+        grid: newGrid,
       });
 
-      // Check if all opponent pieces are captured
-      const opponentPlayer =
-        piece.player === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
-      const opponentHasPieces = newGrid.some((row) =>
-        row.some((cell) => cell?.player === opponentPlayer)
-      );
+      // Only change turns if there are no additional captures available
+      if (additionalCaptures.length === 0) {
+        const nextPlayer =
+          state.gameStatus === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+        events.push({
+          type: "TURN_CHANGED",
+          player: nextPlayer,
+        });
 
-      if (!opponentHasPieces) {
+        // Check win condition
+        const opponentPlayer =
+          piece.player === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+        const opponentHasPieces = newGrid.some((row) =>
+          row.some((cell) => cell?.player === opponentPlayer)
+        );
+
+        if (!opponentHasPieces) {
+          return {
+            state: {
+              ...state,
+              grid: newGrid,
+              gameStatus: "GAME_OVER",
+              movesSinceLastCaptureOrPromotion:
+                state.movesSinceLastCaptureOrPromotion + 1,
+              positionHistory: [
+                ...state.positionHistory,
+                JSON.stringify(newGrid),
+              ],
+            },
+            events: [...events, { type: "GAME_OVER", winner: piece.player }],
+          };
+        }
+
         return {
           state: {
             ...state,
             grid: newGrid,
-            gameStatus: "GAME_OVER",
+            gameStatus: nextPlayer,
             movesSinceLastCaptureOrPromotion:
               state.movesSinceLastCaptureOrPromotion + 1,
             positionHistory: [
@@ -576,17 +600,16 @@ export const updateGameState = (
               JSON.stringify(newGrid),
             ],
           },
-          events: [...events, { type: "GAME_OVER", winner: piece.player }],
+          events,
         };
       }
 
+      // If there are additional captures, don't change turns
       return {
         state: {
           ...state,
           grid: newGrid,
-          gameStatus: nextPlayer,
-          movesSinceLastCaptureOrPromotion:
-            state.movesSinceLastCaptureOrPromotion + 1,
+          movesSinceLastCaptureOrPromotion: 0, // Reset counter since we had a capture
           positionHistory: [...state.positionHistory, JSON.stringify(newGrid)],
         },
         events,
