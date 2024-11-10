@@ -98,6 +98,14 @@ const getPieceAtPosition = (
   position: CheckerPosition
 ): CheckerPiece | null => gameState.grid[position.row][position.col] ?? null;
 
+export const getPlayerCaptures = (
+  player: PlayerType,
+  gameState: GameState
+): CheckerValidMove[] =>
+  Array.from(getPlayerValidMoves(player, gameState).values())
+    .flatMap((moves) => moves)
+    .filter((move) => move.isCapture);
+
 export const getPlayerValidMoves = (
   player: PlayerType,
   gameState: GameState
@@ -319,12 +327,12 @@ export const updateGameState = (
   switch (action.type) {
     case "MOVE_PIECE": {
       if (!isValidPosition(action.from) || !isValidPosition(action.to)) {
-        return { state, events: [{ type: "INVALID_MOVE" }] };
+        return checkForNoMoves(state);
       }
 
       const piece = getPieceAtPosition(state, action.from);
       if (!piece || piece.player !== state.gameStatus) {
-        return { state, events: [{ type: "INVALID_MOVE" }] };
+        return checkForNoMoves(state);
       }
 
       // Get valid moves for the selected piece
@@ -339,7 +347,7 @@ export const updateGameState = (
             move.targetPosition.col === action.to.col
         )
       ) {
-        return { state, events: [{ type: "INVALID_MOVE" }] };
+        return checkForNoMoves(state);
       }
 
       const events: GameEvent[] = [];
@@ -439,6 +447,54 @@ export const updateGameState = (
         };
       }
 
+      // Check if opponent has any valid moves
+      const opponentMoves = getPlayerValidMoves(nextPlayer, {
+        ...state,
+        grid: newGrid,
+        gameStatus: nextPlayer,
+      });
+
+      // If opponent has no valid moves, current player wins
+      if (opponentMoves.size() === 0) {
+        return {
+          state: {
+            ...state,
+            grid: newGrid,
+            gameStatus: "GAME_OVER",
+          },
+          events: [...events, { type: "GAME_OVER", winner: piece.player }],
+        };
+      }
+
+      // Check for draw condition (both players only have kings and no captures possible)
+      const allPieces = newGrid
+        .flat()
+        .filter((cell): cell is CheckerPiece => cell !== null);
+      const onlyKings = allPieces.every((piece) => piece.isKing);
+      const playerOneCaptures = getPlayerCaptures("PLAYER_ONE", {
+        ...state,
+        grid: newGrid,
+        gameStatus: "PLAYER_ONE",
+      });
+      const playerTwoCaptures = getPlayerCaptures("PLAYER_TWO", {
+        ...state,
+        grid: newGrid,
+        gameStatus: "PLAYER_TWO",
+      });
+      const noCapturePossible =
+        playerOneCaptures.length === 0 && playerTwoCaptures.length === 0;
+
+      if (onlyKings && noCapturePossible && allPieces.length <= 3) {
+        return {
+          state: {
+            ...state,
+            grid: newGrid,
+            gameStatus: "GAME_OVER",
+          },
+          events: [...events, { type: "GAME_OVER", result: "DRAW" }],
+        };
+      }
+
       return {
         state: {
           ...state,
@@ -452,3 +508,19 @@ export const updateGameState = (
       return { state, events: [] };
   }
 };
+
+const checkForNoMoves = (state: GameState): GameStateUpdate => {
+  const currentPlayer = state.gameStatus;
+  const validMoves = getPlayerValidMoves(currentPlayer, state);
+
+  if (validMoves.size() === 0) {
+    const winner = currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+    return {
+      state: { ...state, gameStatus: "GAME_OVER" },
+      events: [{ type: "INVALID_MOVE" }, { type: "GAME_OVER", winner }],
+    };
+  }
+
+  return { state, events: [{ type: "INVALID_MOVE" }] };
+};
+

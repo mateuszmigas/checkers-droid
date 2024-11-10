@@ -18,5 +18,17 @@ export class CustomMap<TKey, TValue> {
   size() {
     return this.map.size;
   }
+
+  values() {
+    return this.map.values();
+  }
+
+  entries() {
+    return this.map.entries();
+  }
+
+  keys() {
+    return this.map.keys();
+  }
 }
 

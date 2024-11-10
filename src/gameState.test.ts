@@ -548,12 +548,114 @@ describe("promotion to king", () => {
 });
 
 describe("winning conditions", () => {
-  test("win by capturing all opponent pieces", () => {});
+  test("win by capturing all opponent pieces", () => {
+    const gameState = createEmptyGameState();
 
-  test("win when opponent has no legal moves", () => {});
+    // Setup a simple scenario where PLAYER_ONE can capture the last PLAYER_TWO piece
+    const playerOnePiece: CheckerPiece = {
+      id: "p1",
+      player: "PLAYER_ONE",
+      isKing: false,
+    };
+    const playerTwoPiece: CheckerPiece = {
+      id: "p2",
+      player: "PLAYER_TWO",
+      isKing: false,
+    };
+
+    gameState.grid[4][3] = playerOnePiece;
+    gameState.grid[5][4] = playerTwoPiece; // Last remaining PLAYER_TWO piece
+
+    const result = updateGameState(gameState, {
+      type: "MOVE_PIECE",
+      from: { row: 4, col: 3 },
+      to: { row: 6, col: 5 },
+    });
+
+    expect(result.state.gameStatus).toBe("GAME_OVER");
+    expect(result.events).toContainEqual({
+      type: "GAME_OVER",
+      winner: "PLAYER_ONE",
+    });
+    expect(result.state.grid[5][4]).toBeNull(); // Captured piece should be removed
+  });
+
+  test("win when opponent has no legal moves", () => {
+    const gameState = createEmptyGameState();
+
+    // Setup a scenario where PLAYER_TWO is blocked and has no legal moves
+    const playerOnePieces: CheckerPiece[] = Array(3)
+      .fill(null)
+      .map((_, i) => ({
+        id: `p1-${i}`,
+        player: "PLAYER_ONE",
+        isKing: false,
+      }));
+
+    const playerTwoPiece: CheckerPiece = {
+      id: "p2",
+      player: "PLAYER_TWO",
+      isKing: false,
+    };
+
+    // Place PLAYER_TWO piece in a corner
+    gameState.grid[0][0] = playerTwoPiece;
+
+    // Block all possible moves
+    gameState.grid[1][1] = playerOnePieces[0];
+    gameState.gameStatus = "PLAYER_TWO"; // Set it to PLAYER_TWO's turn
+
+    // Attempt to move - should result in game over since no moves are possible
+    const result = updateGameState(gameState, {
+      type: "MOVE_PIECE",
+      from: { row: 0, col: 0 },
+      to: { row: 2, col: 2 }, // Invalid move
+    });
+
+    expect(result.events).toContainEqual({ type: "INVALID_MOVE" });
+    expect(result.events).toContainEqual({
+      type: "GAME_OVER",
+      winner: "PLAYER_ONE",
+    });
+    expect(result.state.gameStatus).toBe("GAME_OVER");
+    expect(getPlayerValidMoves("PLAYER_TWO", gameState).size()).toBe(0);
+  });
 });
 
 describe("draw conditions", () => {
-  test("draw when neither player can force win", () => {});
+  test("draw when neither player can force win", () => {
+    const gameState = createEmptyGameState();
+
+    // Setup a position where both players have only one king
+    // and neither can force a win
+    const playerOneKing: CheckerPiece = {
+      id: "p1-king",
+      player: "PLAYER_ONE",
+      isKing: true,
+    };
+
+    const playerTwoKing: CheckerPiece = {
+      id: "p2-king",
+      player: "PLAYER_TWO",
+      isKing: true,
+    };
+
+    gameState.grid[0][0] = playerOneKing;
+    gameState.grid[7][7] = playerTwoKing;
+
+    // Verify both players have valid moves but neither can capture
+    const playerOneMoves = getPlayerValidMoves("PLAYER_ONE", gameState);
+    const playerTwoMoves = getPlayerValidMoves("PLAYER_TWO", gameState);
+
+    expect(playerOneMoves.size()).toBeGreaterThan(0);
+    expect(playerTwoMoves.size()).toBeGreaterThan(0);
+
+    // Verify no capture moves are available
+    const hasCaptures = [...playerOneMoves.values(), ...playerTwoMoves.values()]
+      .flat()
+      .some((move) => move.isCapture);
+
+    expect(hasCaptures).toBe(false);
+  });
 });
 
