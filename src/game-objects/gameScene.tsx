@@ -7,15 +7,24 @@ import { TurnIndicator } from "./turnIndicator";
 import {
   GameState,
   createInitialGameState,
-  positionToCoordinates,
   PlayerType,
   CheckerPiece,
   Position,
-  getValidMoves,
-  movePiece,
+  updateGameState,
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { RobotHead } from "./robotHead";
+
+// Helper function to convert logical position to 3D coordinates
+const positionToCoordinates = (
+  position: Position
+): [number, number, number] => {
+  const size = 1;
+  const x = position.col * size - 3.5 * size;
+  const y = 0.125; // Height of checker above board
+  const z = position.row * size - 3.5 * size;
+  return [x, y, z];
+};
 
 interface GameSceneProps {
   isOrthographic?: boolean;
@@ -31,25 +40,57 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     return player === "PLAYER_ONE" ? "#cc0000" : "#00cc00";
   };
 
-  const handlePieceClick = (piece: CheckerPiece) => {
+  const handlePieceClick = (position: Position) => {
+    const piece = gameState.grid[position.row][position.col];
+
+    if (!piece) return;
+
     if (piece.player === gameState.currentPlayer) {
-      const validMoves = getValidMoves(piece, gameState);
-      setGameState((prev) => ({
-        ...prev,
-        selectedPiece: prev.selectedPiece?.id === piece.id ? null : piece,
-        possibleMoves: prev.selectedPiece?.id === piece.id ? [] : validMoves,
-      }));
+      if (
+        gameState.selectedPosition?.row === position.row &&
+        gameState.selectedPosition?.col === position.col
+      ) {
+        const { state, events } = updateGameState(gameState, {
+          type: "DESELECT_PIECE",
+        });
+        setGameState(state);
+        console.log(events);
+      } else {
+        const { state, events } = updateGameState(gameState, {
+          type: "SELECT_PIECE",
+          position,
+        });
+        setGameState(state);
+        console.log(events);
+      }
     }
   };
 
   const handleMoveClick = (targetPosition: Position) => {
-    if (gameState.selectedPiece) {
-      const newGameState = movePiece(
-        gameState,
-        gameState.selectedPiece,
-        targetPosition
-      );
-      setGameState(newGameState);
+    if (gameState.selectedPosition) {
+      const { state, events } = updateGameState(gameState, {
+        type: "MOVE_PIECE",
+        from: gameState.selectedPosition,
+        to: targetPosition,
+      });
+
+      setGameState(state);
+      console.log(events);
+
+      // Here you can handle the events to show notifications or animations
+      events.forEach((event) => {
+        switch (event.type) {
+          case "PIECE_CAPTURED":
+            // Handle capture animation or notification
+            break;
+          case "PIECE_CROWNED":
+            // Handle crowning animation or notification
+            break;
+          case "TURN_CHANGED":
+            // Handle turn change notification
+            break;
+        }
+      });
     }
   };
 
@@ -72,6 +113,19 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     }
   }, [isOrthographic, camera]);
 
+  // Convert grid to pieces array for rendering
+  const pieces: (CheckerPiece & { position: Position })[] = [];
+  gameState.grid.forEach((row, rowIndex) => {
+    row.forEach((piece, colIndex) => {
+      if (piece) {
+        pieces.push({
+          ...piece,
+          position: { row: rowIndex, col: colIndex },
+        });
+      }
+    });
+  });
+
   return (
     <>
       <ambientLight intensity={Math.PI / 2} />
@@ -85,13 +139,16 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
       <CheckersBoard />
       <TurnIndicator player={gameState.currentPlayer} />
-      {gameState.pieces.map((piece) => (
+      {pieces.map((piece) => (
         <Checker
           key={piece.id}
           position={positionToCoordinates(piece.position)}
           color={getPlayerColor(piece.player)}
-          isSelected={piece.id === gameState.selectedPiece?.id}
-          onClick={() => handlePieceClick(piece)}
+          isSelected={
+            piece.position.row === gameState.selectedPosition?.row &&
+            piece.position.col === gameState.selectedPosition?.col
+          }
+          onClick={() => handlePieceClick(piece.position)}
         />
       ))}
       {gameState.possibleMoves.map((move, index) => (
@@ -105,4 +162,3 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     </>
   );
 };
-

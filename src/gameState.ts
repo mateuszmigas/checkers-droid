@@ -7,32 +7,36 @@ export interface Position {
 
 export interface CheckerPiece {
   id: string;
-  position: Position;
   player: PlayerType;
   isKing: boolean;
 }
 
+// Define what can be in a grid cell
+export type GridCell = CheckerPiece | null;
+
 export interface GameState {
-  pieces: CheckerPiece[];
+  grid: GridCell[][]; // 8x8 grid representing the board
   currentPlayer: PlayerType;
-  selectedPiece: CheckerPiece | null;
+  selectedPosition: Position | null;
   possibleMoves: Position[];
   capturedPieces: CheckerPiece[];
 }
 
 export const createInitialGameState = (): GameState => {
-  const pieces: CheckerPiece[] = [];
+  // Initialize empty 8x8 grid
+  const grid: GridCell[][] = Array(8)
+    .fill(null)
+    .map(() => Array(8).fill(null));
 
   // Place Player One's checkers
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 8; col++) {
       if ((row + col) % 2 !== 0) {
-        pieces.push({
+        grid[row][col] = {
           id: `p1-${row}-${col}`,
-          position: { row, col },
           player: "PLAYER_ONE",
           isKing: false,
-        });
+        };
       }
     }
   }
@@ -41,71 +45,58 @@ export const createInitialGameState = (): GameState => {
   for (let row = 5; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       if ((row + col) % 2 !== 0) {
-        pieces.push({
+        grid[row][col] = {
           id: `p2-${row}-${col}`,
-          position: { row, col },
           player: "PLAYER_TWO",
           isKing: false,
-        });
+        };
       }
     }
   }
 
   return {
-    pieces,
+    grid,
     currentPlayer: "PLAYER_ONE",
-    selectedPiece: null,
+    selectedPosition: null,
     possibleMoves: [],
     capturedPieces: [],
   };
 };
 
-// Helper function to convert logical position to 3D coordinates
-export const positionToCoordinates = (
+// Helper function to get piece at position
+const getPieceAtPosition = (
+  gameState: GameState,
   position: Position
-): [number, number, number] => {
-  const size = 1;
-  const x = position.col * size - 3.5 * size;
-  const y = 0.125; // Height of checker above board
-  const z = position.row * size - 3.5 * size;
-  return [x, y, z];
-};
-
-// Helper function to convert 3D coordinates to logical position
-export const coordinatesToPosition = (
-  coords: [number, number, number]
-): Position => {
-  const size = 1;
-  const col = Math.round((coords[0] + 3.5 * size) / size);
-  const row = Math.round((coords[2] + 3.5 * size) / size);
-  return { row, col };
+): CheckerPiece | null => {
+  return gameState.grid[position.row][position.col];
 };
 
 export const getValidMoves = (
-  piece: CheckerPiece,
+  position: Position,
   gameState: GameState
 ): Position[] => {
+  const piece = getPieceAtPosition(gameState, position);
+  if (!piece) return [];
+
   const moves: Position[] = [];
   const direction = piece.player === "PLAYER_ONE" ? 1 : -1;
 
   // Check for jump moves first
-  const jumpMoves = getJumpMoves(piece, gameState);
+  const jumpMoves = getJumpMoves(position, gameState);
   if (jumpMoves.length > 0) {
-    // If jumps are available, only return jump moves (jumps are mandatory)
     return jumpMoves;
   }
 
-  // Regular moves (only if no jumps are available)
+  // Regular moves
   const leftMove = {
-    row: piece.position.row + direction,
-    col: piece.position.col - 1,
+    row: position.row + direction,
+    col: position.col - 1,
   };
   const rightMove = {
-    row: piece.position.row + direction,
-    col: piece.position.col + 1,
+    row: position.row + direction,
+    col: position.col + 1,
   };
 
-  // Check if moves are within board bounds and target square is empty
   if (isValidPosition(leftMove) && !getPieceAtPosition(gameState, leftMove)) {
     moves.push(leftMove);
   }
@@ -116,102 +107,166 @@ export const getValidMoves = (
   return moves;
 };
 
-const getJumpMoves = (
-  piece: CheckerPiece,
-  gameState: GameState
-): Position[] => {
+const getJumpMoves = (position: Position, gameState: GameState): Position[] => {
+  const piece = getPieceAtPosition(gameState, position);
+  if (!piece) return [];
+
   const jumpMoves: Position[] = [];
   const direction = piece.player === "PLAYER_ONE" ? 1 : -1;
 
-  // Check left jump
-  const leftJumpOver = {
-    row: piece.position.row + direction,
-    col: piece.position.col - 1,
-  };
-  const leftJumpTarget = {
-    row: piece.position.row + direction * 2,
-    col: piece.position.col - 2,
-  };
+  // Check left and right jumps
+  const jumps = [
+    {
+      over: { row: position.row + direction, col: position.col - 1 },
+      target: { row: position.row + direction * 2, col: position.col - 2 },
+    },
+    {
+      over: { row: position.row + direction, col: position.col + 1 },
+      target: { row: position.row + direction * 2, col: position.col + 2 },
+    },
+  ];
 
-  // Check right jump
-  const rightJumpOver = {
-    row: piece.position.row + direction,
-    col: piece.position.col + 1,
-  };
-  const rightJumpTarget = {
-    row: piece.position.row + direction * 2,
-    col: piece.position.col + 2,
-  };
-
-  // Check if jumps are valid
-  if (canJumpOver(piece, leftJumpOver, leftJumpTarget, gameState)) {
-    jumpMoves.push(leftJumpTarget);
-  }
-  if (canJumpOver(piece, rightJumpOver, rightJumpTarget, gameState)) {
-    jumpMoves.push(rightJumpTarget);
+  for (const jump of jumps) {
+    if (canJumpOver(position, jump.over, jump.target, gameState)) {
+      jumpMoves.push(jump.target);
+    }
   }
 
   return jumpMoves;
 };
 
 const canJumpOver = (
-  piece: CheckerPiece,
+  from: Position,
   jumpOver: Position,
   target: Position,
   gameState: GameState
 ): boolean => {
-  // Check if target position is valid and empty
-  if (!isValidPosition(target) || getPieceAtPosition(gameState, target)) {
-    return false;
-  }
+  if (!isValidPosition(target)) return false;
 
-  // Get the piece being jumped over
+  const jumpingPiece = getPieceAtPosition(gameState, from);
   const jumpedPiece = getPieceAtPosition(gameState, jumpOver);
+  const targetPiece = getPieceAtPosition(gameState, target);
 
-  // Check if there's an opponent's piece to jump over
-  return jumpedPiece !== undefined && jumpedPiece.player !== piece.player;
+  return (
+    jumpingPiece !== null &&
+    jumpedPiece !== null &&
+    targetPiece === null &&
+    jumpedPiece.player !== jumpingPiece.player
+  );
 };
 
-export const movePiece = (
-  gameState: GameState,
-  piece: CheckerPiece,
-  targetPosition: Position
-): GameState => {
-  let newPieces = [...gameState.pieces];
-  let capturedPieces = [...gameState.capturedPieces];
+export const updateGameState = (
+  state: GameState,
+  action: GameAction
+): GameStateUpdate => {
+  switch (action.type) {
+    case "SELECT_PIECE": {
+      const piece = getPieceAtPosition(state, action.position);
+      if (!piece || piece.player !== state.currentPlayer) {
+        return { state, events: [] };
+      }
 
-  // Check if this is a jump move
-  const rowDiff = Math.abs(targetPosition.row - piece.position.row);
-  if (rowDiff === 2) {
-    // This is a jump move - remove the jumped piece
-    const jumpedRow = (piece.position.row + targetPosition.row) / 2;
-    const jumpedCol = (piece.position.col + targetPosition.col) / 2;
-    const jumpedPiece = getPieceAtPosition(gameState, {
-      row: jumpedRow,
-      col: jumpedCol,
-    });
-
-    if (jumpedPiece) {
-      // Remove the jumped piece from the board
-      newPieces = newPieces.filter((p) => p.id !== jumpedPiece.id);
-      capturedPieces.push(jumpedPiece);
+      const validMoves = getValidMoves(action.position, state);
+      return {
+        state: {
+          ...state,
+          selectedPosition: action.position,
+          possibleMoves: validMoves,
+        },
+        events: [],
+      };
     }
+
+    case "DESELECT_PIECE": {
+      return {
+        state: {
+          ...state,
+          selectedPosition: null,
+          possibleMoves: [],
+        },
+        events: [],
+      };
+    }
+
+    case "MOVE_PIECE": {
+      const events: GameEvent[] = [];
+      const piece = getPieceAtPosition(state, action.from);
+
+      if (!piece) return { state, events: [{ type: "INVALID_MOVE" }] };
+
+      const newGrid = state.grid.map((row) => [...row]);
+      const capturedPieces = [...state.capturedPieces];
+
+      // Check if this is a jump move
+      const rowDiff = Math.abs(action.to.row - action.from.row);
+      if (rowDiff === 2) {
+        const jumpedRow = (action.from.row + action.to.row) / 2;
+        const jumpedCol = (action.from.col + action.to.col) / 2;
+        const jumpedPiece = getPieceAtPosition(state, {
+          row: jumpedRow,
+          col: jumpedCol,
+        });
+
+        if (jumpedPiece) {
+          capturedPieces.push(jumpedPiece);
+          newGrid[jumpedRow][jumpedCol] = null;
+          events.push({
+            type: "PIECE_CAPTURED",
+            position: { row: jumpedRow, col: jumpedCol },
+            piece: jumpedPiece,
+          });
+        }
+      }
+
+      // Check if piece becomes king
+      const becomesKing =
+        !piece.isKing &&
+        ((piece.player === "PLAYER_ONE" && action.to.row === 7) ||
+          (piece.player === "PLAYER_TWO" && action.to.row === 0));
+
+      // Move the piece
+      newGrid[action.to.row][action.to.col] = {
+        ...piece,
+        isKing: piece.isKing || becomesKing,
+      };
+      newGrid[action.from.row][action.from.col] = null;
+
+      events.push({
+        type: "PIECE_MOVED",
+        from: action.from,
+        to: action.to,
+      });
+
+      if (becomesKing) {
+        events.push({
+          type: "PIECE_CROWNED",
+          position: action.to,
+        });
+      }
+
+      const nextPlayer =
+        state.currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+      events.push({
+        type: "TURN_CHANGED",
+        player: nextPlayer,
+      });
+
+      return {
+        state: {
+          ...state,
+          grid: newGrid,
+          capturedPieces,
+          currentPlayer: nextPlayer,
+          selectedPosition: null,
+          possibleMoves: [],
+        },
+        events,
+      };
+    }
+
+    default:
+      return { state, events: [] };
   }
-
-  // Update the moving piece's position
-  newPieces = newPieces.map((p) =>
-    p.id === piece.id ? { ...p, position: targetPosition } : p
-  );
-
-  return {
-    ...gameState,
-    pieces: newPieces,
-    capturedPieces,
-    currentPlayer:
-      gameState.currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE",
-    selectedPiece: null,
-    possibleMoves: [],
-  };
 };
 
 const isValidPosition = (position: Position): boolean => {
@@ -223,12 +278,20 @@ const isValidPosition = (position: Position): boolean => {
   );
 };
 
-const getPieceAtPosition = (
-  gameState: GameState,
-  position: Position
-): CheckerPiece | undefined => {
-  return gameState.pieces.find(
-    (p) => p.position.row === position.row && p.position.col === position.col
-  );
-};
+// Add these new types at the top of the file
+export type GameAction =
+  | { type: "SELECT_PIECE"; position: Position }
+  | { type: "MOVE_PIECE"; from: Position; to: Position }
+  | { type: "DESELECT_PIECE" };
 
+export type GameEvent =
+  | { type: "PIECE_MOVED"; from: Position; to: Position }
+  | { type: "PIECE_CAPTURED"; position: Position; piece: CheckerPiece }
+  | { type: "PIECE_CROWNED"; position: Position }
+  | { type: "TURN_CHANGED"; player: PlayerType }
+  | { type: "INVALID_MOVE" };
+
+export interface GameStateUpdate {
+  state: GameState;
+  events: GameEvent[];
+}
