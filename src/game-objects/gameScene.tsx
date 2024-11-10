@@ -11,7 +11,6 @@ import {
   CheckerPiece,
   Position,
   updateGameState,
-  getAllPiecesWithCaptures,
   getValidMoves,
   ValidMovesMap,
   PositionMap,
@@ -133,10 +132,8 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
   useEffect(() => {
     if (gameState.gameStatus !== "GAME_OVER") {
-      const newLocal = getValidMoves(gameState.gameStatus, gameState);
-      console.log({ newLocal });
-      console.log({ gameState });
-      setValidMoves(newLocal);
+      const validMoves = getValidMoves(gameState.gameStatus, gameState);
+      setValidMoves(validMoves);
     } else {
       setValidMoves(new PositionMap<ValidMove[]>());
     }
@@ -155,22 +152,12 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     });
   });
 
-  // Add this function to check if a piece must capture
-  const mustCapture = (position: Position): boolean => {
-    const piecesWithCaptures = getAllPiecesWithCaptures(gameState);
-    return (
-      piecesWithCaptures.length > 0 &&
-      piecesWithCaptures.some(
-        (pos) => pos.row === position.row && pos.col === position.col
-      )
-    );
-  };
+  const mustCapture = (position: Position): boolean =>
+    (validMoves.get(position) ?? []).some((move) => move.isCapture);
 
   const possibleMoves = selectedPosition
     ? validMoves.get(selectedPosition) || []
     : [];
-
-  console.log({ possibleMoves, validMoves, selectedPosition });
 
   return (
     <>
