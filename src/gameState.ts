@@ -1,3 +1,5 @@
+import { CustomMap } from "./utils/customMap";
+
 export type PlayerType = "PLAYER_ONE" | "PLAYER_TWO";
 
 export interface Position {
@@ -78,44 +80,21 @@ const isThreefoldRepetition = (gameState: GameState): boolean => {
   );
 };
 
-// Update the ValidMovesMap type to use Position as key
-export type ValidMovesMap = PositionMap<ValidMove[]>;
+export type ValidMovesMap = CustomMap<Position, ValidMove[]>;
+export const createPositionMap = () =>
+  new CustomMap<Position, ValidMove[]>(
+    (position) => `${position.row}-${position.col}`
+  );
 
-// Custom Map class that uses position equality for keys
-export class PositionMap<T> {
-  private map: Map<string, T> = new Map();
-
-  private positionToKey(position: Position): string {
-    return `${position.row}-${position.col}`;
-  }
-
-  set(key: Position, value: T) {
-    this.map.set(this.positionToKey(key), value);
-  }
-
-  get(key: Position) {
-    return this.map.get(this.positionToKey(key));
-  }
-
-  has(key: Position): boolean {
-    return this.map.has(this.positionToKey(key));
-  }
-
-  size() {
-    return this.map.size;
-  }
-}
-
-// Modify getValidMoves to use PositionMap
 export const getValidMoves = (
   player: PlayerType,
   gameState: GameState
 ): ValidMovesMap => {
-  const movesMap = new PositionMap<ValidMove[]>();
+  const movesMap = createPositionMap();
 
   // First check for pieces that can capture
   let hasCaptures = false;
-  const piecesWithCaptures = new PositionMap<ValidMove[]>();
+  const piecesWithCaptures = createPositionMap();
 
   // First pass: find all capture moves
   for (let row = 0; row < 8; row++) {

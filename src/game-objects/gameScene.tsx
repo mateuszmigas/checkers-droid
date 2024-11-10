@@ -13,8 +13,6 @@ import {
   updateGameState,
   getValidMoves,
   ValidMovesMap,
-  PositionMap,
-  ValidMove,
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { RobotHead } from "./robotHead";
@@ -47,11 +45,8 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(
     null
   );
-  // const [possibleMoves, setPossibleMoves] = useState<ValidMove[]>([]);
 
-  const [validMoves, setValidMoves] = useState<ValidMovesMap>(
-    new PositionMap<ValidMove[]>()
-  );
+  const [validMoves, setValidMoves] = useState<ValidMovesMap | null>(null);
 
   const handlePieceClick = (position: Position) => {
     const piece = gameState.grid[position.row][position.col];
@@ -135,7 +130,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
       const validMoves = getValidMoves(gameState.gameStatus, gameState);
       setValidMoves(validMoves);
     } else {
-      setValidMoves(new PositionMap<ValidMove[]>());
+      setValidMoves(null);
     }
   }, [gameState]);
 
@@ -153,10 +148,10 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
   });
 
   const mustCapture = (position: Position): boolean =>
-    (validMoves.get(position) ?? []).some((move) => move.isCapture);
+    (validMoves?.get(position) ?? []).some((move) => move.isCapture);
 
   const possibleMoves = selectedPosition
-    ? validMoves.get(selectedPosition) || []
+    ? validMoves?.get(selectedPosition) || []
     : [];
 
   return (
