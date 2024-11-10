@@ -189,17 +189,6 @@ describe("Turn Order Rules", () => {
       player: "PLAYER_TWO",
     });
   });
-
-  test("player cannot move opponent's pieces", () => {
-    const initialState = createInitialGameState();
-    const result = updateGameState(initialState, {
-      type: "SELECT_PIECE",
-      position: { row: 5, col: 0 }, // PLAYER_TWO's piece
-    });
-
-    // Should not change state
-    expect(result.state).toEqual(initialState);
-  });
 });
 
 describe("King Movement Rules", () => {
@@ -771,4 +760,3 @@ describe("Board Visualization Example", () => {
     printBoard(gameState);
   });
 });
-

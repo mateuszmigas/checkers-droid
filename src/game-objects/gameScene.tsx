@@ -12,6 +12,7 @@ import {
   Position,
   updateGameState,
   getAllPiecesWithCaptures,
+  getValidMoves,
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { RobotHead } from "./robotHead";
@@ -41,6 +42,11 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     return player === "PLAYER_ONE" ? "#cc0000" : "#00cc00";
   };
 
+  const [selectedPosition, setSelectedPosition] = useState<Position | null>(
+    null
+  );
+  const [possibleMoves, setPossibleMoves] = useState<Position[]>([]);
+
   const handlePieceClick = (position: Position) => {
     const piece = gameState.grid[position.row][position.col];
 
@@ -48,37 +54,32 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
     if (piece.player === gameState.currentPlayer) {
       if (
-        gameState.selectedPosition?.row === position.row &&
-        gameState.selectedPosition?.col === position.col
+        selectedPosition?.row === position.row &&
+        selectedPosition?.col === position.col
       ) {
-        const { state, events } = updateGameState(gameState, {
-          type: "DESELECT_PIECE",
-        });
-        setGameState(state);
-        console.log(events);
+        setSelectedPosition(null);
+        setPossibleMoves([]);
       } else {
-        const { state, events } = updateGameState(gameState, {
-          type: "SELECT_PIECE",
-          position,
-        });
-        setGameState(state);
-        console.log(events);
+        setSelectedPosition(position);
+        setPossibleMoves(getValidMoves(position, gameState));
       }
     }
   };
 
   const handleMoveClick = (targetPosition: Position) => {
-    if (gameState.selectedPosition) {
+    if (selectedPosition) {
       const { state, events } = updateGameState(gameState, {
         type: "MOVE_PIECE",
-        from: gameState.selectedPosition,
+        from: selectedPosition,
         to: targetPosition,
       });
 
       setGameState(state);
+      setSelectedPosition(null);
+      setPossibleMoves([]);
+
       console.log(events);
 
-      // Here you can handle the events to show notifications or animations
       events.forEach((event) => {
         switch (event.type) {
           case "PIECE_CAPTURED":
@@ -154,14 +155,14 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
           position={positionToCoordinates(piece.position)}
           color={getPlayerColor(piece.player)}
           isSelected={
-            piece.position.row === gameState.selectedPosition?.row &&
-            piece.position.col === gameState.selectedPosition?.col
+            piece.position.row === selectedPosition?.row &&
+            piece.position.col === selectedPosition?.col
           }
           mustCapture={mustCapture(piece.position)}
           onClick={() => handlePieceClick(piece.position)}
         />
       ))}
-      {gameState.possibleMoves.map((move, index) => (
+      {possibleMoves.map((move, index) => (
         <MoveIndicator
           key={`move-${index}`}
           position={positionToCoordinates(move)}
@@ -172,4 +173,3 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     </>
   );
 };
-

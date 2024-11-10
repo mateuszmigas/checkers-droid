@@ -17,8 +17,6 @@ export type GridCell = CheckerPiece | null;
 export interface GameState {
   grid: GridCell[][]; // 8x8 grid representing the board
   currentPlayer: PlayerType;
-  selectedPosition: Position | null;
-  possibleMoves: Position[];
   capturedPieces: CheckerPiece[];
   gameOver?: boolean;
   winner?: PlayerType | null;
@@ -61,8 +59,6 @@ export const createInitialGameState = (): GameState => {
   return {
     grid,
     currentPlayer: "PLAYER_ONE",
-    selectedPosition: null,
-    possibleMoves: [],
     capturedPieces: [],
     movesSinceLastCaptureOrPromotion: 0,
     positionHistory: [],
@@ -123,23 +119,6 @@ export const getAllPiecesWithCaptures = (gameState: GameState): Position[] => {
   }
 
   return positions;
-};
-
-// Helper function to get all valid moves for current player
-const getAllValidMovesForPlayer = (gameState: GameState): Position[] => {
-  const moves: Position[] = [];
-
-  for (let row = 0; row < 8; row++) {
-    for (let col = 0; col < 8; col++) {
-      const piece = gameState.grid[row][col];
-      if (piece?.player === gameState.currentPlayer) {
-        const pieceMoves = getValidMoves({ row, col }, gameState);
-        moves.push(...pieceMoves);
-      }
-    }
-  }
-
-  return moves;
 };
 
 // Helper function to check if position occurs three times in history
@@ -316,8 +295,7 @@ const getCaptureMoves = (
   // For regular pieces during multiple captures, maintain direction
   if (!piece.isKing && previousDirection) {
     directions = directions.filter(
-      ([rowDir, colDir]) =>
-        Math.sign(rowDir) === Math.sign(previousDirection.rowDir)
+      ([rowDir]) => Math.sign(rowDir) === Math.sign(previousDirection.rowDir)
     );
   }
 
@@ -349,26 +327,6 @@ const getCaptureMoves = (
   }
 
   return moves;
-};
-
-// Simulate a move on the grid without modifying the original
-const simulateMove = (
-  grid: GridCell[][],
-  from: Position,
-  to: Position,
-  captured: Position
-): GridCell[][] => {
-  const newGrid = grid.map((row) => [...row]);
-  newGrid[to.row][to.col] = newGrid[from.row][from.col];
-  newGrid[from.row][from.col] = null;
-  newGrid[captured.row][captured.col] = null;
-  return newGrid;
-};
-
-// Helper function to check if a position is a dark square
-const isDarkSquare = (position: Position): boolean => {
-  // In a standard checkers board, squares are dark if row + col is even
-  return (position.row + position.col) % 2 === 0;
 };
 
 // Get regular (non-capture) moves
@@ -460,34 +418,6 @@ export const updateGameState = (
   action: GameAction
 ): GameStateUpdate => {
   switch (action.type) {
-    case "SELECT_PIECE": {
-      const piece = getPieceAtPosition(state, action.position);
-      if (!piece || piece.player !== state.currentPlayer) {
-        return { state, events: [] };
-      }
-
-      const validMoves = getValidMoves(action.position, state);
-      return {
-        state: {
-          ...state,
-          selectedPosition: action.position,
-          possibleMoves: validMoves,
-        },
-        events: [],
-      };
-    }
-
-    case "DESELECT_PIECE": {
-      return {
-        state: {
-          ...state,
-          selectedPosition: null,
-          possibleMoves: [],
-        },
-        events: [],
-      };
-    }
-
     case "MOVE_PIECE": {
       if (!isValidPosition(action.from) || !isValidPosition(action.to)) {
         return { state, events: [{ type: "INVALID_MOVE" }] };
@@ -592,10 +522,9 @@ export const updateGameState = (
           grid: newGrid,
           capturedPieces,
           currentPlayer: nextPlayer,
-          selectedPosition: null,
-          possibleMoves: [],
-          gameOver: !opponentHasPieces,
-          winner: !opponentHasPieces ? piece.player : undefined,
+          movesSinceLastCaptureOrPromotion:
+            state.movesSinceLastCaptureOrPromotion + 1,
+          positionHistory: [...state.positionHistory, JSON.stringify(newGrid)],
         },
         events,
       };
@@ -659,9 +588,7 @@ const isValidPosition = (position: Position): boolean => {
 
 // Add these new types at the top of the file
 export type GameAction =
-  | { type: "SELECT_PIECE"; position: Position }
   | { type: "MOVE_PIECE"; from: Position; to: Position }
-  | { type: "DESELECT_PIECE" }
   | { type: "CHECK_GAME_STATE" };
 
 export type GameEvent =
@@ -694,4 +621,3 @@ const hasValidMovesLeft = (
   }
   return false;
 };
-
