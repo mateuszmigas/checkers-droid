@@ -16,10 +16,7 @@ export type GridCell = CheckerPiece | null;
 
 export interface GameState {
   grid: GridCell[][]; // 8x8 grid representing the board
-  currentPlayer: PlayerType;
-  capturedPieces: CheckerPiece[];
-  gameOver?: boolean;
-  winner?: PlayerType | null;
+  gameStatus: PlayerType | "GAME_OVER";
   movesSinceLastCaptureOrPromotion: number;
   positionHistory: string[]; // Hashed board positions for repetition detection
 }
@@ -58,8 +55,7 @@ export const createInitialGameState = (): GameState => {
 
   return {
     grid,
-    currentPlayer: "PLAYER_ONE",
-    capturedPieces: [],
+    gameStatus: "PLAYER_ONE",
     movesSinceLastCaptureOrPromotion: 0,
     positionHistory: [],
   };
@@ -82,7 +78,7 @@ export const getAllPiecesWithCaptures = (gameState: GameState): Position[] => {
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
       const piece = gameState.grid[row][col];
-      if (piece?.player === gameState.currentPlayer) {
+      if (piece?.player === gameState.gameStatus) {
         const captureMoves = getCaptureMoves({ row, col }, gameState);
         if (captureMoves.length > 0) {
           const maxCapturesForPiece = Math.max(
@@ -101,7 +97,7 @@ export const getAllPiecesWithCaptures = (gameState: GameState): Position[] => {
     for (let row = 0; row < 8; row++) {
       for (let col = 0; col < 8; col++) {
         const piece = gameState.grid[row][col];
-        if (piece?.player === gameState.currentPlayer) {
+        if (piece?.player === gameState.gameStatus) {
           const captureMoves = getCaptureMoves({ row, col }, gameState);
           if (captureMoves.length > 0) {
             const maxCapturesForPiece = Math.max(
@@ -195,7 +191,7 @@ const getAllValidMovesForPosition = (
   const piece = getPieceAtPosition(gameState, position);
   if (
     !piece ||
-    piece.player !== gameState.currentPlayer ||
+    piece.player !== gameState.gameStatus ||
     isCompletelyBlocked(position, gameState)
   ) {
     return [];
@@ -417,6 +413,10 @@ export const updateGameState = (
   state: GameState,
   action: GameAction
 ): GameStateUpdate => {
+  if (state.gameStatus === "GAME_OVER") {
+    return { state, events: [{ type: "INVALID_MOVE" }] };
+  }
+
   switch (action.type) {
     case "MOVE_PIECE": {
       if (!isValidPosition(action.from) || !isValidPosition(action.to)) {
@@ -424,7 +424,7 @@ export const updateGameState = (
       }
 
       const piece = getPieceAtPosition(state, action.from);
-      if (!piece || piece.player !== state.currentPlayer) {
+      if (!piece || piece.player !== state.gameStatus) {
         return { state, events: [{ type: "INVALID_MOVE" }] };
       }
 
@@ -439,7 +439,6 @@ export const updateGameState = (
 
       const events: GameEvent[] = [];
       const newGrid = state.grid.map((row) => [...row]);
-      const capturedPieces = [...state.capturedPieces];
 
       // Handle multiple captures by checking each step in the path
       const rowDiff = action.to.row - action.from.row;
@@ -458,7 +457,6 @@ export const updateGameState = (
         });
 
         if (jumpedPiece && jumpedPiece.player !== piece.player) {
-          capturedPieces.push(jumpedPiece);
           newGrid[jumpedRow][jumpedCol] = null;
           events.push({
             type: "PIECE_CAPTURED",
@@ -496,7 +494,7 @@ export const updateGameState = (
       });
 
       const nextPlayer =
-        state.currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+        state.gameStatus === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
       events.push({
         type: "TURN_CHANGED",
         player: nextPlayer,
@@ -510,18 +508,27 @@ export const updateGameState = (
       );
 
       if (!opponentHasPieces) {
-        events.push({
-          type: "GAME_OVER",
-          winner: piece.player,
-        });
+        return {
+          state: {
+            ...state,
+            grid: newGrid,
+            gameStatus: "GAME_OVER",
+            movesSinceLastCaptureOrPromotion:
+              state.movesSinceLastCaptureOrPromotion + 1,
+            positionHistory: [
+              ...state.positionHistory,
+              JSON.stringify(newGrid),
+            ],
+          },
+          events: [...events, { type: "GAME_OVER", winner: piece.player }],
+        };
       }
 
       return {
         state: {
           ...state,
           grid: newGrid,
-          capturedPieces,
-          currentPlayer: nextPlayer,
+          gameStatus: nextPlayer,
           movesSinceLastCaptureOrPromotion:
             state.movesSinceLastCaptureOrPromotion + 1,
           positionHistory: [...state.positionHistory, JSON.stringify(newGrid)],
@@ -533,39 +540,37 @@ export const updateGameState = (
     case "CHECK_GAME_STATE": {
       const events: GameEvent[] = [];
 
-      // Check if current player has any valid moves
-      if (!hasValidMovesLeft(state.currentPlayer, state)) {
+      // Check for game ending conditions
+      if (!hasValidMovesLeft(state.gameStatus, state)) {
         const otherPlayer =
-          state.currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+          state.gameStatus === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
 
-        // Check if it's a stalemate or win
         if (!hasValidMovesLeft(otherPlayer, state)) {
-          events.push({ type: "GAME_OVER", result: "DRAW" });
+          return {
+            state: { ...state, gameStatus: "GAME_OVER" },
+            events: [{ type: "GAME_OVER", result: "DRAW" }],
+          };
         } else {
-          events.push({ type: "GAME_OVER", winner: otherPlayer });
+          return {
+            state: { ...state, gameStatus: "GAME_OVER" },
+            events: [{ type: "GAME_OVER", winner: otherPlayer }],
+          };
         }
-
-        return {
-          state: { ...state, gameOver: true },
-          events,
-        };
       }
 
       // Check for threefold repetition
       if (isThreefoldRepetition(state)) {
-        events.push({ type: "GAME_OVER", result: "DRAW" });
         return {
-          state: { ...state, gameOver: true },
-          events,
+          state: { ...state, gameStatus: "GAME_OVER" },
+          events: [{ type: "GAME_OVER", result: "DRAW" }],
         };
       }
 
       // Check for 40-move rule
       if (state.movesSinceLastCaptureOrPromotion >= 80) {
-        events.push({ type: "GAME_OVER", result: "DRAW" });
         return {
-          state: { ...state, gameOver: true },
-          events,
+          state: { ...state, gameStatus: "GAME_OVER" },
+          events: [{ type: "GAME_OVER", result: "DRAW" }],
         };
       }
 

@@ -52,7 +52,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
     if (!piece) return;
 
-    if (piece.player === gameState.currentPlayer) {
+    if (piece.player === gameState.gameStatus) {
       if (
         selectedPosition?.row === position.row &&
         selectedPosition?.col === position.col
@@ -148,7 +148,9 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
       />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
       <CheckersBoard />
-      <TurnIndicator player={gameState.currentPlayer} />
+      {gameState.gameStatus !== "GAME_OVER" && (
+        <TurnIndicator player={gameState.gameStatus} />
+      )}
       {pieces.map((piece) => (
         <Checker
           key={piece.id}
