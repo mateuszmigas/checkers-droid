@@ -160,10 +160,52 @@ const isCompletelyBlocked = (
   const piece = getPieceAtPosition(gameState, position);
   if (!piece) return true;
 
-  const regularMoves = getRegularMoves(position, gameState);
-  const captureMoves = getCaptureMoves(position, gameState);
+  // Check all possible directions
+  const directions = piece.isKing
+    ? [
+        [1, 1],
+        [1, -1],
+        [-1, 1],
+        [-1, -1],
+      ]
+    : piece.player === "PLAYER_ONE"
+    ? [
+        [1, 1],
+        [1, -1],
+      ]
+    : [
+        [-1, 1],
+        [-1, -1],
+      ];
 
-  return regularMoves.length === 0 && captureMoves.length === 0;
+  for (const [rowDir, colDir] of directions) {
+    // Check for regular moves
+    const moveTarget = {
+      row: position.row + rowDir,
+      col: position.col + colDir,
+    };
+    if (
+      isValidPosition(moveTarget) &&
+      !getPieceAtPosition(gameState, moveTarget)
+    ) {
+      return false;
+    }
+
+    // Check for captures
+    const jumpOver = {
+      row: position.row + rowDir,
+      col: position.col + colDir,
+    };
+    const captureTarget = {
+      row: position.row + rowDir * 2,
+      col: position.col + colDir * 2,
+    };
+    if (canJumpOver(position, jumpOver, captureTarget, gameState)) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 // New helper function to get all valid moves for a player
@@ -247,19 +289,20 @@ const countCapturesInPath = (
 // Get all possible capture moves
 const getCaptureMoves = (
   position: Position,
-  gameState: GameState
+  gameState: GameState,
+  previousDirection?: { rowDir: number; colDir: number }
 ): Position[] => {
   const piece = getPieceAtPosition(gameState, position);
   if (!piece) return [];
 
   const moves: Position[] = [];
-  const directions = piece.isKing
+  let directions = piece.isKing
     ? [
         [1, 1],
         [1, -1],
         [-1, 1],
         [-1, -1],
-      ] // King moves in all directions
+      ]
     : piece.player === "PLAYER_ONE"
     ? [
         [1, 1],
@@ -268,7 +311,15 @@ const getCaptureMoves = (
     : [
         [-1, 1],
         [-1, -1],
-      ]; // Regular pieces
+      ];
+
+  // For regular pieces during multiple captures, maintain direction
+  if (!piece.isKing && previousDirection) {
+    directions = directions.filter(
+      ([rowDir, colDir]) =>
+        Math.sign(rowDir) === Math.sign(previousDirection.rowDir)
+    );
+  }
 
   for (const [rowDir, colDir] of directions) {
     const jumpOver = {
@@ -281,17 +332,19 @@ const getCaptureMoves = (
     };
 
     if (canJumpOver(position, jumpOver, target, gameState)) {
-      // Check for additional captures from the target position
-      const additionalMoves = getCaptureMoves(target, {
-        ...gameState,
-        grid: simulateMove(gameState.grid, position, target, jumpOver),
-      });
-
-      if (additionalMoves.length > 0) {
-        moves.push(...additionalMoves);
-      } else {
-        moves.push(target);
+      // For kings, ensure there are no other pieces beyond the jumped piece
+      if (piece.isKing) {
+        let nextRow = target.row + rowDir;
+        let nextCol = target.col + colDir;
+        while (isValidPosition({ row: nextRow, col: nextCol })) {
+          if (getPieceAtPosition(gameState, { row: nextRow, col: nextCol })) {
+            break;
+          }
+          nextRow += rowDir;
+          nextCol += colDir;
+        }
       }
+      moves.push(target);
     }
   }
 
@@ -312,6 +365,12 @@ const simulateMove = (
   return newGrid;
 };
 
+// Helper function to check if a position is a dark square
+const isDarkSquare = (position: Position): boolean => {
+  // In a standard checkers board, squares are dark if row + col is even
+  return (position.row + position.col) % 2 === 0;
+};
+
 // Get regular (non-capture) moves
 const getRegularMoves = (
   position: Position,
@@ -323,34 +382,45 @@ const getRegularMoves = (
   const moves: Position[] = [];
   const directions = piece.isKing
     ? [
-        [1, 1],
-        [1, -1],
-        [-1, 1],
-        [-1, -1],
+        [1, 1], // forward-right
+        [1, -1], // forward-left
+        [-1, 1], // backward-right
+        [-1, -1], // backward-left
       ]
     : piece.player === "PLAYER_ONE"
     ? [
-        [1, 1],
-        [1, -1],
+        [1, 1], // forward-right
+        [1, -1], // forward-left
       ]
     : [
-        [-1, 1],
-        [-1, -1],
+        [-1, 1], // forward-right (for PLAYER_TWO)
+        [-1, -1], // forward-left (for PLAYER_TWO)
       ];
 
   for (const [rowDir, colDir] of directions) {
-    const target = {
-      row: position.row + rowDir,
-      col: position.col + colDir,
-    };
+    if (piece.isKing) {
+      let distance = 1;
+      while (true) {
+        const target = {
+          row: position.row + rowDir * distance,
+          col: position.col + colDir * distance,
+        };
 
-    if (
-      isValidPosition(target) &&
-      !getPieceAtPosition(gameState, target) &&
-      (target.row + target.col) % 2 !== 0
-    ) {
-      // Only allow moves to dark squares
-      moves.push(target);
+        if (!isValidPosition(target)) break;
+        if (getPieceAtPosition(gameState, target)) break;
+
+        moves.push(target);
+        distance++;
+      }
+    } else {
+      const target = {
+        row: position.row + rowDir,
+        col: position.col + colDir,
+      };
+
+      if (isValidPosition(target) && !getPieceAtPosition(gameState, target)) {
+        moves.push(target);
+      }
     }
   }
 
@@ -419,11 +489,25 @@ export const updateGameState = (
     }
 
     case "MOVE_PIECE": {
-      const events: GameEvent[] = [];
+      if (!isValidPosition(action.from) || !isValidPosition(action.to)) {
+        return { state, events: [{ type: "INVALID_MOVE" }] };
+      }
+
       const piece = getPieceAtPosition(state, action.from);
+      if (!piece || piece.player !== state.currentPlayer) {
+        return { state, events: [{ type: "INVALID_MOVE" }] };
+      }
 
-      if (!piece) return { state, events: [{ type: "INVALID_MOVE" }] };
+      const validMoves = getValidMoves(action.from, state);
+      if (
+        !validMoves.some(
+          (move) => move.row === action.to.row && move.col === action.to.col
+        )
+      ) {
+        return { state, events: [{ type: "INVALID_MOVE" }] };
+      }
 
+      const events: GameEvent[] = [];
       const newGrid = state.grid.map((row) => [...row]);
       const capturedPieces = [...state.capturedPieces];
 
@@ -454,31 +538,32 @@ export const updateGameState = (
         }
       }
 
-      // Check if piece becomes king
+      // Move the piece first, then check for crowning
+      newGrid[action.to.row][action.to.col] = piece;
+      newGrid[action.from.row][action.from.col] = null;
+
+      // Check if piece becomes king after completing all captures
       const becomesKing =
         !piece.isKing &&
         ((piece.player === "PLAYER_ONE" && action.to.row === 7) ||
           (piece.player === "PLAYER_TWO" && action.to.row === 0));
 
-      // Move the piece
-      newGrid[action.to.row][action.to.col] = {
-        ...piece,
-        isKing: piece.isKing || becomesKing,
-      };
-      newGrid[action.from.row][action.from.col] = null;
+      if (becomesKing) {
+        newGrid[action.to.row][action.to.col] = {
+          ...newGrid[action.to.row][action.to.col]!,
+          isKing: true,
+        };
+        events.push({
+          type: "PIECE_CROWNED",
+          position: action.to,
+        });
+      }
 
       events.push({
         type: "PIECE_MOVED",
         from: action.from,
         to: action.to,
       });
-
-      if (becomesKing) {
-        events.push({
-          type: "PIECE_CROWNED",
-          position: action.to,
-        });
-      }
 
       const nextPlayer =
         state.currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
@@ -519,6 +604,24 @@ export const updateGameState = (
     case "CHECK_GAME_STATE": {
       const events: GameEvent[] = [];
 
+      // Check if current player has any valid moves
+      if (!hasValidMovesLeft(state.currentPlayer, state)) {
+        const otherPlayer =
+          state.currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+
+        // Check if it's a stalemate or win
+        if (!hasValidMovesLeft(otherPlayer, state)) {
+          events.push({ type: "GAME_OVER", result: "DRAW" });
+        } else {
+          events.push({ type: "GAME_OVER", winner: otherPlayer });
+        }
+
+        return {
+          state: { ...state, gameOver: true },
+          events,
+        };
+      }
+
       // Check for threefold repetition
       if (isThreefoldRepetition(state)) {
         events.push({ type: "GAME_OVER", result: "DRAW" });
@@ -533,35 +636,6 @@ export const updateGameState = (
         events.push({ type: "GAME_OVER", result: "DRAW" });
         return {
           state: { ...state, gameOver: true },
-          events,
-        };
-      }
-
-      // Check if current player has any valid moves
-      const hasValidMoves = getAllValidMovesForPlayer(state).length > 0;
-      if (!hasValidMoves) {
-        // Check if it's a win or draw
-        const otherPlayer =
-          state.currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
-        const otherPlayerHasPieces = state.grid.some((row) =>
-          row.some((cell) => cell?.player === otherPlayer)
-        );
-
-        if (otherPlayerHasPieces) {
-          events.push({
-            type: "GAME_OVER",
-            winner: otherPlayer,
-          });
-        } else {
-          events.push({ type: "GAME_OVER", result: "DRAW" });
-        }
-
-        return {
-          state: {
-            ...state,
-            gameOver: true,
-            winner: otherPlayerHasPieces ? otherPlayer : null,
-          },
           events,
         };
       }
@@ -603,4 +677,21 @@ export interface GameStateUpdate {
   state: GameState;
   events: GameEvent[];
 }
+
+// Add this helper function
+const hasValidMovesLeft = (
+  player: PlayerType,
+  gameState: GameState
+): boolean => {
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const piece = gameState.grid[row][col];
+      if (piece?.player === player) {
+        const moves = getValidMoves({ row, col }, gameState);
+        if (moves.length > 0) return true;
+      }
+    }
+  }
+  return false;
+};
 

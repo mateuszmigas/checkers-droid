@@ -8,6 +8,35 @@ import {
   getAllPiecesWithCaptures,
 } from "./gameState";
 
+// Add this helper function at the top of the file, after imports
+const printBoard = (gameState: GameState): void => {
+  console.log("\n   0 1 2 3 4 5 6 7"); // Column numbers
+  console.log("  -----------------");
+
+  for (let row = 0; row < 8; row++) {
+    let rowStr = `${row} |`; // Row numbers
+    for (let col = 0; col < 8; col++) {
+      const piece = gameState.grid[row][col];
+      let symbol = " ";
+
+      if (piece) {
+        if (piece.player === "PLAYER_ONE") {
+          symbol = piece.isKing ? "⛃" : "○";
+        } else {
+          symbol = piece.isKing ? "⛂" : "●";
+        }
+      } else {
+        // Show dark/light squares
+        symbol = (row + col) % 2 !== 0 ? "·" : " ";
+      }
+      rowStr += symbol + " ";
+    }
+    console.log(rowStr + "|");
+  }
+  console.log("  -----------------");
+  console.log(`Current Player: ${gameState.currentPlayer}`);
+};
+
 describe("Initial Board Setup", () => {
   test("should create correct initial board layout", () => {
     const gameState = createInitialGameState();
@@ -188,6 +217,7 @@ describe("King Movement Rules", () => {
       player: "PLAYER_ONE",
       isKing: true,
     };
+
     gameState.currentPlayer = "PLAYER_ONE";
 
     const validMoves = getValidMoves({ row: 4, col: 4 }, gameState);
@@ -312,7 +342,7 @@ describe("Invalid Move Scenarios", () => {
     const position: Position = { row: 2, col: 1 };
 
     // Place a piece in one of the possible move locations
-    gameState.grid[3][2] = {
+    gameState.grid[3][0] = {
       id: "blocking-piece",
       player: "PLAYER_TWO",
       isKing: false,
@@ -321,7 +351,7 @@ describe("Invalid Move Scenarios", () => {
     const validMoves = getValidMoves(position, gameState);
 
     // Should only have one valid move remaining
-    expect(validMoves).toEqual([{ row: 3, col: 0 }]);
+    expect(validMoves).toEqual([{ row: 3, col: 2 }]);
   });
 
   test("should not allow moves outside the board", () => {
@@ -732,6 +762,13 @@ describe("King Capture Sequences", () => {
 
     // Should be able to capture both pieces in a zig-zag pattern
     expect(validMoves).toContainEqual({ row: 2, col: 6 });
+  });
+});
+
+describe("Board Visualization Example", () => {
+  test("should print initial board layout", () => {
+    const gameState = createInitialGameState();
+    printBoard(gameState);
   });
 });
 
