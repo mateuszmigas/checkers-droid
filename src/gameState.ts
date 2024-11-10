@@ -20,6 +20,10 @@ export interface GameState {
   selectedPosition: Position | null;
   possibleMoves: Position[];
   capturedPieces: CheckerPiece[];
+  gameOver?: boolean;
+  winner?: PlayerType | null;
+  movesSinceLastCaptureOrPromotion: number;
+  positionHistory: string[]; // Hashed board positions for repetition detection
 }
 
 export const createInitialGameState = (): GameState => {
@@ -60,6 +64,8 @@ export const createInitialGameState = (): GameState => {
     selectedPosition: null,
     possibleMoves: [],
     capturedPieces: [],
+    movesSinceLastCaptureOrPromotion: 0,
+    positionHistory: [],
   };
 };
 
@@ -71,7 +77,123 @@ const getPieceAtPosition = (
   return gameState.grid[position.row][position.col];
 };
 
+// Helper function to get all pieces that can capture for the current player
+export const getAllPiecesWithCaptures = (gameState: GameState): Position[] => {
+  const positions: Position[] = [];
+
+  // Scan the board for pieces that can capture
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const piece = gameState.grid[row][col];
+      if (piece?.player === gameState.currentPlayer) {
+        // Check if this piece has any capture moves
+        const captureMoves = getCaptureMoves({ row, col }, gameState);
+        if (captureMoves.length > 0) {
+          positions.push({ row, col });
+        }
+      }
+    }
+  }
+
+  return positions;
+};
+
+// Helper function to get all valid moves for current player
+const getAllValidMovesForPlayer = (gameState: GameState): Position[] => {
+  const moves: Position[] = [];
+
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const piece = gameState.grid[row][col];
+      if (piece?.player === gameState.currentPlayer) {
+        const pieceMoves = getValidMoves({ row, col }, gameState);
+        moves.push(...pieceMoves);
+      }
+    }
+  }
+
+  return moves;
+};
+
+// Helper function to check if position occurs three times in history
+const isThreefoldRepetition = (gameState: GameState): boolean => {
+  const currentPosition =
+    gameState.positionHistory[gameState.positionHistory.length - 1];
+  return (
+    gameState.positionHistory.filter((pos) => pos === currentPosition).length >=
+    3
+  );
+};
+
+// Add this helper function
+const isCompletelyBlocked = (
+  position: Position,
+  gameState: GameState
+): boolean => {
+  const piece = getPieceAtPosition(gameState, position);
+  if (!piece) return true;
+
+  const regularMoves = getRegularMoves(position, gameState);
+  const captureMoves = getCaptureMoves(position, gameState);
+
+  return regularMoves.length === 0 && captureMoves.length === 0;
+};
+
+// Enhanced getValidMoves to handle all scenarios
 export const getValidMoves = (
+  position: Position,
+  gameState: GameState
+): Position[] => {
+  const piece = getPieceAtPosition(gameState, position);
+  if (
+    !piece ||
+    piece.player !== gameState.currentPlayer ||
+    isCompletelyBlocked(position, gameState)
+  ) {
+    return [];
+  }
+
+  // Check for capture moves first
+  const captureMoves = getCaptureMoves(position, gameState);
+  if (captureMoves.length > 0) {
+    // If there are multiple capture sequences, return the ones with maximum captures
+    const maxCaptures = Math.max(
+      ...captureMoves.map((move) =>
+        countCapturesInPath(position, move, gameState)
+      )
+    );
+    return captureMoves.filter(
+      (move) => countCapturesInPath(position, move, gameState) === maxCaptures
+    );
+  }
+
+  // If no captures available, get regular moves
+  return getRegularMoves(position, gameState);
+};
+
+// Helper function to count captures in a move path
+const countCapturesInPath = (
+  from: Position,
+  to: Position,
+  gameState: GameState
+): number => {
+  let count = 0;
+  const rowStep = Math.sign(to.row - from.row);
+  const colStep = Math.sign(to.col - from.col);
+  let row = from.row + rowStep;
+  let col = from.col + colStep;
+
+  while (row !== to.row || col !== to.col) {
+    if (getPieceAtPosition(gameState, { row, col })) count++;
+    row += rowStep;
+    col += colStep;
+  }
+
+  return count;
+};
+
+// Get all possible capture moves
+const getCaptureMoves = (
   position: Position,
   gameState: GameState
 ): Position[] => {
@@ -79,80 +201,136 @@ export const getValidMoves = (
   if (!piece) return [];
 
   const moves: Position[] = [];
-  const direction = piece.player === "PLAYER_ONE" ? 1 : -1;
+  const directions = piece.isKing
+    ? [
+        [1, 1],
+        [1, -1],
+        [-1, 1],
+        [-1, -1],
+      ] // King moves in all directions
+    : piece.player === "PLAYER_ONE"
+    ? [
+        [1, 1],
+        [1, -1],
+      ]
+    : [
+        [-1, 1],
+        [-1, -1],
+      ]; // Regular pieces
 
-  // Check for jump moves first
-  const jumpMoves = getJumpMoves(position, gameState);
-  if (jumpMoves.length > 0) {
-    return jumpMoves;
-  }
+  for (const [rowDir, colDir] of directions) {
+    const jumpOver = {
+      row: position.row + rowDir,
+      col: position.col + colDir,
+    };
+    const target = {
+      row: position.row + rowDir * 2,
+      col: position.col + colDir * 2,
+    };
 
-  // Regular moves
-  const leftMove = {
-    row: position.row + direction,
-    col: position.col - 1,
-  };
-  const rightMove = {
-    row: position.row + direction,
-    col: position.col + 1,
-  };
+    if (canJumpOver(position, jumpOver, target, gameState)) {
+      // Check for additional captures from the target position
+      const additionalMoves = getCaptureMoves(target, {
+        ...gameState,
+        grid: simulateMove(gameState.grid, position, target, jumpOver),
+      });
 
-  if (isValidPosition(leftMove) && !getPieceAtPosition(gameState, leftMove)) {
-    moves.push(leftMove);
-  }
-  if (isValidPosition(rightMove) && !getPieceAtPosition(gameState, rightMove)) {
-    moves.push(rightMove);
+      if (additionalMoves.length > 0) {
+        moves.push(...additionalMoves);
+      } else {
+        moves.push(target);
+      }
+    }
   }
 
   return moves;
 };
 
-const getJumpMoves = (position: Position, gameState: GameState): Position[] => {
+// Simulate a move on the grid without modifying the original
+const simulateMove = (
+  grid: GridCell[][],
+  from: Position,
+  to: Position,
+  captured: Position
+): GridCell[][] => {
+  const newGrid = grid.map((row) => [...row]);
+  newGrid[to.row][to.col] = newGrid[from.row][from.col];
+  newGrid[from.row][from.col] = null;
+  newGrid[captured.row][captured.col] = null;
+  return newGrid;
+};
+
+// Get regular (non-capture) moves
+const getRegularMoves = (
+  position: Position,
+  gameState: GameState
+): Position[] => {
   const piece = getPieceAtPosition(gameState, position);
   if (!piece) return [];
 
-  const jumpMoves: Position[] = [];
-  const direction = piece.player === "PLAYER_ONE" ? 1 : -1;
+  const moves: Position[] = [];
+  const directions = piece.isKing
+    ? [
+        [1, 1],
+        [1, -1],
+        [-1, 1],
+        [-1, -1],
+      ]
+    : piece.player === "PLAYER_ONE"
+    ? [
+        [1, 1],
+        [1, -1],
+      ]
+    : [
+        [-1, 1],
+        [-1, -1],
+      ];
 
-  // Check left and right jumps
-  const jumps = [
-    {
-      over: { row: position.row + direction, col: position.col - 1 },
-      target: { row: position.row + direction * 2, col: position.col - 2 },
-    },
-    {
-      over: { row: position.row + direction, col: position.col + 1 },
-      target: { row: position.row + direction * 2, col: position.col + 2 },
-    },
-  ];
+  for (const [rowDir, colDir] of directions) {
+    const target = {
+      row: position.row + rowDir,
+      col: position.col + colDir,
+    };
 
-  for (const jump of jumps) {
-    if (canJumpOver(position, jump.over, jump.target, gameState)) {
-      jumpMoves.push(jump.target);
+    if (
+      isValidPosition(target) &&
+      !getPieceAtPosition(gameState, target) &&
+      (target.row + target.col) % 2 !== 0
+    ) {
+      // Only allow moves to dark squares
+      moves.push(target);
     }
   }
 
-  return jumpMoves;
+  return moves;
 };
 
+// Helper function to check if a piece can jump over another piece to a target position
 const canJumpOver = (
   from: Position,
   jumpOver: Position,
   target: Position,
   gameState: GameState
 ): boolean => {
+  // Check if target position is within bounds
   if (!isValidPosition(target)) return false;
 
-  const jumpingPiece = getPieceAtPosition(gameState, from);
-  const jumpedPiece = getPieceAtPosition(gameState, jumpOver);
-  const targetPiece = getPieceAtPosition(gameState, target);
+  // Check if target position is empty
+  if (getPieceAtPosition(gameState, target)) return false;
 
-  return (
-    jumpingPiece !== null &&
-    jumpedPiece !== null &&
-    targetPiece === null &&
-    jumpedPiece.player !== jumpingPiece.player
-  );
+  const piece = getPieceAtPosition(gameState, from)!;
+  const jumpedPiece = getPieceAtPosition(gameState, jumpOver);
+
+  // Must have a piece to jump over and it must be an opponent's piece
+  if (!jumpedPiece || jumpedPiece.player === piece?.player) return false;
+
+  // For non-king pieces, verify they are moving in the correct direction
+  if (!piece?.isKing) {
+    const forwardDirection = piece.player === "PLAYER_ONE" ? 1 : -1;
+    if (Math.sign(target.row - from.row) !== forwardDirection) return false;
+  }
+
+  return true;
 };
 
 export const updateGameState = (
@@ -197,17 +375,23 @@ export const updateGameState = (
       const newGrid = state.grid.map((row) => [...row]);
       const capturedPieces = [...state.capturedPieces];
 
-      // Check if this is a jump move
-      const rowDiff = Math.abs(action.to.row - action.from.row);
-      if (rowDiff === 2) {
-        const jumpedRow = (action.from.row + action.to.row) / 2;
-        const jumpedCol = (action.from.col + action.to.col) / 2;
+      // Handle multiple captures by checking each step in the path
+      const rowDiff = action.to.row - action.from.row;
+      const colDiff = action.to.col - action.from.col;
+      const steps = Math.abs(rowDiff);
+      const rowStep = Math.sign(rowDiff);
+      const colStep = Math.sign(colDiff);
+
+      // For each step in the path, check if we're jumping over a piece
+      for (let i = 1; i < steps; i++) {
+        const jumpedRow = action.from.row + i * rowStep;
+        const jumpedCol = action.from.col + i * colStep;
         const jumpedPiece = getPieceAtPosition(state, {
           row: jumpedRow,
           col: jumpedCol,
         });
 
-        if (jumpedPiece) {
+        if (jumpedPiece && jumpedPiece.player !== piece.player) {
           capturedPieces.push(jumpedPiece);
           newGrid[jumpedRow][jumpedCol] = null;
           events.push({
@@ -251,6 +435,20 @@ export const updateGameState = (
         player: nextPlayer,
       });
 
+      // Check if all opponent pieces are captured
+      const opponentPlayer =
+        piece.player === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+      const opponentHasPieces = newGrid.some((row) =>
+        row.some((cell) => cell?.player === opponentPlayer)
+      );
+
+      if (!opponentHasPieces) {
+        events.push({
+          type: "GAME_OVER",
+          winner: piece.player,
+        });
+      }
+
       return {
         state: {
           ...state,
@@ -259,9 +457,64 @@ export const updateGameState = (
           currentPlayer: nextPlayer,
           selectedPosition: null,
           possibleMoves: [],
+          gameOver: !opponentHasPieces,
+          winner: !opponentHasPieces ? piece.player : undefined,
         },
         events,
       };
+    }
+
+    case "CHECK_GAME_STATE": {
+      const events: GameEvent[] = [];
+
+      // Check for threefold repetition
+      if (isThreefoldRepetition(state)) {
+        events.push({ type: "GAME_OVER", result: "DRAW" });
+        return {
+          state: { ...state, gameOver: true },
+          events,
+        };
+      }
+
+      // Check for 40-move rule
+      if (state.movesSinceLastCaptureOrPromotion >= 80) {
+        events.push({ type: "GAME_OVER", result: "DRAW" });
+        return {
+          state: { ...state, gameOver: true },
+          events,
+        };
+      }
+
+      // Check if current player has any valid moves
+      const hasValidMoves = getAllValidMovesForPlayer(state).length > 0;
+      if (!hasValidMoves) {
+        // Check if it's a win or draw
+        const otherPlayer =
+          state.currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+        const otherPlayerHasPieces = state.grid.some((row) =>
+          row.some((cell) => cell?.player === otherPlayer)
+        );
+
+        if (otherPlayerHasPieces) {
+          events.push({
+            type: "GAME_OVER",
+            winner: otherPlayer,
+          });
+        } else {
+          events.push({ type: "GAME_OVER", result: "DRAW" });
+        }
+
+        return {
+          state: {
+            ...state,
+            gameOver: true,
+            winner: otherPlayerHasPieces ? otherPlayer : null,
+          },
+          events,
+        };
+      }
+
+      return { state, events };
     }
 
     default:
@@ -282,14 +535,17 @@ const isValidPosition = (position: Position): boolean => {
 export type GameAction =
   | { type: "SELECT_PIECE"; position: Position }
   | { type: "MOVE_PIECE"; from: Position; to: Position }
-  | { type: "DESELECT_PIECE" };
+  | { type: "DESELECT_PIECE" }
+  | { type: "CHECK_GAME_STATE" };
 
 export type GameEvent =
   | { type: "PIECE_MOVED"; from: Position; to: Position }
   | { type: "PIECE_CAPTURED"; position: Position; piece: CheckerPiece }
   | { type: "PIECE_CROWNED"; position: Position }
   | { type: "TURN_CHANGED"; player: PlayerType }
-  | { type: "INVALID_MOVE" };
+  | { type: "INVALID_MOVE" }
+  | { type: "GAME_OVER"; winner: PlayerType }
+  | { type: "GAME_OVER"; result: "DRAW" };
 
 export interface GameStateUpdate {
   state: GameState;
