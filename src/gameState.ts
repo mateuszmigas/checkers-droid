@@ -510,7 +510,7 @@ export const updateGameState = (
 };
 
 const checkForNoMoves = (state: GameState): GameStateUpdate => {
-  const currentPlayer = state.gameStatus;
+  const currentPlayer = state.gameStatus as PlayerType;
   const validMoves = getPlayerValidMoves(currentPlayer, state);
 
   if (validMoves.size() === 0) {
@@ -523,4 +523,3 @@ const checkForNoMoves = (state: GameState): GameStateUpdate => {
 
   return { state, events: [{ type: "INVALID_MOVE" }] };
 };
-

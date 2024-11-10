@@ -7,7 +7,6 @@ import { TurnIndicator } from "./turnIndicator";
 import {
   GameState,
   createInitialGameState,
-  PlayerType,
   CheckerPiece,
   CheckerPosition,
   updateGameState,
@@ -37,10 +36,6 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
   const [gameState, setGameState] = useState<GameState>(
     createInitialGameState()
   );
-
-  const getPlayerColor = (player: PlayerType): string => {
-    return player === "PLAYER_ONE" ? "#cc0000" : "#00cc00";
-  };
 
   const [selectedPosition, setSelectedPosition] =
     useState<CheckerPosition | null>(null);
@@ -157,15 +152,17 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
   return (
     <>
-      <ambientLight intensity={Math.PI / 2} />
+      <ambientLight intensity={0.3} />
+      <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
+      <directionalLight position={[-5, 5, -5]} intensity={0.8} />
       <spotLight
-        position={[10, 10, 10]}
-        angle={0.15}
-        penumbra={1}
-        decay={0}
-        intensity={Math.PI}
+        position={[0, 10, 0]}
+        intensity={0.9}
+        angle={0.6}
+        penumbra={0.5}
+        castShadow
       />
-      <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+
       <CheckersBoard />
       {gameState.gameStatus !== "GAME_OVER" && (
         <TurnIndicator player={gameState.gameStatus} />
@@ -174,7 +171,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
         <Checker
           key={piece.id}
           position={positionToCoordinates(piece.position)}
-          color={getPlayerColor(piece.player)}
+          player={piece.player}
           isSelected={
             piece.position.row === selectedPosition?.row &&
             piece.position.col === selectedPosition?.col
