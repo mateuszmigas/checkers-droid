@@ -394,28 +394,455 @@ describe("movement rules for kings", () => {
 });
 
 describe("capturing rules", () => {
-  test("capturing is mandatory when available", () => {});
+  test("capturing is mandatory when available", () => {
+    const gameState = createEmptyGameState();
 
-  test("captures are made by jumping over opponent pieces", () => {});
+    // Setup a scenario where a capture is available
+    const playerOnePiece: CheckerPiece = {
+      id: "p1",
+      player: "PLAYER_ONE",
+      isKing: false,
+    };
+    const playerTwoPiece: CheckerPiece = {
+      id: "p2",
+      player: "PLAYER_TWO",
+      isKing: false,
+    };
+
+    gameState.grid[3][3] = playerOnePiece;
+    gameState.grid[4][4] = playerTwoPiece;
+
+    // Try to make a regular move when capture is available
+    const invalidMove = updateGameState(gameState, {
+      type: "MOVE_PIECE",
+      from: { row: 3, col: 3 },
+      to: { row: 4, col: 2 },
+    });
+
+    expect(invalidMove.events).toContainEqual({ type: "INVALID_MOVE" });
+    expect(invalidMove.state.grid[4][4]).toEqual(playerTwoPiece); // Piece should not be captured
+
+    // Make the capture move
+    const validMove = updateGameState(gameState, {
+      type: "MOVE_PIECE",
+      from: { row: 3, col: 3 },
+      to: { row: 5, col: 5 },
+    });
+
+    expect(validMove.events).toContainEqual({
+      type: "PIECE_CAPTURED",
+      position: { row: 4, col: 4 },
+      piece: playerTwoPiece,
+    });
+    expect(validMove.state.grid[4][4]).toBeNull(); // Captured piece should be removed
+    expect(validMove.state.grid[5][5]).toEqual(playerOnePiece);
+  });
+
+  test("captures are made by jumping over opponent pieces", () => {
+    const gameState = createEmptyGameState();
+
+    // Setup pieces for capture
+    const playerOnePiece: CheckerPiece = {
+      id: "p1",
+      player: "PLAYER_ONE",
+      isKing: false,
+    };
+    const playerTwoPiece: CheckerPiece = {
+      id: "p2",
+      player: "PLAYER_TWO",
+      isKing: false,
+    };
+
+    gameState.grid[2][2] = playerOnePiece;
+    gameState.grid[3][3] = playerTwoPiece;
+
+    // Make the capture move
+    const result = updateGameState(gameState, {
+      type: "MOVE_PIECE",
+      from: { row: 2, col: 2 },
+      to: { row: 4, col: 4 },
+    });
+
+    // Verify the capture
+    expect(result.state.grid[2][2]).toBeNull(); // Original position empty
+    expect(result.state.grid[3][3]).toBeNull(); // Captured piece removed
+    expect(result.state.grid[4][4]).toEqual(playerOnePiece); // Piece moved to new position
+    expect(result.events).toContainEqual({
+      type: "PIECE_CAPTURED",
+      position: { row: 3, col: 3 },
+      piece: playerTwoPiece,
+    });
+  });
 
   describe("men capturing rules", () => {
-    test("men can only capture forward", () => {});
+    test("men can only capture forward", () => {
+      const gameState = createEmptyGameState();
+
+      // Setup pieces
+      const playerOnePiece: CheckerPiece = {
+        id: "p1",
+        player: "PLAYER_ONE",
+        isKing: false,
+      };
+      const playerTwoPieces: CheckerPiece[] = [
+        {
+          id: "p2-1",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        {
+          id: "p2-2",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+      ];
+
+      // Place pieces so there's both a forward and backward capture opportunity
+      gameState.grid[4][4] = playerOnePiece;
+      gameState.grid[5][5] = playerTwoPieces[0]; // Forward capture opportunity
+      gameState.grid[3][5] = playerTwoPieces[1]; // Backward capture opportunity
+
+      // Try backward capture (should be invalid)
+      const invalidMove = updateGameState(gameState, {
+        type: "MOVE_PIECE",
+        from: { row: 4, col: 4 },
+        to: { row: 2, col: 6 },
+      });
+
+      expect(invalidMove.events).toContainEqual({ type: "INVALID_MOVE" });
+      expect(invalidMove.state.grid[3][5]).toEqual(playerTwoPieces[1]); // Piece should remain
+
+      // Try forward capture (should be valid)
+      const validMove = updateGameState(gameState, {
+        type: "MOVE_PIECE",
+        from: { row: 4, col: 4 },
+        to: { row: 6, col: 6 },
+      });
+
+      expect(validMove.events).toContainEqual({
+        type: "PIECE_CAPTURED",
+        position: { row: 5, col: 5 },
+        piece: playerTwoPieces[0],
+      });
+      expect(validMove.state.grid[5][5]).toBeNull(); // Captured piece should be removed
+      expect(validMove.state.grid[6][6]).toEqual(playerOnePiece);
+    });
   });
 
   describe("kings capturing rules", () => {
-    test("kings can capture in any direction and change direction", () => {});
+    test("kings can capture in any direction and change direction", () => {
+      const gameState = createEmptyGameState();
 
-    test("multiple captures are mandatory and continue from landing square", () => {});
+      // Setup king and opponent pieces
+      const king: CheckerPiece = {
+        id: "king",
+        player: "PLAYER_ONE",
+        isKing: true,
+      };
+      const opponentPieces: CheckerPiece[] = [
+        {
+          id: "p2-1",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        {
+          id: "p2-2",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+      ];
+
+      gameState.grid[4][4] = king;
+      gameState.grid[3][3] = opponentPieces[0]; // Backward capture
+      gameState.grid[5][3] = opponentPieces[1]; // Forward capture
+
+      // Test backward capture
+      const backwardCapture = updateGameState(gameState, {
+        type: "MOVE_PIECE",
+        from: { row: 4, col: 4 },
+        to: { row: 2, col: 2 },
+      });
+
+      // Verify grid state after backward capture
+      expect(backwardCapture.state.grid[4][4]).toBeNull(); // Original position empty
+      expect(backwardCapture.state.grid[3][3]).toBeNull(); // Captured piece removed
+      expect(backwardCapture.state.grid[2][2]).toEqual(king); // King in new position
+      expect(backwardCapture.events).toContainEqual({
+        type: "PIECE_CAPTURED",
+        position: { row: 3, col: 3 },
+        piece: opponentPieces[0],
+      });
+
+      // Reset game state for forward capture test
+      const newGameState = createEmptyGameState();
+      newGameState.grid[4][4] = king;
+      newGameState.grid[5][3] = opponentPieces[1];
+
+      // Test forward capture
+      const forwardCapture = updateGameState(newGameState, {
+        type: "MOVE_PIECE",
+        from: { row: 4, col: 4 },
+        to: { row: 6, col: 2 },
+      });
+
+      // Verify grid state after forward capture
+      expect(forwardCapture.state.grid[4][4]).toBeNull(); // Original position empty
+      expect(forwardCapture.state.grid[5][3]).toBeNull(); // Captured piece removed
+      expect(forwardCapture.state.grid[6][2]).toEqual(king); // King in new position
+      expect(forwardCapture.events).toContainEqual({
+        type: "PIECE_CAPTURED",
+        position: { row: 5, col: 3 },
+        piece: opponentPieces[1],
+      });
+    });
+
+    test("multiple captures are mandatory and continue from landing square", () => {
+      const gameState = createEmptyGameState();
+
+      // Setup king and opponent pieces for multiple captures
+      const king: CheckerPiece = {
+        id: "king",
+        player: "PLAYER_ONE",
+        isKing: true,
+      };
+      const opponentPieces: CheckerPiece[] = [
+        {
+          id: "p2-1",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        {
+          id: "p2-2",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+        {
+          // Extra piece so game is not over after captures
+          id: "p2-3",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+      ];
+
+      gameState.grid[2][2] = king;
+      gameState.grid[3][3] = opponentPieces[0];
+      gameState.grid[5][5] = opponentPieces[1];
+      gameState.grid[2][1] = opponentPieces[2];
+
+      // First capture
+      const firstCapture = updateGameState(gameState, {
+        type: "MOVE_PIECE",
+        from: { row: 2, col: 2 },
+        to: { row: 4, col: 4 },
+      });
+
+      // Verify grid state after first capture
+      expect(firstCapture.state.grid[2][2]).toBeNull(); // Original position empty
+      expect(firstCapture.state.grid[3][3]).toBeNull(); // First captured piece removed
+      expect(firstCapture.state.grid[4][4]).toEqual(king); // King in intermediate position
+      expect(firstCapture.events).toContainEqual({
+        type: "PIECE_CAPTURED",
+        position: { row: 3, col: 3 },
+        piece: opponentPieces[0],
+      });
+
+      expect(firstCapture.state.gameStatus).toBe("PLAYER_ONE"); // Turn shouldn't change yet
+
+      // Second capture
+      const secondCapture = updateGameState(firstCapture.state, {
+        type: "MOVE_PIECE",
+        from: { row: 4, col: 4 },
+        to: { row: 6, col: 6 },
+      });
+
+      // Verify grid state after second capture
+      expect(secondCapture.state.grid[4][4]).toBeNull(); // Intermediate position empty
+      expect(secondCapture.state.grid[5][5]).toBeNull(); // Second captured piece removed
+      expect(secondCapture.state.grid[6][6]).toEqual(king); // King in final position
+      expect(secondCapture.events).toContainEqual({
+        type: "PIECE_CAPTURED",
+        position: { row: 5, col: 5 },
+        piece: opponentPieces[1],
+      });
+      expect(secondCapture.state.gameStatus).toBe("PLAYER_TWO"); // Turn should change after all captures
+    });
   });
 
-  test("captured pieces are immediately removed", () => {});
+  test("captured pieces are immediately removed", () => {
+    const gameState = createEmptyGameState();
 
-  test("player can choose between multiple capture sequences", () => {});
+    // Setup pieces
+    const playerOnePiece: CheckerPiece = {
+      id: "p1",
+      player: "PLAYER_ONE",
+      isKing: false,
+    };
+    const playerTwoPiece: CheckerPiece = {
+      id: "p2",
+      player: "PLAYER_TWO",
+      isKing: false,
+    };
+
+    gameState.grid[2][2] = playerOnePiece;
+    gameState.grid[3][3] = playerTwoPiece;
+
+    // Make capture move
+    const result = updateGameState(gameState, {
+      type: "MOVE_PIECE",
+      from: { row: 2, col: 2 },
+      to: { row: 4, col: 4 },
+    });
+
+    // Verify piece is immediately removed
+    expect(result.state.grid[3][3]).toBeNull();
+    expect(
+      result.events.findIndex((e) => e.type === "PIECE_CAPTURED")
+    ).toBeLessThan(result.events.findIndex((e) => e.type === "PIECE_MOVED"));
+  });
+
+  test("player can choose between multiple capture sequences", () => {
+    const gameState = createEmptyGameState();
+
+    // Setup pieces for multiple capture opportunities
+    const playerOnePiece: CheckerPiece = {
+      id: "p1",
+      player: "PLAYER_ONE",
+      isKing: true, // Make it a king to have more capture options
+    };
+    const playerTwoPieces: CheckerPiece[] = [
+      { id: "p2-1", player: "PLAYER_TWO", isKing: false },
+      { id: "p2-2", player: "PLAYER_TWO", isKing: false },
+    ];
+
+    gameState.grid[3][3] = playerOnePiece;
+    gameState.grid[4][4] = playerTwoPieces[0];
+    gameState.grid[4][2] = playerTwoPieces[1];
+
+    // Try first capture sequence
+    const firstSequence = updateGameState(gameState, {
+      type: "MOVE_PIECE",
+      from: { row: 3, col: 3 },
+      to: { row: 5, col: 5 },
+    });
+
+    expect(firstSequence.events).toContainEqual({
+      type: "PIECE_CAPTURED",
+      position: { row: 4, col: 4 },
+      piece: playerTwoPieces[0],
+    });
+
+    // Reset and try second capture sequence
+    const newGameState = { ...gameState };
+    const secondSequence = updateGameState(newGameState, {
+      type: "MOVE_PIECE",
+      from: { row: 3, col: 3 },
+      to: { row: 5, col: 1 },
+    });
+
+    expect(secondSequence.events).toContainEqual({
+      type: "PIECE_CAPTURED",
+      position: { row: 4, col: 2 },
+      piece: playerTwoPieces[1],
+    });
+  });
 
   describe("direction restrictions", () => {
-    test("men cannot change direction during captures", () => {});
+    test("men cannot change direction during captures", () => {
+      const gameState = createEmptyGameState();
 
-    test("kings can change direction during captures", () => {});
+      // Setup pieces for a potential direction change capture
+      const playerOnePiece: CheckerPiece = {
+        id: "p1",
+        player: "PLAYER_ONE",
+        isKing: false,
+      };
+      const playerTwoPieces: CheckerPiece[] = [
+        { id: "p2-1", player: "PLAYER_TWO", isKing: false },
+        { id: "p2-2", player: "PLAYER_TWO", isKing: false },
+      ];
+
+      gameState.grid[2][2] = playerOnePiece;
+      gameState.grid[3][3] = playerTwoPieces[0];
+      gameState.grid[4][2] = playerTwoPieces[1];
+
+      // Make first capture
+      const firstCapture = updateGameState(gameState, {
+        type: "MOVE_PIECE",
+        from: { row: 2, col: 2 },
+        to: { row: 4, col: 4 },
+      });
+
+      // Try to change direction (should be invalid)
+      const invalidMove = updateGameState(firstCapture.state, {
+        type: "MOVE_PIECE",
+        from: { row: 4, col: 4 },
+        to: { row: 3, col: 1 },
+      });
+
+      expect(invalidMove.events).toContainEqual({ type: "INVALID_MOVE" });
+    });
+
+    test("kings can change direction during captures", () => {
+      const gameState = createEmptyGameState();
+
+      // Setup king and opponent pieces
+      const king: CheckerPiece = {
+        id: "king",
+        player: "PLAYER_ONE",
+        isKing: true,
+      };
+      const playerTwoPieces: CheckerPiece[] = [
+        { id: "p2-1", player: "PLAYER_TWO", isKing: false },
+        { id: "p2-2", player: "PLAYER_TWO", isKing: false },
+        {
+          // Extra piece so game is not over after captures
+          id: "p2-3",
+          player: "PLAYER_TWO",
+          isKing: false,
+        },
+      ];
+
+      gameState.grid[2][2] = king;
+      gameState.grid[3][3] = playerTwoPieces[0];
+      gameState.grid[5][3] = playerTwoPieces[1];
+      gameState.grid[7][7] = playerTwoPieces[2];
+
+      // Make first capture
+      const firstCapture = updateGameState(gameState, {
+        type: "MOVE_PIECE",
+        from: { row: 2, col: 2 },
+        to: { row: 4, col: 4 },
+      });
+
+      // Verify first capture
+      expect(firstCapture.state.grid[2][2]).toBeNull(); // Original position empty
+      expect(firstCapture.state.grid[3][3]).toBeNull(); // First captured piece removed
+      expect(firstCapture.state.grid[4][4]).toEqual(king); // King in intermediate position
+      expect(firstCapture.events).toContainEqual({
+        type: "PIECE_CAPTURED",
+        position: { row: 3, col: 3 },
+        piece: playerTwoPieces[0],
+      });
+      expect(firstCapture.state.gameStatus).toBe("PLAYER_ONE"); // Turn shouldn't change yet
+
+      // Change direction for second capture
+      const secondCapture = updateGameState(firstCapture.state, {
+        type: "MOVE_PIECE",
+        from: { row: 4, col: 4 },
+        to: { row: 6, col: 2 },
+      });
+
+      // Verify second capture
+      expect(secondCapture.state.grid[4][4]).toBeNull(); // Intermediate position empty
+      expect(secondCapture.state.grid[5][3]).toBeNull(); // Second captured piece removed
+      expect(secondCapture.state.grid[6][2]).toEqual(king); // King in final position
+      expect(secondCapture.events).toContainEqual({
+        type: "PIECE_CAPTURED",
+        position: { row: 5, col: 3 },
+        piece: playerTwoPieces[1],
+      });
+      expect(secondCapture.state.gameStatus).toBe("PLAYER_TWO"); // Turn should change after all captures
+    });
   });
 });
 
