@@ -13,6 +13,7 @@ import {
   updateGameState,
   getAllPiecesWithCaptures,
   getValidMoves,
+  ValidMovesMap,
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { RobotHead } from "./robotHead";
@@ -47,6 +48,8 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
   );
   const [possibleMoves, setPossibleMoves] = useState<Position[]>([]);
 
+  const [validMoves, setValidMoves] = useState<ValidMovesMap>(new Map());
+
   const handlePieceClick = (position: Position) => {
     const piece = gameState.grid[position.row][position.col];
 
@@ -60,8 +63,9 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
         setSelectedPosition(null);
         setPossibleMoves([]);
       } else {
+        const moves = validMoves.get(position) || [];
         setSelectedPosition(position);
-        setPossibleMoves(getValidMoves(position, gameState));
+        setPossibleMoves(moves);
       }
     }
   };
@@ -115,6 +119,14 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     }
   }, [isOrthographic, camera]);
 
+  useEffect(() => {
+    if (gameState.gameStatus !== "GAME_OVER") {
+      setValidMoves(getValidMoves(gameState.gameStatus, gameState));
+    } else {
+      setValidMoves(new Map());
+    }
+  }, [gameState]);
+
   // Convert grid to pieces array for rendering
   const pieces: (CheckerPiece & { position: Position })[] = [];
   gameState.grid.forEach((row, rowIndex) => {
@@ -131,8 +143,11 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
   // Add this function to check if a piece must capture
   const mustCapture = (position: Position): boolean => {
     const piecesWithCaptures = getAllPiecesWithCaptures(gameState);
-    return piecesWithCaptures.some(
-      (pos) => pos.row === position.row && pos.col === position.col
+    return (
+      piecesWithCaptures.length > 0 &&
+      piecesWithCaptures.some(
+        (pos) => pos.row === position.row && pos.col === position.col
+      )
     );
   };
 

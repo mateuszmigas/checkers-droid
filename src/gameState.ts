@@ -215,29 +215,81 @@ const getAllValidMovesForPosition = (
   return getRegularMoves(position, gameState);
 };
 
-// Modified getValidMoves to check all pieces
-export const getValidMoves = (
-  position: Position,
-  gameState: GameState
-): Position[] => {
-  // First, check if any piece has capture moves
-  const piecesWithCaptures = getAllPiecesWithCaptures(gameState);
+// Update the ValidMovesMap type to use Position as key
+export type ValidMovesMap = Map<Position, Position[]>;
 
-  if (piecesWithCaptures.length > 0) {
-    // If the selected piece can capture, return its capture moves
-    if (
-      piecesWithCaptures.some(
-        (pos) => pos.row === position.row && pos.col === position.col
-      )
-    ) {
-      return getAllValidMovesForPosition(position, gameState);
+// Helper function to create position key (for Map comparison)
+const positionsEqual = (a: Position, b: Position): boolean => {
+  return a.row === b.row && a.col === b.col;
+};
+
+// Custom Map class that uses position equality for keys
+export class PositionMap<T> extends Map<Position, T> {
+  set(key: Position, value: T): this {
+    for (const existingKey of this.keys()) {
+      if (positionsEqual(existingKey, key)) {
+        super.delete(existingKey);
+        break;
+      }
     }
-    // If other pieces can capture, this piece cannot move
-    return [];
+    return super.set(key, value);
   }
 
-  // If no captures are available, return regular moves for this piece
-  return getAllValidMovesForPosition(position, gameState);
+  get(key: Position): T | undefined {
+    for (const existingKey of this.keys()) {
+      if (positionsEqual(existingKey, key)) {
+        return super.get(existingKey);
+      }
+    }
+    return undefined;
+  }
+
+  has(key: Position): boolean {
+    for (const existingKey of this.keys()) {
+      if (positionsEqual(existingKey, key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+// Modify getValidMoves to use PositionMap
+export const getValidMoves = (
+  player: PlayerType,
+  gameState: GameState
+): ValidMovesMap => {
+  const movesMap = new PositionMap<Position[]>();
+
+  // First check for pieces that can capture
+  const piecesWithCaptures = getAllPiecesWithCaptures(gameState);
+
+  // If there are pieces that can capture, only they can move
+  if (piecesWithCaptures.length > 0) {
+    piecesWithCaptures.forEach((position) => {
+      const moves = getAllValidMovesForPosition(position, gameState);
+      if (moves.length > 0) {
+        movesMap.set(position, moves);
+      }
+    });
+    return movesMap;
+  }
+
+  // If no captures available, check all pieces for regular moves
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const piece = gameState.grid[row][col];
+      if (piece?.player === player) {
+        const position = { row, col };
+        const moves = getAllValidMovesForPosition(position, gameState);
+        if (moves.length > 0) {
+          movesMap.set(position, moves);
+        }
+      }
+    }
+  }
+
+  return movesMap;
 };
 
 // Helper function to count captures in a move path
@@ -428,9 +480,13 @@ export const updateGameState = (
         return { state, events: [{ type: "INVALID_MOVE" }] };
       }
 
-      const validMoves = getValidMoves(action.from, state);
+      // Get valid moves for the selected piece
+      const validMovesMap = getValidMoves(state.gameStatus, state);
+      const validMovesForPiece = validMovesMap.get(action.from) || [];
+
+      // Check if the target position is in the valid moves
       if (
-        !validMoves.some(
+        !validMovesForPiece.some(
           (move) => move.row === action.to.row && move.col === action.to.col
         )
       ) {
@@ -619,8 +675,8 @@ const hasValidMovesLeft = (
     for (let col = 0; col < 8; col++) {
       const piece = gameState.grid[row][col];
       if (piece?.player === player) {
-        const moves = getValidMoves({ row, col }, gameState);
-        if (moves.length > 0) return true;
+        const moves = getValidMoves(player, gameState);
+        if (moves.size > 0) return true;
       }
     }
   }
