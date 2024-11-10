@@ -6,11 +6,8 @@ import { useSpring, animated } from "@react-spring/three";
 
 type Expression = "happy" | "sad" | "focused";
 
-interface RobotHeadProps {
-  expression?: Expression;
-}
-
-export const RobotHead = ({ expression = "happy" }: RobotHeadProps) => {
+export const Robot = (props: { expression?: Expression }) => {
+  const { expression = "happy" } = props;
   const robotRef = useRef<Mesh>(null);
 
   // Expression-based animations with more pronounced values
@@ -52,7 +49,7 @@ export const RobotHead = ({ expression = "happy" }: RobotHeadProps) => {
   });
 
   return (
-    <group position={[0, 1.5, -5]}>
+    <group position={[0, 2, -5.5]} scale={2}>
       {/* Robot Torso */}
       <group position={[0, -1.2, 0]}>
         {/* Main body */}

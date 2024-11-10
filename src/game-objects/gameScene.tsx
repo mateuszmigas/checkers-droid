@@ -14,7 +14,7 @@ import {
   CheckerValidMoveMap,
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
-import { RobotHead } from "./robotHead";
+import { Robot } from "./robot";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -171,7 +171,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
         <Checker
           key={piece.id}
           position={positionToCoordinates(piece.position)}
-          player={piece.player}
+          piece={piece}
           isSelected={
             piece.position.row === selectedPosition?.row &&
             piece.position.col === selectedPosition?.col
@@ -188,7 +188,8 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
           isCapture={move.isCapture}
         />
       ))}
-      <RobotHead expression={expression} />
+      <Robot expression={expression} />
     </>
   );
 };
+

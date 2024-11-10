@@ -1,26 +1,20 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { PlayerType } from "@/gameState";
+import { CheckerPiece } from "@/gameState";
 import * as THREE from "three";
 
 interface CheckerProps {
   position: [number, number, number];
-  player: PlayerType;
-  isSelected?: boolean;
-  mustCapture?: boolean;
+  isSelected: boolean;
+  mustCapture: boolean;
   onClick?: () => void;
-  isKing?: boolean;
+  piece: CheckerPiece;
 }
 
-export const Checker = ({
-  position,
-  player,
-  isSelected,
-  mustCapture,
-  onClick,
-  isKing = false,
-}: CheckerProps) => {
+export const Checker = (props: CheckerProps) => {
+  const { position, isSelected, mustCapture, piece, onClick } = props;
   const groupRef = useRef<THREE.Group>(null);
+  const { player, isKing } = piece;
 
   const color = player === "PLAYER_ONE" ? "#ff2020" : "#f0f0f0";
   const materialProps = { color };
@@ -66,3 +60,4 @@ export const Checker = ({
     </group>
   );
 };
+
