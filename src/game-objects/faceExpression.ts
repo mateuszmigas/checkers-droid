@@ -1,10 +1,43 @@
 export type FaceExpression = "happy" | "sad" | "focused";
 
+interface FaceParams {
+  leftEyebrowAngle: number;
+  rightEyebrowAngle: number;
+  mouthWidth: number;
+  mouthHeight: number;
+  mouthY: number;
+}
+
+const expressionParams: Record<FaceExpression, FaceParams> = {
+  happy: {
+    leftEyebrowAngle: -0.3,
+    rightEyebrowAngle: 0.3,
+    mouthWidth: 0.4,
+    mouthHeight: 0.15,
+    mouthY: 0.65,
+  },
+  sad: {
+    leftEyebrowAngle: 0.3,
+    rightEyebrowAngle: -0.3,
+    mouthWidth: 0.3,
+    mouthHeight: 0.08,
+    mouthY: 0.75,
+  },
+  focused: {
+    leftEyebrowAngle: 0,
+    rightEyebrowAngle: 0,
+    mouthWidth: 0.25,
+    mouthHeight: 0.05,
+    mouthY: 0.7,
+  },
+};
+
 export const drawFace = (
   context: CanvasRenderingContext2D,
   expression: FaceExpression
 ) => {
   const { width, height } = context.canvas;
+  const params = expressionParams[expression];
 
   // Clear background
   context.fillStyle = "black";
@@ -15,102 +48,40 @@ export const drawFace = (
   context.fillStyle = "blue";
   context.lineWidth = 20;
 
-  const eyeRadius = 50;
-  const mouthRadius = 150;
+  // Draw eyes (always circles)
+  const drawEye = (x: number) => {
+    context.beginPath();
+    context.arc(x, height * 0.4, 40, 0, Math.PI * 2);
+    context.fill();
+  };
 
-  // Draw eyes based on expression
-  switch (expression) {
-    case "happy":
-      // Left eye
-      context.beginPath();
-      context.ellipse(
-        width * 0.3,
-        height * 0.3,
-        eyeRadius,
-        eyeRadius,
-        0,
-        0,
-        Math.PI * 2
-      );
-      context.fill();
-      // Right eye
-      context.beginPath();
-      context.ellipse(
-        width * 0.7,
-        height * 0.3,
-        eyeRadius,
-        eyeRadius,
-        0,
-        0,
-        Math.PI * 2
-      );
-      context.fill();
+  drawEye(width * 0.3); // Left eye
+  drawEye(width * 0.7); // Right eye
 
-      // Mouth
-      context.beginPath();
-      context.moveTo(width * 0.2, height * 0.7);
-      context.bezierCurveTo(
-        width * 0.35,
-        height * 0.9,
-        width * 0.65,
-        height * 0.9,
-        width * 0.8,
-        height * 0.7
-      );
-      context.fill();
-      break;
+  // Draw eyebrows
+  const eyebrowLength = 80;
+  const eyebrowDistance = 60;
 
-    case "sad":
-      // Sad eyes (curved down lines)
-      context.beginPath();
-      context.arc(
-        width * 0.3,
-        height * 0.45,
-        eyeRadius,
-        -0.3,
-        Math.PI + 0.3,
-        true
-      );
-      context.stroke();
-      context.beginPath();
-      context.arc(
-        width * 0.7,
-        height * 0.45,
-        eyeRadius,
-        -0.3,
-        Math.PI + 0.3,
-        true
-      );
-      context.stroke();
+  const drawEyebrow = (x: number, angle: number) => {
+    context.save();
+    context.translate(x, height * 0.3);
+    context.rotate(angle);
+    context.beginPath();
+    context.moveTo(-eyebrowLength / 2, -eyebrowDistance);
+    context.lineTo(eyebrowLength / 2, -eyebrowDistance);
+    context.stroke();
+    context.restore();
+  };
 
-      // Sad mouth (curved down)
-      context.beginPath();
-      context.arc(
-        width * 0.5,
-        height * 0.7,
-        mouthRadius,
-        Math.PI,
-        Math.PI * 2,
-        false
-      );
-      context.stroke();
-      break;
+  drawEyebrow(width * 0.3, params.leftEyebrowAngle); // Left eyebrow
+  drawEyebrow(width * 0.7, params.rightEyebrowAngle); // Right eyebrow
 
-    case "focused":
-      // Focused eyes (straight lines)
-      context.beginPath();
-      context.moveTo(width * 0.25, height * 0.4);
-      context.lineTo(width * 0.35, height * 0.4);
-      context.moveTo(width * 0.65, height * 0.4);
-      context.lineTo(width * 0.75, height * 0.4);
-      context.stroke();
+  // Draw mouth (always rectangle with varying dimensions)
+  const mouthWidth = width * params.mouthWidth;
+  const mouthHeight = height * params.mouthHeight;
+  const mouthX = width * 0.5 - mouthWidth / 2;
+  const mouthY = height * params.mouthY;
 
-      // Focused mouth (straight line)
-      context.beginPath();
-      context.moveTo(width * 0.4, height * 0.6);
-      context.lineTo(width * 0.6, height * 0.6);
-      context.stroke();
-      break;
-  }
+  context.fillRect(mouthX, mouthY, mouthWidth, mouthHeight);
 };
 
