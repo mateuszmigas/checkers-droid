@@ -15,7 +15,13 @@ import {
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { Robot } from "./robot";
-import { OrbitControls } from "@react-three/drei";
+import { BakeShadows, OrbitControls } from "@react-three/drei";
+import {
+  Selection,
+  Select,
+  EffectComposer,
+  Outline,
+} from "@react-three/postprocessing";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -155,7 +161,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     <>
       <ambientLight intensity={0.3} />
       <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
-      <directionalLight position={[-5, 5, -5]} intensity={0.8} />
+      <directionalLight position={[0, 5, 1]} intensity={0.8} />
       <spotLight
         position={[0, 10, 0]}
         intensity={0.9}
@@ -168,19 +174,32 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
       {gameState.gameStatus !== "GAME_OVER" && (
         <TurnIndicator player={gameState.gameStatus} />
       )}
-      {pieces.map((piece) => (
-        <Checker
-          key={piece.id}
-          position={positionToCoordinates(piece.position)}
-          piece={piece}
-          isSelected={
-            piece.position.row === selectedPosition?.row &&
-            piece.position.col === selectedPosition?.col
-          }
-          mustCapture={mustCapture(piece.position)}
-          onClick={() => handlePieceClick(piece.position)}
-        />
-      ))}
+      <Selection>
+        <EffectComposer multisampling={8} autoClear={false}>
+          <Outline
+            blur
+            visibleEdgeColor={0xffffff}
+            edgeStrength={10}
+            width={5000}
+          />
+        </EffectComposer>
+        {pieces.map((piece) => (
+          <Select
+            key={piece.id}
+            enabled={
+              piece.position.row === selectedPosition?.row &&
+              piece.position.col === selectedPosition?.col
+            }
+          >
+            <Checker
+              position={positionToCoordinates(piece.position)}
+              piece={piece}
+              mustCapture={mustCapture(piece.position)}
+              onClick={() => handlePieceClick(piece.position)}
+            />
+          </Select>
+        ))}
+      </Selection>
       {possibleMoves.map((move, index) => (
         <MoveIndicator
           key={`move-${index}`}
@@ -189,8 +208,10 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
           isCapture={move.isCapture}
         />
       ))}
+      <BakeShadows />
       <Robot expression={expression} />
       <OrbitControls target={[0, 1.42, 0]} />
     </>
   );
 };
+

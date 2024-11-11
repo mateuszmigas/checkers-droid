@@ -97,3 +97,4 @@ export const CheckersBoard = () => {
 
   return <mesh position={[0, 0, 0]}>{boardElements}</mesh>;
 };
+

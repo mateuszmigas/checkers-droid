@@ -5,14 +5,13 @@ import * as THREE from "three";
 
 interface CheckerProps {
   position: [number, number, number];
-  isSelected: boolean;
   mustCapture: boolean;
   onClick?: () => void;
   piece: CheckerPiece;
 }
 
 export const Checker = (props: CheckerProps) => {
-  const { position, isSelected, mustCapture, piece, onClick } = props;
+  const { position, mustCapture, piece, onClick } = props;
   const groupRef = useRef<THREE.Group>(null);
   const { player, isKing } = piece;
 
@@ -21,10 +20,7 @@ export const Checker = (props: CheckerProps) => {
 
   useFrame((state) => {
     if (groupRef.current) {
-      if (isSelected) {
-        groupRef.current.position.y =
-          position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.1;
-      } else if (mustCapture) {
+      if (mustCapture) {
         groupRef.current.scale.setScalar(
           1 + Math.sin(state.clock.elapsedTime * 4) * 0.1
         );
@@ -60,3 +56,4 @@ export const Checker = (props: CheckerProps) => {
     </group>
   );
 };
+

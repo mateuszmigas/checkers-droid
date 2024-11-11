@@ -9,24 +9,56 @@ type Expression = "happy" | "sad" | "focused";
 export const Robot = (props: { expression?: Expression }) => {
   const { expression = "happy" } = props;
   const robotRef = useRef<Group>(null);
-
-  const baseY = useRef(2);
-  const floatOffset = useRef(0);
+  const headRef = useRef<Group>(null);
 
   useFrame((state) => {
-    if (!robotRef.current) {
+    if (!headRef.current) {
       return;
     }
-    floatOffset.current = Math.sin(state.clock.elapsedTime) * 0.5;
-    robotRef.current.position.y = baseY.current + floatOffset.current;
+    // Rotate head left and right using sine wave
+    headRef.current.rotation.y = Math.sin(state.clock.elapsedTime) * 0.2;
   });
 
   return (
-    <group ref={robotRef} position={[0, baseY.current, 0]} scale={2}>
-      <RoundedBox args={[1, 0.9, 0.75]} radius={0.2} smoothness={5}>
+    <group ref={robotRef} position={[0, 2, -5]} scale={2}>
+      {/* Head */}
+      <group ref={headRef}>
+        <RoundedBox args={[1, 0.9, 0.75]} radius={0.2} smoothness={5}>
+          <meshStandardMaterial color="#ffffff" roughness={0.1} />
+        </RoundedBox>
+        <RobotFace expression={expression} />
+      </group>
+
+      {/* Torso */}
+      <RoundedBox
+        position={[0, -1, 0]}
+        args={[0.8, 1, 0.5]}
+        radius={0.1}
+        smoothness={4}
+      >
         <meshStandardMaterial color="#ffffff" roughness={0.1} />
       </RoundedBox>
-      <RobotFace expression={expression} />
+
+      {/* Left Arm */}
+      <RoundedBox
+        position={[-0.5, -0.8, 0]}
+        args={[0.2, 0.6, 0.2]}
+        radius={0.05}
+        smoothness={4}
+      >
+        <meshStandardMaterial color="#ffffff" roughness={0.1} />
+      </RoundedBox>
+
+      {/* Right Arm */}
+      <RoundedBox
+        position={[0.5, -0.8, 0]}
+        args={[0.2, 0.6, 0.2]}
+        radius={0.05}
+        smoothness={4}
+      >
+        <meshStandardMaterial color="#ffffff" roughness={0.1} />
+      </RoundedBox>
     </group>
   );
 };
+
