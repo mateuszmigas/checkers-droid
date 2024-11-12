@@ -5,20 +5,10 @@ import {
   AccumulativeShadows,
   RandomizedLight,
 } from "@react-three/drei";
-import {
-  EffectComposer,
-  Bloom,
-  ToneMapping,
-} from "@react-three/postprocessing";
 
 export const SciFiRoom = () => {
   return (
     <>
-      <EffectComposer>
-        <Bloom mipmapBlur intensity={0.5} luminanceThreshold={1} />
-        <ToneMapping />
-      </EffectComposer>
-
       <spotLight
         castShadow
         position={[0, 10, 0]}

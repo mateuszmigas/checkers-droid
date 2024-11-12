@@ -23,6 +23,9 @@ import {
   Outline,
 } from "@react-three/postprocessing";
 import { SciFiRoom } from "./SciFiRoom";
+import { Canvas } from "@react-three/fiber";
+import { Bloom, ToneMapping } from "@react-three/postprocessing";
+import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -160,20 +163,17 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
   return (
     <>
+      <EffectComposer>
+        <Bloom mipmapBlur intensity={0.5} luminanceThreshold={1} />
+        <ToneMapping />
+      </EffectComposer>
+
       <SciFiRoom />
       <CheckersBoard />
       {gameState.gameStatus !== "GAME_OVER" && (
         <TurnIndicator player={gameState.gameStatus} />
       )}
       <Selection>
-        <EffectComposer multisampling={8} autoClear={false}>
-          <Outline
-            blur
-            visibleEdgeColor={0xffffff}
-            edgeStrength={10}
-            width={5000}
-          />
-        </EffectComposer>
         {pieces.map((piece) => (
           <Select
             key={piece.id}
