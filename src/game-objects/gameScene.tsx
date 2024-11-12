@@ -15,13 +15,14 @@ import {
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { Robot } from "./robot";
-import { BakeShadows, OrbitControls } from "@react-three/drei";
+import { BakeShadows, OrbitControls, Environment } from "@react-three/drei";
 import {
   Selection,
   Select,
   EffectComposer,
   Outline,
 } from "@react-three/postprocessing";
+import { SciFiRoom } from "./SciFiRoom";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -159,17 +160,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
   return (
     <>
-      <ambientLight intensity={0.3} />
-      <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
-      <directionalLight position={[0, 5, 1]} intensity={0.8} />
-      <spotLight
-        position={[0, 10, 0]}
-        intensity={0.9}
-        angle={0.6}
-        penumbra={0.5}
-        castShadow
-      />
-
+      <SciFiRoom />
       <CheckersBoard />
       {gameState.gameStatus !== "GAME_OVER" && (
         <TurnIndicator player={gameState.gameStatus} />
@@ -208,9 +199,14 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
           isCapture={move.isCapture}
         />
       ))}
-      <BakeShadows />
+
       <Robot expression={expression} />
-      <OrbitControls target={[0, 1.42, 0]} />
+      <OrbitControls
+        target={[0, 1.42, 0]}
+        maxDistance={20}
+        minDistance={5}
+        maxPolarAngle={Math.PI / 2.1}
+      />
     </>
   );
 };

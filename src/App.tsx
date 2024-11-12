@@ -1,6 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { GameScene } from "./game-objects/gameScene";
 import { useState } from "react";
+import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 
 type Expression = "happy" | "sad" | "focused";
 
@@ -56,7 +57,13 @@ export const App = () => {
         {isOrthographic ? "Perspective" : "Orthographic"} View
       </button>
 
-      <Canvas>
+      <Canvas
+        shadows
+        // gl={{
+        //   toneMapping: ACESFilmicToneMapping,
+        //   outputColorSpace: SRGBColorSpace,
+        // }}
+      >
         <GameScene isOrthographic={isOrthographic} expression={expression} />
       </Canvas>
     </div>
