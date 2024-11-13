@@ -59,10 +59,10 @@ export const App = () => {
 
       <Canvas
         shadows
-        // gl={{
-        //   toneMapping: ACESFilmicToneMapping,
-        //   outputColorSpace: SRGBColorSpace,
-        // }}
+        gl={{
+          toneMapping: ACESFilmicToneMapping,
+          outputColorSpace: SRGBColorSpace,
+        }}
       >
         <GameScene isOrthographic={isOrthographic} expression={expression} />
       </Canvas>

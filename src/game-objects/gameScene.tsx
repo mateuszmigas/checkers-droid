@@ -15,17 +15,10 @@ import {
 } from "../gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { Robot } from "./robot";
-import { BakeShadows, OrbitControls, Environment } from "@react-three/drei";
-import {
-  Selection,
-  Select,
-  EffectComposer,
-  Outline,
-} from "@react-three/postprocessing";
+import { OrbitControls } from "@react-three/drei";
+import { Selection, Select, EffectComposer } from "@react-three/postprocessing";
 import { SciFiRoom } from "./SciFiRoom";
-import { Canvas } from "@react-three/fiber";
 import { Bloom, ToneMapping } from "@react-three/postprocessing";
-import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -210,4 +203,3 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     </>
   );
 };
-

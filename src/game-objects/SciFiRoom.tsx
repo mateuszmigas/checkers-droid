@@ -1,10 +1,6 @@
-import {
-  useGLTF,
-  CameraControls,
-  Center,
-  AccumulativeShadows,
-  RandomizedLight,
-} from "@react-three/drei";
+import { BasicGlowMaterial } from "./materials/glowMaterial";
+
+const tableSize = [12, 1, 12] as const;
 
 export const SciFiRoom = () => {
   return (
@@ -17,50 +13,48 @@ export const SciFiRoom = () => {
         intensity={1}
         color="#b0e0e6"
       />
-      <ambientLight intensity={0.2} />
-      <ambientLight intensity={0.2} color="#b0e0e6" />
+      <directionalLight
+        position={[5, 15, 5]}
+        intensity={0.5}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
+      <ambientLight intensity={0.1} />
+      <ambientLight intensity={0.1} color="#b0e0e6" />
 
-      <mesh receiveShadow position={[0, -5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      {/* Floor */}
+      <mesh
+        receiveShadow
+        position={[0, -50, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
         <planeGeometry args={[50, 50]} />
-        <meshStandardMaterial color="#ffffff" />
+        <meshStandardMaterial
+          color="#ffffff"
+          envMapIntensity={1}
+          metalness={0.5}
+          roughness={0.2}
+        />
       </mesh>
 
+      {/* Table */}
       <group position={[0, -0.1, 0]}>
         <mesh castShadow receiveShadow>
           <boxGeometry args={[12, 0.2, 12]} />
           <meshStandardMaterial
-            color="#ffffff"
+            color="#000000"
             roughness={0.1}
             metalness={0.8}
+            envMapIntensity={1}
           />
         </mesh>
 
-        <mesh position={[0, -1.5, 0]}>
-          <boxGeometry args={[2, 3, 2]} />
-          <meshStandardMaterial
-            color="#ffffff"
-            metalness={0.9}
-            roughness={0.1}
-            envMapIntensity={1.5}
-          />
-        </mesh>
-
-        <mesh position={[0, -3, 0]}>
-          <boxGeometry args={[4, 0.1, 4]} />
-          <meshBasicMaterial color={[5, 0, 0]} toneMapped={false} />
+        <mesh position={[0, -3, 0]} scale={tableSize}>
+          <boxGeometry args={[1, 1, 1]} />
+          <BasicGlowMaterial color={[1, 1, 1]} intensity={2} />
         </mesh>
       </group>
-
-      <mesh position={[-2, 0, 0]}>
-        <boxGeometry />
-        <meshBasicMaterial color={[5, 0, 0]} toneMapped={false} />
-      </mesh>
-
-      <mesh position={[2, 0, 0]}>
-        <boxGeometry />
-        <meshBasicMaterial color="green" />
-      </mesh>
     </>
   );
 };
-
