@@ -1,7 +1,4 @@
 import { useGLTF } from "@react-three/drei";
-import { BasicGlowMaterial } from "./materials/glowMaterial";
-
-const tableSize = [12, 1, 12] as const;
 
 export const SciFiRoom = () => {
   const { scene } = useGLTF("/room.glb");
@@ -53,11 +50,6 @@ export const SciFiRoom = () => {
             metalness={0.8}
             envMapIntensity={1}
           />
-        </mesh>
-
-        <mesh position={[0, -3, 0]} scale={tableSize}>
-          <boxGeometry args={[1, 1, 1]} />
-          <BasicGlowMaterial color={[1, 1, 1]} intensity={2} />
         </mesh>
       </group>
     </>

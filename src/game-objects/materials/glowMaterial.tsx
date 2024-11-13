@@ -7,6 +7,7 @@ export const BasicGlowMaterial = (
   } & MeshBasicMaterialProps
 ) => (
   <meshBasicMaterial
+    {...props}
     color={[
       props.color[0] * props.intensity,
       props.color[1] * props.intensity,
@@ -15,4 +16,3 @@ export const BasicGlowMaterial = (
     toneMapped={false}
   />
 );
-

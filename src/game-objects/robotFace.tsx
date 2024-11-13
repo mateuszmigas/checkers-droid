@@ -3,6 +3,7 @@ import { CanvasTexture } from "three";
 import { Box } from "@react-three/drei";
 import { drawFace } from "./faceExpression";
 import { FaceExpression } from "./faceExpression";
+import { BasicGlowMaterial } from "./materials/glowMaterial";
 
 const textureSize = 512;
 
@@ -25,18 +26,13 @@ export const RobotFace = (props: { expression?: FaceExpression }) => {
 
   return (
     <Box args={[0.65, 0.5, 0.25]} position={[0, 0, 0.3]}>
-      <meshStandardMaterial attach="material-0" color="white" />
-      <meshStandardMaterial attach="material-1" color="white" />
-      <meshStandardMaterial attach="material-2" color="white" />
-      <meshStandardMaterial attach="material-3" color="white" />
-      <meshStandardMaterial
+      <BasicGlowMaterial
         attach="material-4"
         map={textureRef.current}
         transparent={true}
-        color="white"
+        color={[1, 1, 1]}
+        intensity={15}
       />
-      <meshStandardMaterial attach="material-5" color="white" />
     </Box>
   );
 };
-
