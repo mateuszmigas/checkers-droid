@@ -1,8 +1,11 @@
+import { useGLTF } from "@react-three/drei";
 import { BasicGlowMaterial } from "./materials/glowMaterial";
 
 const tableSize = [12, 1, 12] as const;
 
 export const SciFiRoom = () => {
+  const { scene } = useGLTF("/room.glb");
+
   return (
     <>
       <spotLight
@@ -22,6 +25,8 @@ export const SciFiRoom = () => {
       />
       <ambientLight intensity={0.1} />
       <ambientLight intensity={0.1} color="#b0e0e6" />
+
+      <primitive position={[0, -3, 0]} object={scene} />
 
       {/* Floor */}
       <mesh
