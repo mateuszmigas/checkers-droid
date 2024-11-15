@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   GameState,
   createInitialGameState,
   updateGameState,
   getPlayerValidMoves,
+  GameAction,
 } from "./gameState";
 import {
   CheckerPosition,
@@ -12,7 +13,6 @@ import {
 } from "./types";
 import { AIPlayer } from "./aiPlayer";
 import { GameEvent } from "./gameEvent";
-import EventEmitter from "events";
 
 type AIReaction = {
   mood: "happy" | "sad" | "focused";
@@ -24,16 +24,23 @@ export interface IPlayer {
   getReaction: () => Promise<AIReaction>;
 }
 
+const useTriggerRender = () => {
+  const [, setTriggerRender] = useState(0);
+  return () => setTriggerRender((prev) => prev + 1);
+};
+
 export function useGameSession() {
-  const [gameState, setGameState] = useState<GameState>(
-    createInitialGameState()
-  );
+  const triggerRender = useTriggerRender();
+  const gameStateRef = useRef<GameState>(createInitialGameState());
   const [selectedPosition, setSelectedPosition] =
     useState<CheckerPosition | null>(null);
   const [validMoves, setValidMoves] = useState<CheckerValidMoveMap | null>(
     null
   );
-  const [aiPlayer] = useState(() => new AIPlayer());
+  const aiPlayer = useMemo(() => new AIPlayer(), []);
+
+  const isAiPlayer = (gameState: GameState) =>
+    gameState.gameStatus === "PLAYER_TWO";
 
   // const getCurrentPlayer = useCallback(() => {
   //   return gameState.gameStatus;
@@ -41,46 +48,42 @@ export function useGameSession() {
 
   // Calculate valid moves only when necessary
   useEffect(() => {
-    if (gameState.gameStatus === "GAME_OVER") {
+    if (gameStateRef.current.gameStatus === "GAME_OVER") {
       setValidMoves(null);
       return;
     }
 
     // Only calculate moves for the current player
-    const moves = getPlayerValidMoves(gameState.gameStatus, gameState);
+    const moves = getPlayerValidMoves(
+      gameStateRef.current.gameStatus,
+      gameStateRef.current
+    );
     setValidMoves(moves);
-  }, [gameState.gameStatus, gameState.grid]); // Only recalculate when these change
+  }, [gameStateRef.current.gameStatus, gameStateRef.current.grid]); // Only recalculate when these change
 
-  // Handle AI moves
-  useEffect(() => {
-    if (gameState.gameStatus === "PLAYER_TWO") {
-      // Add a small delay to make the AI moves feel more natural
-      const timeoutId = setTimeout(() => {
-        const aiMove = aiPlayer.getMove(gameState);
-        if (aiMove) {
-          const { state, events } = updateGameState(gameState, {
-            type: "MOVE_PIECE",
-            from: aiMove.from,
-            to: aiMove.to,
-          });
-          setGameState(state);
-          handleEvents(events);
-        }
-      }, 500);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [gameState]);
+  const invokeGameAction = useCallback(
+    (action: GameAction) => {
+      console.log("invokeGameAction", action);
+      const { state: newState, events } = updateGameState(
+        gameStateRef.current,
+        action
+      );
+      gameStateRef.current = newState;
+      handleEvents(events);
+      triggerRender();
+    },
+    [gameStateRef]
+  );
 
   const handlePieceClick = useCallback(
     (position: CheckerPosition) => {
       // Prevent moves during AI turn
-      if (gameState.gameStatus === "PLAYER_TWO") return;
+      if (gameStateRef.current.gameStatus === "PLAYER_TWO") return;
 
-      const piece = gameState.grid[position.row][position.col];
+      const piece = gameStateRef.current.grid[position.row][position.col];
       if (!piece) return;
 
-      if (piece.player === gameState.gameStatus) {
+      if (piece.player === gameStateRef.current.gameStatus) {
         if (
           selectedPosition?.row === position.row &&
           selectedPosition?.col === position.col
@@ -91,58 +94,63 @@ export function useGameSession() {
         }
       }
     },
-    [gameState, selectedPosition]
+    [gameStateRef, selectedPosition]
   );
 
   const handleMoveClick = useCallback(
     (targetPosition: CheckerPosition) => {
       // Prevent moves during AI turn
-      if (gameState.gameStatus === "PLAYER_TWO") return;
+      if (gameStateRef.current.gameStatus === "PLAYER_TWO") return;
 
       if (selectedPosition) {
-        const previousPlayer = gameState.gameStatus;
-        const { state, events } = updateGameState(gameState, {
+        const previousPlayer = gameStateRef.current.gameStatus;
+        invokeGameAction({
           type: "MOVE_PIECE",
           from: selectedPosition,
           to: targetPosition,
         });
 
-        setGameState(state);
-        handleEvents(events);
-
-        if (state.gameStatus !== previousPlayer) {
+        if (gameStateRef.current.gameStatus !== previousPlayer) {
           setSelectedPosition(null);
         } else {
           setSelectedPosition(targetPosition);
         }
       }
     },
-    [selectedPosition, gameState]
+    [selectedPosition, gameStateRef]
   );
 
   const handleEvents = (events: GameEvent[]) => {
-    events.forEach((event) => {
+    events.forEach(async (event) => {
       switch (event.type) {
-        case "PIECE_CAPTURED":
-          // Handle capture animation or notification
-          break;
         case "PIECE_CROWNED":
           // Handle crowning animation or notification
           break;
         case "TURN_CHANGED":
-          // Handle turn change notification
+          if (isAiPlayer(gameStateRef.current)) {
+            const aiMove = await aiPlayer.getMove(gameStateRef.current);
+            if (aiMove) {
+              invokeGameAction({
+                type: "MOVE_PIECE",
+                from: aiMove.from,
+                to: aiMove.to,
+              });
+            }
+          } else {
+            setSelectedPosition(null);
+          }
           break;
       }
     });
   };
 
   const resetGame = useCallback(() => {
-    setGameState(createInitialGameState());
-    setSelectedPosition(null);
+    // setGameState(createInitialGameState());
+    // setSelectedPosition(null);
   }, []);
 
   return {
-    gameState,
+    gameState: gameStateRef.current,
     selectedPosition,
     validMoves,
     handlePieceClick,

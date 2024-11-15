@@ -15,6 +15,7 @@ export const App = () => {
         <div className="relative size-full bg-background dark">
           <div className="absolute size-full z-10">
             <Canvas
+              camera={{ position: [0, 6, 7] }}
               shadows
               gl={{
                 toneMapping: ACESFilmicToneMapping,
@@ -37,3 +38,4 @@ export const App = () => {
     </GameSessionProvider>
   );
 };
+

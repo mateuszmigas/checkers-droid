@@ -8,7 +8,7 @@ import {
   CheckerValidMoveMap,
 } from "./types";
 
-type GameAction = {
+export type GameAction = {
   type: "MOVE_PIECE";
   from: CheckerPosition;
   to: CheckerPosition;

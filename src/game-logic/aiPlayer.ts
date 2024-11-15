@@ -1,3 +1,4 @@
+import { delay } from "@/utils/promise";
 import { GameEvent } from "./gameEvent";
 import { GameState, getPlayerValidMoves } from "./gameState";
 import {
@@ -11,10 +12,11 @@ export class AIPlayer {
     return true;
   }
 
-  getMove(
+  async getMove(
     gameState: GameState
-  ): { from: CheckerPosition; to: CheckerPosition } | null {
+  ): Promise<{ from: CheckerPosition; to: CheckerPosition } | null> {
     // Get all valid moves for black pieces
+    await delay(Math.random() * 1000 + 1000);
     const validMoves: CheckerValidMoveMap = getPlayerValidMoves(
       "PLAYER_TWO",
       gameState
