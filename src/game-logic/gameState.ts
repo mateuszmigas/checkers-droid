@@ -1,44 +1,20 @@
-import { CustomMap } from "./utils/customMap";
-
-export type PlayerType = "PLAYER_ONE" | "PLAYER_TWO";
-
-export type CheckerPosition = {
-  row: number;
-  col: number;
-};
-
-export type CheckerPiece = {
-  id: string;
-  player: PlayerType;
-  isKing: boolean;
-};
-
-export type CheckerValidMove = {
-  targetPosition: CheckerPosition;
-  isCapture: boolean;
-};
-
-export type CheckerValidMoveMap = CustomMap<
+import { CustomMap } from "../utils/customMap";
+import { GameEvent } from "./gameEvent";
+import {
   CheckerPosition,
-  CheckerValidMove[]
->;
+  CheckerPiece,
+  PlayerType,
+  CheckerValidMove,
+  CheckerValidMoveMap,
+} from "./types";
 
-export type GameAction = {
+type GameAction = {
   type: "MOVE_PIECE";
   from: CheckerPosition;
   to: CheckerPosition;
 };
 
-export type GameEvent =
-  | { type: "PIECE_MOVED"; from: CheckerPosition; to: CheckerPosition }
-  | { type: "PIECE_CAPTURED"; position: CheckerPosition; piece: CheckerPiece }
-  | { type: "PIECE_CROWNED"; position: CheckerPosition }
-  | { type: "TURN_CHANGED"; player: PlayerType }
-  | { type: "INVALID_MOVE" }
-  | { type: "GAME_OVER"; winner: PlayerType }
-  | { type: "GAME_OVER"; result: "DRAW" };
-
-export type GameStateUpdate = {
+type GameStateUpdate = {
   state: GameState;
   events: GameEvent[];
 };
@@ -523,3 +499,4 @@ const checkForNoMoves = (state: GameState): GameStateUpdate => {
 
   return { state, events: [{ type: "INVALID_MOVE" }] };
 };
+

@@ -1,12 +1,11 @@
 import { describe, expect, test } from "vitest";
 import {
-  CheckerPiece,
   createInitialGameState,
   GameState,
   getPlayerValidMoves,
-  PlayerType,
   updateGameState,
 } from "./gameState";
+import { PlayerType, CheckerPiece } from "./types";
 
 export const printBoard = (gameState: GameState): void => {
   console.log("\n   0 1 2 3 4 5 6 7"); // Column numbers

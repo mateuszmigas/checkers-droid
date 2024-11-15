@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { CheckerPiece } from "@/gameState";
+import { CheckerPiece } from "@/game-logic/types";
 import * as THREE from "three";
 
 interface CheckerProps {

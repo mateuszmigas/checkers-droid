@@ -7,18 +7,21 @@ import { TurnIndicator } from "./turnIndicator";
 import {
   GameState,
   createInitialGameState,
-  CheckerPiece,
-  CheckerPosition,
   updateGameState,
   getPlayerValidMoves,
-  CheckerValidMoveMap,
-} from "../gameState";
+} from "../game-logic/gameState";
 import { PerspectiveCamera, Vector3 } from "three";
 import { Robot } from "./robot";
 import { OrbitControls } from "@react-three/drei";
 import { Selection, Select, EffectComposer } from "@react-three/postprocessing";
 import { SciFiRoom } from "./SciFiRoom";
 import { Bloom, ToneMapping } from "@react-three/postprocessing";
+import {
+  CheckerPiece,
+  CheckerPosition,
+  CheckerValidMoveMap,
+} from "@/game-logic/types";
+import { useGameSession } from "../game-logic/gameSession";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -37,74 +40,13 @@ interface GameSceneProps {
 }
 
 export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
-  const [gameState, setGameState] = useState<GameState>(
-    createInitialGameState()
-  );
-
-  const [selectedPosition, setSelectedPosition] =
-    useState<CheckerPosition | null>(null);
-
-  const [validMoves, setValidMoves] = useState<CheckerValidMoveMap | null>(
-    null
-  );
-
-  const handlePieceClick = (position: CheckerPosition) => {
-    const piece = gameState.grid[position.row][position.col];
-
-    if (!piece) return;
-
-    if (piece.player === gameState.gameStatus) {
-      if (
-        selectedPosition?.row === position.row &&
-        selectedPosition?.col === position.col
-      ) {
-        setSelectedPosition(null);
-        // setPossibleMoves([]);
-      } else {
-        // const moves = validMoves.get(position) || [];
-        setSelectedPosition(position);
-        // setPossibleMoves(moves);
-      }
-    }
-  };
-
-  const handleMoveClick = (targetPosition: CheckerPosition) => {
-    if (selectedPosition) {
-      const previousPlayer = gameState.gameStatus;
-      const { state, events } = updateGameState(gameState, {
-        type: "MOVE_PIECE",
-        from: selectedPosition,
-        to: targetPosition,
-      });
-
-      setGameState(state);
-
-      if (state.gameStatus !== previousPlayer) {
-        setSelectedPosition(null);
-        // setPossibleMoves([]);
-      } else {
-        setSelectedPosition(targetPosition);
-        // const newValidMoves = validMoves.get(targetPosition) || [];
-        // setPossibleMoves(newValidMoves);
-      }
-
-      console.log(events);
-
-      events.forEach((event) => {
-        switch (event.type) {
-          case "PIECE_CAPTURED":
-            // Handle capture animation or notification
-            break;
-          case "PIECE_CROWNED":
-            // Handle crowning animation or notification
-            break;
-          case "TURN_CHANGED":
-            // Handle turn change notification
-            break;
-        }
-      });
-    }
-  };
+  const {
+    gameState,
+    selectedPosition,
+    validMoves,
+    handlePieceClick,
+    handleMoveClick,
+  } = useGameSession();
 
   const { camera } = useThree();
 
@@ -124,15 +66,6 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
       }
     }
   }, [isOrthographic, camera]);
-
-  useEffect(() => {
-    if (gameState.gameStatus !== "GAME_OVER") {
-      const validMoves = getPlayerValidMoves(gameState.gameStatus, gameState);
-      setValidMoves(validMoves);
-    } else {
-      setValidMoves(null);
-    }
-  }, [gameState]);
 
   // Convert grid to pieces array for rendering
   const pieces: (CheckerPiece & { position: CheckerPosition })[] = [];
@@ -203,3 +136,4 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     </>
   );
 };
+
