@@ -8,6 +8,11 @@ import {
 import { CheckerPosition, GameEvent, CheckerValidMoveMap } from "./types";
 import { AIPlayer } from "./aiPlayer";
 
+type AIReaction = {
+  mood: "happy" | "sad" | "focused";
+  message: string;
+};
+
 export function useGameSession() {
   const [gameState, setGameState] = useState<GameState>(
     createInitialGameState()
@@ -19,15 +24,17 @@ export function useGameSession() {
   );
   const [aiPlayer] = useState(() => new AIPlayer());
 
-  // Update valid moves whenever game state changes
+  // Calculate valid moves only when necessary
   useEffect(() => {
-    if (gameState.gameStatus !== "GAME_OVER") {
-      const moves = getPlayerValidMoves(gameState.gameStatus, gameState);
-      setValidMoves(moves);
-    } else {
+    if (gameState.gameStatus === "GAME_OVER") {
       setValidMoves(null);
+      return;
     }
-  }, [gameState]);
+
+    // Only calculate moves for the current player
+    const moves = getPlayerValidMoves(gameState.gameStatus, gameState);
+    setValidMoves(moves);
+  }, [gameState.gameStatus, gameState.grid]); // Only recalculate when these change
 
   // Handle AI moves
   useEffect(() => {

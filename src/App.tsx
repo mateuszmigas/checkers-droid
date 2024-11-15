@@ -22,9 +22,9 @@ export const App = () => {
           <GameScene expression={expression} />
         </Canvas>
       </div>
-      <div className="absolute inset-0 z-20 flex items-center justify-center">
+      {/* <div className="absolute inset-0 z-20 flex items-center justify-center">
         <WrongBrowserAlert />
-      </div>
+      </div> */}
       <div className="absolute z-20">
         <button onClick={() => setExpression("happy")}>Happy</button>
         <button onClick={() => setExpression("sad")}>Sad</button>
