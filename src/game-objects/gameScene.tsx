@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 import { CheckersBoard } from "./checkersBoard";
 import { Checker } from "./checker";
@@ -21,7 +21,7 @@ import {
   CheckerPosition,
   CheckerValidMoveMap,
 } from "@/game-logic/types";
-import { useGameSession } from "../game-logic/gameSession";
+import { useGameSessionContext } from "../game-logic/gameSessionContext";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -46,7 +46,7 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     validMoves,
     handlePieceClick,
     handleMoveClick,
-  } = useGameSession();
+  } = useGameSessionContext();
 
   const { camera } = useThree();
 
