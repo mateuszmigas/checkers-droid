@@ -5,8 +5,9 @@ import {
   updateGameState,
   getPlayerValidMoves,
 } from "./gameState";
-import { CheckerPosition, GameEvent, CheckerValidMoveMap } from "./types";
+import { CheckerPosition, CheckerValidMoveMap } from "./types";
 import { AIPlayer } from "./aiPlayer";
+import { GameEvent } from "./gameEvent";
 
 type AIReaction = {
   mood: "happy" | "sad" | "focused";
@@ -38,22 +39,30 @@ export function useGameSession() {
 
   // Handle AI moves
   useEffect(() => {
-    if (gameState.gameStatus === "BLACK") {
-      const aiMove = aiPlayer.getMove(gameState);
-      if (aiMove) {
-        const { state, events } = updateGameState(gameState, {
-          type: "MOVE_PIECE",
-          from: aiMove.from,
-          to: aiMove.to,
-        });
-        setGameState(state);
-        handleEvents(events);
-      }
+    if (gameState.gameStatus === "PLAYER_TWO") {
+      // Add a small delay to make the AI moves feel more natural
+      const timeoutId = setTimeout(() => {
+        const aiMove = aiPlayer.getMove(gameState);
+        if (aiMove) {
+          const { state, events } = updateGameState(gameState, {
+            type: "MOVE_PIECE",
+            from: aiMove.from,
+            to: aiMove.to,
+          });
+          setGameState(state);
+          handleEvents(events);
+        }
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [gameState]);
 
   const handlePieceClick = useCallback(
     (position: CheckerPosition) => {
+      // Prevent moves during AI turn
+      if (gameState.gameStatus === "PLAYER_TWO") return;
+
       const piece = gameState.grid[position.row][position.col];
       if (!piece) return;
 
@@ -73,6 +82,9 @@ export function useGameSession() {
 
   const handleMoveClick = useCallback(
     (targetPosition: CheckerPosition) => {
+      // Prevent moves during AI turn
+      if (gameState.gameStatus === "PLAYER_TWO") return;
+
       if (selectedPosition) {
         const previousPlayer = gameState.gameStatus;
         const { state, events } = updateGameState(gameState, {
