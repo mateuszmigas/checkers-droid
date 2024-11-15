@@ -1,13 +1,18 @@
 import { useRef } from "react";
 import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
-import { RoundedBox } from "@react-three/drei";
+import { Html, RoundedBox } from "@react-three/drei";
 import { RobotFace } from "./robotFace";
 
 type Expression = "happy" | "sad" | "focused";
 
-export const Robot = (props: { expression?: Expression }) => {
-  const { expression = "happy" } = props;
+type RobotProps = {
+  expression?: Expression;
+  speechText?: string;
+};
+
+export const Robot = (props: RobotProps) => {
+  const { expression = "happy", speechText } = props;
   const robotRef = useRef<Group>(null);
   const headRef = useRef<Group>(null);
 
@@ -21,6 +26,28 @@ export const Robot = (props: { expression?: Expression }) => {
 
   return (
     <group ref={robotRef} position={[0, 2, -5]} scale={2}>
+      {/* Speech Bubble */}
+      {speechText && (
+        <Html
+          position={[0, 0.6, 0]}
+          center
+          style={{
+            transform: "scale(0.5)",
+          }}
+        >
+          <div className="relative px-4 py-2 bg-white rounded-lg shadow-lg w-[300px] text-center">
+            <div className="text-gray-800 break-words">{speechText}</div>
+            {/* Triangle pointer now points from the left side */}
+            <div
+              className="absolute left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0 h-0 
+                          border-t-[8px] border-t-transparent 
+                          border-r-[8px] border-r-white 
+                          border-b-[8px] border-b-transparent"
+            ></div>
+          </div>
+        </Html>
+      )}
+
       {/* Head */}
       <group ref={headRef}>
         <RoundedBox args={[1, 0.9, 0.75]} radius={0.2} smoothness={5}>
@@ -61,4 +88,3 @@ export const Robot = (props: { expression?: Expression }) => {
     </group>
   );
 };
-
