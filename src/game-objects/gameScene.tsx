@@ -4,13 +4,7 @@ import { MoveIndicator } from "./moveIndicator";
 import { TurnIndicator } from "./turnIndicator";
 import { Robot } from "./robot";
 import { OrbitControls, Stars, Stats } from "@react-three/drei";
-import {
-  Selection,
-  Select,
-  EffectComposer,
-  Bloom,
-  ToneMapping,
-} from "@react-three/postprocessing";
+import { Selection, Select } from "@react-three/postprocessing";
 import { SciFiRoom } from "./SciFiRoom";
 import { CheckerPiece, CheckerPosition } from "@/game-logic/types";
 import { useGameSessionContext } from "../game-logic/gameSessionContext";
