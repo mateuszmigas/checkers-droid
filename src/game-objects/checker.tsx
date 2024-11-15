@@ -61,3 +61,4 @@ export const Checker = (props: CheckerProps) => {
     </animated.group>
   );
 };
+

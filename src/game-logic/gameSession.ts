@@ -5,14 +5,24 @@ import {
   updateGameState,
   getPlayerValidMoves,
 } from "./gameState";
-import { CheckerPosition, CheckerValidMoveMap } from "./types";
+import {
+  CheckerPosition,
+  CheckerValidMove,
+  CheckerValidMoveMap,
+} from "./types";
 import { AIPlayer } from "./aiPlayer";
 import { GameEvent } from "./gameEvent";
+import EventEmitter from "events";
 
 type AIReaction = {
   mood: "happy" | "sad" | "focused";
   message: string;
 };
+
+export interface IPlayer {
+  getMove: (gameState: GameState) => Promise<CheckerValidMove>;
+  getReaction: () => Promise<AIReaction>;
+}
 
 export function useGameSession() {
   const [gameState, setGameState] = useState<GameState>(
@@ -24,6 +34,10 @@ export function useGameSession() {
     null
   );
   const [aiPlayer] = useState(() => new AIPlayer());
+
+  // const getCurrentPlayer = useCallback(() => {
+  //   return gameState.gameStatus;
+  // }, [gameState.gameStatus]);
 
   // Calculate valid moves only when necessary
   useEffect(() => {
@@ -135,5 +149,11 @@ export function useGameSession() {
     handleMoveClick,
     resetGame,
   };
+  //getMoves
+  //getCheckers
+  //getSelected
+  //handleSelection
+  //handleMove
+  //resetGame
 }
 
