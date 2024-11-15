@@ -193,7 +193,10 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
         />
       ))}
 
-      <Robot expression={expression} />
+      <Robot
+        expression={expression}
+        speechText="Hello, I'm a friendly robot! and this is some long text"
+      />
       <OrbitControls
         target={[0, 1.42, 0]}
         maxDistance={20}
