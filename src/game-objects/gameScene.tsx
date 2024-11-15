@@ -1,26 +1,12 @@
-import { useEffect } from "react";
-import { useThree } from "@react-three/fiber";
 import { CheckersBoard } from "./checkersBoard";
 import { Checker } from "./checker";
 import { MoveIndicator } from "./moveIndicator";
 import { TurnIndicator } from "./turnIndicator";
-import {
-  GameState,
-  createInitialGameState,
-  updateGameState,
-  getPlayerValidMoves,
-} from "../game-logic/gameState";
-import { PerspectiveCamera, Vector3 } from "three";
 import { Robot } from "./robot";
 import { OrbitControls } from "@react-three/drei";
-import { Selection, Select, EffectComposer } from "@react-three/postprocessing";
+import { Selection, Select } from "@react-three/postprocessing";
 import { SciFiRoom } from "./SciFiRoom";
-import { Bloom, ToneMapping } from "@react-three/postprocessing";
-import {
-  CheckerPiece,
-  CheckerPosition,
-  CheckerValidMoveMap,
-} from "@/game-logic/types";
+import { CheckerPiece, CheckerPosition } from "@/game-logic/types";
 import { useGameSessionContext } from "../game-logic/gameSessionContext";
 
 // Helper function to convert logical position to 3D coordinates
@@ -35,11 +21,10 @@ const positionToCoordinates = (
 };
 
 interface GameSceneProps {
-  isOrthographic?: boolean;
   expression: "happy" | "sad" | "focused";
 }
 
-export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
+export const GameScene = ({ expression }: GameSceneProps) => {
   const {
     gameState,
     selectedPosition,
@@ -47,25 +32,6 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     handlePieceClick,
     handleMoveClick,
   } = useGameSessionContext();
-
-  const { camera } = useThree();
-
-  useEffect(() => {
-    if (isOrthographic) {
-      camera.position.set(0, 20, 0);
-      camera.lookAt(new Vector3(0, 0, 0));
-      camera.zoom = 2;
-      camera.updateProjectionMatrix();
-    } else {
-      camera.position.set(0, 10, 10);
-      camera.lookAt(new Vector3(0, 0, 0));
-      camera.zoom = 1;
-      if ("fov" in camera) {
-        (camera as PerspectiveCamera).fov = 45;
-        camera.updateProjectionMatrix();
-      }
-    }
-  }, [isOrthographic, camera]);
 
   // Convert grid to pieces array for rendering
   const pieces: (CheckerPiece & { position: CheckerPosition })[] = [];
@@ -89,10 +55,10 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
 
   return (
     <>
-      <EffectComposer>
+      {/* <EffectComposer>
         <Bloom mipmapBlur intensity={0.5} luminanceThreshold={1} />
         <ToneMapping />
-      </EffectComposer>
+      </EffectComposer> */}
 
       <SciFiRoom />
       <CheckersBoard />
@@ -139,4 +105,3 @@ export const GameScene = ({ isOrthographic, expression }: GameSceneProps) => {
     </>
   );
 };
-

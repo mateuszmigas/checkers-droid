@@ -1,28 +1,30 @@
+import { useSpring, animated } from "@react-spring/three";
+
 interface TurnIndicatorProps {
   player: "PLAYER_ONE" | "PLAYER_TWO";
 }
 
 export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ player }) => {
-  const position: [number, number, number] =
+  const targetPosition: [number, number, number] =
     player === "PLAYER_ONE"
-      ? [0, 0.1, -4.2] // Player One at bottom (negative z)
-      : [0, 0.1, 4.2]; // Player Two at top (positive z)
+      ? [4, 0.5, -4.5] // Player One at bottom (negative z)
+      : [4, 0.5, 4.5]; // Player Two at top (positive z)
 
   const color = player === "PLAYER_ONE" ? "#cc0000" : "#ffffff";
 
+  const { position } = useSpring({
+    position: targetPosition,
+  });
+
   return (
-    <mesh position={position}>
-      {/* Simple bar extending from the board */}
-      <boxGeometry args={[8, 0.01, 0.2]} />
-      {/* Width matches board, thin height, small depth */}
+    <animated.mesh position={position}>
+      {/* Small cube indicator */}
+      <boxGeometry args={[0.5, 0.5, 0.5]} />
       <meshStandardMaterial
         color={color}
         emissive={color}
-        emissiveIntensity={0.3}
-        metalness={0.5}
-        roughness={0.2}
+        emissiveIntensity={0.5}
       />
-    </mesh>
+    </animated.mesh>
   );
 };
-

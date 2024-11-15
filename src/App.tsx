@@ -2,7 +2,6 @@ import { Canvas } from "@react-three/fiber";
 import { GameScene } from "./game-objects/gameScene";
 import { useState } from "react";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
-import { WrongBrowserAlert } from "./components/wrongBrowserAlert";
 import { GameSessionProvider } from "./game-logic/gameSessionContext";
 
 type Expression = "happy" | "sad" | "focused";
@@ -38,4 +37,3 @@ export const App = () => {
     </GameSessionProvider>
   );
 };
-
