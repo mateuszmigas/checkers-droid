@@ -25,3 +25,6 @@ dist-ssr
 
 # Blender
 *.blend1
+
+# TypeScript build info
+tsconfig.app.tsbuildinfo

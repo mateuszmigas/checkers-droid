@@ -1,5 +1,4 @@
 import { delay } from "@/utils/promise";
-import { GameEvent } from "./gameEvent";
 import { GameState, getPlayerValidMoves } from "./gameState";
 import {
   CheckerPosition,
