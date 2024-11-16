@@ -3,18 +3,18 @@ import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
 import { RobotFace } from "./robotFace";
+import { PlayerType } from "@/game-logic/types";
 
-type Expression = "happy" | "sad" | "focused";
-
-type RobotProps = {
-  expression?: Expression;
-  speechText?: string;
-};
+type RobotProps = { player: PlayerType };
 
 export const Robot = (props: RobotProps) => {
-  const { expression = "happy", speechText } = props;
+  const { player } = props;
   const robotRef = useRef<Group>(null);
   const headRef = useRef<Group>(null);
+
+  // const gameSession = useGameSessionContext();
+
+  // useEventListener(gameSession)
 
   useFrame((state) => {
     if (!headRef.current) {
@@ -24,16 +24,23 @@ export const Robot = (props: RobotProps) => {
     headRef.current.rotation.y = Math.sin(state.clock.elapsedTime) * 0.2;
   });
 
+  const color = player === "PLAYER_ONE" ? "#FF0000" : "#ffffff";
+
   return (
-    <group ref={robotRef} position={[0, 2, -5]} scale={2}>
+    <group
+      ref={robotRef}
+      position={[0, 2, player === "PLAYER_ONE" ? -5 : 5]}
+      rotation={[0, player === "PLAYER_ONE" ? 0 : Math.PI, 0]}
+      scale={2}
+    >
       {/* Speech Bubble */}
 
       {/* Head */}
       <group ref={headRef}>
         <RoundedBox args={[1, 0.9, 0.75]} radius={0.2} smoothness={5}>
-          <meshStandardMaterial color="#ffffff" roughness={0.1} />
+          <meshStandardMaterial color={color} roughness={0.1} />
         </RoundedBox>
-        <RobotFace expression={expression} speechText={speechText} />
+        <RobotFace expression={"focused"} speechText={"hehe"} />
       </group>
 
       {/* Torso */}
@@ -43,7 +50,7 @@ export const Robot = (props: RobotProps) => {
         radius={0.1}
         smoothness={4}
       >
-        <meshStandardMaterial color="#ffffff" roughness={0.1} />
+        <meshStandardMaterial color={color} roughness={0.1} />
       </RoundedBox>
 
       {/* Left Arm */}
@@ -53,7 +60,7 @@ export const Robot = (props: RobotProps) => {
         radius={0.05}
         smoothness={4}
       >
-        <meshStandardMaterial color="#ffffff" roughness={0.1} />
+        <meshStandardMaterial color={color} roughness={0.1} />
       </RoundedBox>
 
       {/* Right Arm */}
@@ -63,7 +70,7 @@ export const Robot = (props: RobotProps) => {
         radius={0.05}
         smoothness={4}
       >
-        <meshStandardMaterial color="#ffffff" roughness={0.1} />
+        <meshStandardMaterial color={color} roughness={0.1} />
       </RoundedBox>
     </group>
   );

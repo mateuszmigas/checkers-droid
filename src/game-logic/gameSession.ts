@@ -54,6 +54,11 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     this.handleEvents(events);
     this.emit({ type: "stateChanged" });
     events.forEach((event) => this.emit(event));
+
+    if (this.playerOne.type === "AI")
+      this.playerOne.getInstance().notify(events);
+    if (this.playerTwo.type === "AI")
+      this.playerTwo.getInstance().notify(events);
   }
 
   private getCurrentPlayer(): GamePlayer | null {
@@ -141,6 +146,12 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     );
   }
 
+  getPlayer(playerType: PlayerType): GamePlayer {
+    if (playerType === "PLAYER_ONE") return this.playerOne;
+    if (playerType === "PLAYER_TWO") return this.playerTwo;
+    throw new Error("Invalid player type");
+  }
+
   restart = () => {
     this.gameState = createInitialGameState();
     this.selectedCheckerPosition = null;
@@ -155,4 +166,3 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     };
   }
 }
-

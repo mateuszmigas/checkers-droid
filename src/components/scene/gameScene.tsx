@@ -29,11 +29,7 @@ const positionToCoordinates = (
   return [x, y, z];
 };
 
-interface GameSceneProps {
-  expression: "happy" | "sad" | "focused";
-}
-
-export const GameScene = ({ expression }: GameSceneProps) => {
+export const GameScene = () => {
   const gameSession = useGameSessionContext();
   const { gameState, selectedPosition } = gameSession.getState();
   const humanValidMoves = gameSession.getHumanValidMoves();
@@ -97,10 +93,12 @@ export const GameScene = ({ expression }: GameSceneProps) => {
           isCapture={move.isCapture}
         />
       ))}
-      <Robot
-        expression={expression}
-        speechText="Hello, I'm a friendly robot! and this is some long text"
-      />
+      {gameSession.getPlayer("PLAYER_ONE").type === "AI" && (
+        <Robot player={"PLAYER_ONE"} />
+      )}
+      {gameSession.getPlayer("PLAYER_TWO").type === "AI" && (
+        <Robot player={"PLAYER_TWO"} />
+      )}
       <OrbitControls
         target={[0, 1.42, 0]}
         maxDistance={20}
@@ -112,4 +110,3 @@ export const GameScene = ({ expression }: GameSceneProps) => {
     </>
   );
 };
-

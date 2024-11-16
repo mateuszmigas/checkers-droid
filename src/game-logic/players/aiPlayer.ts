@@ -6,9 +6,18 @@ import {
   CheckerValidMoveMap,
   PlayerType,
 } from "../types";
+import { EventEmitter } from "@/utils/eventEmitter";
+import { GameEvent } from "../gameEvent";
 
-export class AIPlayer {
-  constructor(private readonly playerType: PlayerType) {}
+export type AIPlayerEvents =
+  | { type: "EMOTION_CHANGED"; emotion: string }
+  | { type: "COMMENT_CHANGED"; message: string };
+
+export class AIPlayer extends EventEmitter<AIPlayerEvents> {
+  constructor(private readonly playerType: PlayerType) {
+    super();
+  }
+
   async getMove(
     gameState: GameState
   ): Promise<{ from: CheckerPosition; to: CheckerPosition } | null> {
@@ -54,10 +63,24 @@ export class AIPlayer {
     return null;
   }
 
-  async notify(): Promise<string> {
-    return Promise.resolve("Calculating next move...");
+  async notify(gameEvents: GameEvent[]) {
+    const types = gameEvents.map((event) => event.type);
+
+    if (types.includes("PIECE_CAPTURED")) {
+      setTimeout(() => {
+        this.emit({
+          type: "COMMENT_CHANGED",
+          message: "I'm so happy for you!",
+        });
+      }, 500);
+    }
+    if (types.includes("PIECE_MOVED")) {
+      setTimeout(() => {
+        this.emit({
+          type: "COMMENT_CHANGED",
+          message: "Oh no, you moved a piece!",
+        });
+      }, 500);
+    }
   }
-
-  async reset() {}
 }
-
