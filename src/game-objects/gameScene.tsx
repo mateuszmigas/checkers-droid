@@ -33,6 +33,7 @@ export const GameScene = ({ expression }: GameSceneProps) => {
 
   useEventListener(gameSession, ["stateChanged"], () => {
     console.log("state changed");
+    setTriggerRender((prev) => prev + 1);
     // console.log(gameSession.getState().gameState);
   });
 
@@ -71,28 +72,25 @@ export const GameScene = ({ expression }: GameSceneProps) => {
         <TurnIndicator player={gameState.gameStatus} />
       )}
       <Selection>
-        {pieces.map((piece) => {
-          console.log("piece", piece);
-          return (
-            <Select
-              key={piece.id}
-              enabled={
-                piece.position.row === selectedPosition?.row &&
-                piece.position.col === selectedPosition?.col
-              }
-            >
-              <Checker
-                position={positionToCoordinates(piece.position)}
-                piece={piece}
-                mustCapture={mustCapture(piece.position)}
-                onClick={() => {
-                  console.log("clicked piece", piece);
-                  gameSession.handlePieceClick(piece.position);
-                }}
-              />
-            </Select>
-          );
-        })}
+        {pieces.map((piece) => (
+          <Select
+            key={piece.id}
+            enabled={
+              piece.position.row === selectedPosition?.row &&
+              piece.position.col === selectedPosition?.col
+            }
+          >
+            <Checker
+              position={positionToCoordinates(piece.position)}
+              piece={piece}
+              mustCapture={mustCapture(piece.position)}
+              onClick={() => {
+                console.log("clicked piece", piece);
+                gameSession.handlePieceClick(piece.position);
+              }}
+            />
+          </Select>
+        ))}
       </Selection>
       {possibleMoves.map((move, index) => (
         <MoveIndicator

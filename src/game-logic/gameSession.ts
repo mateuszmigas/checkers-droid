@@ -64,8 +64,7 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
       } else {
         this.selectedPosition = position;
       }
-      console.log("triggering state changed");
-      // this.emit("stateChanged");
+      this.emit("stateChanged");
     }
   };
 

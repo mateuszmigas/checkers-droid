@@ -40,7 +40,10 @@ export const Checker = (props: CheckerProps) => {
       position-y={position[1]}
       position-z={z}
       ref={groupRef}
-      onClick={onClick}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
       onPointerOver={() => (document.body.style.cursor = "pointer")}
       onPointerOut={() => (document.body.style.cursor = "default")}
     >
@@ -61,4 +64,3 @@ export const Checker = (props: CheckerProps) => {
     </animated.group>
   );
 };
-
