@@ -1,44 +1,26 @@
 // simple implementation on node EventEmitter in browser
-type EventWithListener<
-  EventType,
-  EventUnion extends { type: string }
-> = Extract<EventUnion, { type: EventType }> extends { payload: infer P }
-  ? [name: EventType, listener: (value: P) => void]
-  : [name: EventType, listener: () => void];
+type Listener<E> = (event: E) => void;
 
-type EventWithPayload<EventType, EventUnion extends { type: string }> = Extract<
-  EventUnion,
-  { type: EventType }
-> extends { payload: infer P }
-  ? [name: EventType, payload: P]
-  : [name: EventType];
+export class EventEmitter<T extends { type: string }> {
+  private listeners = new Map<string, Listener<T>[]>();
 
-type Listener<T> = (payload: T) => void;
-
-export class EventEmitter<T extends { type: string; payload?: unknown }> {
-  private listeners = new Map<string, Listener<unknown>[]>();
-
-  on<EventType extends T["type"]>(
-    ...[event, listener]: EventWithListener<EventType, T>
-  ) {
-    const eventListeners = this.listeners.get(event) || [];
+  on(type: T["type"], listener: Listener<T>) {
+    const eventListeners = this.listeners.get(type) || [];
     eventListeners.push(listener);
-    this.listeners.set(event, eventListeners);
+    this.listeners.set(type, eventListeners);
   }
-  off<EventType extends T["type"]>(
-    ...[event, listener]: EventWithListener<EventType, T>
-  ) {
-    const eventListeners = this.listeners.get(event) || [];
+
+  off(type: T["type"], listener: Listener<T>) {
+    const eventListeners = this.listeners.get(type) || [];
     this.listeners.set(
-      event,
+      type,
       eventListeners.filter((l) => l !== listener)
     );
   }
-  emit<EventType extends T["type"]>(
-    ...[event, payload]: EventWithPayload<EventType, T>
-  ) {
-    const eventListeners = this.listeners.get(event) || [];
-    eventListeners.forEach((listener) => listener(payload));
+
+  emit(event: T) {
+    const eventListeners = this.listeners.get(event.type) || [];
+    eventListeners.forEach((listener) => listener(event));
   }
 }
 

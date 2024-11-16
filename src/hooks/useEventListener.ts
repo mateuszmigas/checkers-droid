@@ -1,20 +1,16 @@
 import { EventEmitter } from "@/utils/eventEmitter";
 import { useEffect } from "react";
 
-export const useEventListener = <T extends { type: string; payload?: unknown }>(
+export const useEventListener = <T extends { type: string }>(
   emitter: EventEmitter<T>,
   events: T["type"][],
-  listener: (payload: T) => void
+  callback: (event: T) => void
 ) => {
   useEffect(() => {
-    events.forEach((event: T["type"]) => {
-      emitter.on(...([event, listener] as never));
-    });
-    return () => {
-      events.forEach((event: T["type"]) => {
-        emitter.off(...([event, listener] as never));
-      });
-    };
-  }, [emitter, events, listener]);
+    events.forEach((eventType) => emitter.on(eventType, callback));
+
+    return () =>
+      events.forEach((eventType) => emitter.off(eventType, callback));
+  }, [emitter, events, callback]);
 };
 

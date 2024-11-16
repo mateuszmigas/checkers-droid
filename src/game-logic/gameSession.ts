@@ -15,7 +15,7 @@ import {
 } from "./players/gamePlayer";
 import { GameMode } from "./gameMode";
 
-export type GameSessionEvent = { type: "stateChanged" };
+export type GameSessionEvent = { type: "stateChanged" } | GameEvent;
 
 export class GameSession extends EventEmitter<GameSessionEvent> {
   private gameState: GameState;
@@ -49,11 +49,11 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
   }
 
   private invokeGameAction(action: GameAction) {
-    console.log("invokeGameAction", action, this.gameState);
     const { state, events } = updateGameState(this.gameState, action);
     this.gameState = state;
     this.handleEvents(events);
-    this.emit("stateChanged");
+    this.emit({ type: "stateChanged" });
+    events.forEach((event) => this.emit(event));
   }
 
   private getCurrentPlayer(): GamePlayer | null {
@@ -78,7 +78,7 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
       } else {
         this.selectedCheckerPosition = position;
       }
-      this.emit("stateChanged");
+      this.emit({ type: "stateChanged" });
     }
   }
 
@@ -103,19 +103,17 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
   }
 
   private async handleEvents(events: GameEvent[]) {
-    console.log("handleEvents", events);
     for (const event of events) {
       switch (event.type) {
         case "PIECE_CROWNED":
           break;
         case "PIECE_CAPTURED":
         case "TURN_CHANGED":
-          console.log("TURN_CHANGED", this.getCurrentPlayer()?.type);
           if (this.getCurrentPlayer()?.type === "AI") {
             this.triggerAutomaticMoves();
           } else {
             this.selectedCheckerPosition = null;
-            this.emit("stateChanged");
+            this.emit({ type: "stateChanged" });
           }
           break;
       }
@@ -123,7 +121,6 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
   }
 
   private async triggerAutomaticMoves() {
-    console.log("triggerAutomaticMoves");
     const currentPlayer = this.getCurrentPlayer();
     if (!currentPlayer || currentPlayer.type !== "AI") return;
 
@@ -147,7 +144,8 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
   restart = () => {
     this.gameState = createInitialGameState();
     this.selectedCheckerPosition = null;
-    this.emit("stateChanged");
+    this.triggerAutomaticMoves();
+    this.emit({ type: "stateChanged" });
   };
 
   getState() {

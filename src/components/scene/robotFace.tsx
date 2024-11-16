@@ -1,13 +1,11 @@
-import { useEffect, useMemo, useRef } from "react";
-import { CanvasTexture } from "three";
+import { useEffect } from "react";
 import { Box } from "@react-three/drei";
-import { drawFace } from "./faceExpression";
-import { FaceExpression } from "./faceExpression";
+import { renderRobotFace } from "./texture-renderers/renderRobotFace";
+import { FaceExpression } from "./texture-renderers/renderRobotFace";
 import { BasicGlowMaterial } from "./materials/glowMaterial";
+import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
 
 const textureSize = 512;
-
-//gameSession.getPlayer => Iplayer => type: "human" | "ai"
 
 export const RobotFace = (props: {
   speechText?: string;
@@ -15,17 +13,13 @@ export const RobotFace = (props: {
 }) => {
   const { expression = "happy" } = props;
 
-  const context = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = textureSize;
-    canvas.height = textureSize;
-    return canvas.getContext("2d")!;
-  }, []);
-
-  const textureRef = useRef<CanvasTexture>(new CanvasTexture(context.canvas));
+  const { context, textureRef } = useCanvas2dTexture({
+    width: textureSize,
+    height: textureSize,
+  });
 
   useEffect(() => {
-    drawFace(context, expression);
+    renderRobotFace(context, expression);
     textureRef.current.needsUpdate = true;
   }, [context, expression]);
 
@@ -41,3 +35,4 @@ export const RobotFace = (props: {
     </Box>
   );
 };
+

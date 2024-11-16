@@ -32,7 +32,7 @@ const expressionParams: Record<FaceExpression, FaceParams> = {
   },
 };
 
-export const drawFace = (
+export const renderRobotFace = (
   context: CanvasRenderingContext2D,
   expression: FaceExpression
 ) => {

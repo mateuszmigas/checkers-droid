@@ -3,13 +3,14 @@ import { Checker } from "./checker";
 import { MoveIndicator } from "./moveIndicator";
 import { TurnIndicator } from "./turnIndicator";
 import { Robot } from "./robot";
-import { OrbitControls, Stars } from "@react-three/drei";
+import { OrbitControls, Stars, Stats } from "@react-three/drei";
 import { Selection, Select } from "@react-three/postprocessing";
 import { SciFiRoom } from "./SciFiRoom";
 import { CheckerPiece, CheckerPosition } from "@/game-logic/types";
 import { useGameSessionContext } from "../../hooks/useGameSessionContext";
 import { useEventListener } from "@/hooks/useEventListener";
 import { useTriggerRender } from "@/hooks/useTriggerRender";
+import { ScoreBoard } from "./scoreBoard";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -63,6 +64,7 @@ export const GameScene = ({ expression }: GameSceneProps) => {
       {gameState.gameStatus !== "GAME_OVER" && (
         <TurnIndicator player={gameState.gameStatus} />
       )}
+      <ScoreBoard />
       <Selection>
         {pieces.map((piece) => (
           <Select
@@ -76,10 +78,7 @@ export const GameScene = ({ expression }: GameSceneProps) => {
               position={positionToCoordinates(piece.position)}
               piece={piece}
               mustCapture={mustCapture(piece.position)}
-              onClick={() => {
-                console.log("clicked piece", piece);
-                gameSession.handlePieceClick(piece.position);
-              }}
+              onClick={() => gameSession.handlePieceClick(piece.position)}
             />
           </Select>
         ))}
@@ -103,7 +102,7 @@ export const GameScene = ({ expression }: GameSceneProps) => {
         maxPolarAngle={Math.PI / 2.1}
       />
       <Stars />
-      {/* <Stats /> */}
+      <Stats />
     </>
   );
 };

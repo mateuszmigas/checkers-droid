@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { EventEmitter } from "./utils/eventEmitter";
+import { EventEmitter } from "./eventEmitter";
 
 type TestEvents =
   | { type: "test"; payload: string }
@@ -17,8 +17,8 @@ describe("EventEmitter", () => {
   it("should register an event listener", () => {
     const listener = vi.fn();
     emitter.on("test", listener);
-    emitter.emit("test", "hello");
-    expect(listener).toHaveBeenCalledWith("hello");
+    emitter.emit({ type: "test", payload: "hello" });
+    expect(listener).toHaveBeenCalledWith({ type: "test", payload: "hello" });
   });
 
   it("should allow multiple listeners for the same event", () => {
@@ -28,17 +28,17 @@ describe("EventEmitter", () => {
     emitter.on("test", listener1);
     emitter.on("test", listener2);
 
-    emitter.emit("test", "hello");
+    emitter.emit({ type: "test", payload: "hello" });
 
-    expect(listener1).toHaveBeenCalledWith("hello");
-    expect(listener2).toHaveBeenCalledWith("hello");
+    expect(listener1).toHaveBeenCalledWith({ type: "test", payload: "hello" });
+    expect(listener2).toHaveBeenCalledWith({ type: "test", payload: "hello" });
   });
 
   it("should handle events without payload", () => {
     const listener = vi.fn();
     emitter.on("noPayload", listener);
-    emitter.emit("noPayload");
-    expect(listener).toHaveBeenCalledWith(undefined);
+    emitter.emit({ type: "noPayload" });
+    expect(listener).toHaveBeenCalledWith({ type: "noPayload" });
   });
 
   // Event Emission Tests
@@ -49,9 +49,9 @@ describe("EventEmitter", () => {
     emitter.on("test", listener1);
     emitter.on("numberPayload", listener2);
 
-    emitter.emit("test", "hello");
+    emitter.emit({ type: "test", payload: "hello" });
 
-    expect(listener1).toHaveBeenCalledWith("hello");
+    expect(listener1).toHaveBeenCalledWith({ type: "test", payload: "hello" });
     expect(listener2).not.toHaveBeenCalled();
   });
 
@@ -61,7 +61,7 @@ describe("EventEmitter", () => {
 
     emitter.on("test", listener);
     emitter.off("test", listener);
-    emitter.emit("test", "hello");
+    emitter.emit({ type: "test", payload: "hello" });
 
     expect(listener).not.toHaveBeenCalled();
   });
@@ -74,16 +74,16 @@ describe("EventEmitter", () => {
     emitter.on("test", listener2);
     emitter.off("test", listener1);
 
-    emitter.emit("test", "hello");
+    emitter.emit({ type: "test", payload: "hello" });
 
     expect(listener1).not.toHaveBeenCalled();
-    expect(listener2).toHaveBeenCalledWith("hello");
+    expect(listener2).toHaveBeenCalledWith({ type: "test", payload: "hello" });
   });
 
   // Edge Cases
   it("should handle emitting event with no listeners", () => {
     expect(() => {
-      emitter.emit("test", "hello");
+      emitter.emit({ type: "test", payload: "hello" });
     }).not.toThrow();
   });
 
@@ -93,7 +93,7 @@ describe("EventEmitter", () => {
     emitter.on("test", listener);
     emitter.on("test", listener);
 
-    emitter.emit("test", "hello");
+    emitter.emit({ type: "test", payload: "hello" });
 
     // The listener should be called twice because it was registered twice
     expect(listener).toHaveBeenCalledTimes(2);
@@ -104,9 +104,12 @@ describe("EventEmitter", () => {
     const complexPayload = 42;
 
     emitter.on("numberPayload", listener);
-    emitter.emit("numberPayload", complexPayload);
+    emitter.emit({ type: "numberPayload", payload: complexPayload });
 
-    expect(listener).toHaveBeenCalledWith(complexPayload);
+    expect(listener).toHaveBeenCalledWith({
+      type: "numberPayload",
+      payload: complexPayload,
+    });
   });
 });
 

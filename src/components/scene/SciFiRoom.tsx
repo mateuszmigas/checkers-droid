@@ -25,21 +25,6 @@ export const SciFiRoom = () => {
 
       <primitive position={[0, -3, 0]} object={scene} />
 
-      {/* Floor */}
-      <mesh
-        receiveShadow
-        position={[0, -50, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-      >
-        <planeGeometry args={[50, 50]} />
-        <meshStandardMaterial
-          color="#ffffff"
-          envMapIntensity={1}
-          metalness={0.5}
-          roughness={0.2}
-        />
-      </mesh>
-
       {/* Table */}
       <group position={[0, -0.1, 0]}>
         <mesh castShadow receiveShadow>
@@ -55,3 +40,4 @@ export const SciFiRoom = () => {
     </>
   );
 };
+
