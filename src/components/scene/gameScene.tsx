@@ -7,7 +7,7 @@ import { OrbitControls, Stars } from "@react-three/drei";
 import { Selection, Select } from "@react-three/postprocessing";
 import { SciFiRoom } from "./SciFiRoom";
 import { CheckerPiece, CheckerPosition } from "@/game-logic/types";
-import { useGameSessionContext } from "../hooks/useGameSessionContext";
+import { useGameSessionContext } from "../../hooks/useGameSessionContext";
 import { useEventListener } from "@/hooks/useEventListener";
 import { useTriggerRender } from "@/hooks/useTriggerRender";
 

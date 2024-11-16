@@ -1,6 +1,6 @@
 import { Canvas } from "@react-three/fiber";
-import { GameScene } from "./game-objects/gameScene";
-import { useState } from "react";
+import { GameScene } from "./components/scene/gameScene";
+import { useEffect, useState } from "react";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import { GameSession } from "./game-logic/gameSession";
 import { GameSessionContext } from "./hooks/useGameSessionContext";
@@ -11,6 +11,11 @@ type Expression = "happy" | "sad" | "focused";
 export const App = () => {
   const [expression, setExpression] = useState<Expression>("happy");
   const [gameSession, setGameSession] = useState<GameSession | null>(null);
+
+  //temp
+  useEffect(() => {
+    setGameSession(new GameSession("AI_VS_AI"));
+  }, []);
 
   return (
     <GameSessionContext.Provider value={gameSession}>
