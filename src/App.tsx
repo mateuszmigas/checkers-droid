@@ -30,7 +30,11 @@ export const App = () => {
           {gameSession ? (
             <div className="absolute size-full z-10">
               <Canvas
-                camera={{ position: [0, 6, -7] }}
+                camera={
+                  gameSession.getPlayer("PLAYER_ONE").type === "HUMAN"
+                    ? { position: [0, 6, -7] }
+                    : { position: [-7, 6, 0] }
+                }
                 shadows
                 gl={{
                   toneMapping: ACESFilmicToneMapping,
