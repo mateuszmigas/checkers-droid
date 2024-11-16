@@ -2,22 +2,17 @@ import { Canvas } from "@react-three/fiber";
 import { GameScene } from "./game-objects/gameScene";
 import { useState } from "react";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
-import { GameSessionProvider } from "./game-logic/gameSessionContext";
+import { GameSession } from "./game-logic/gameSession";
+import { GameSessionContext } from "./game-logic/gameSessionContext";
 
 type Expression = "happy" | "sad" | "focused";
 
 export const App = () => {
   const [expression, setExpression] = useState<Expression>("happy");
-  // const [gameSessin];
-  // const [gameController, setGameController] = useState<GameController | null>(
-  //   null
-  // );
-
-  //useGameSessionContext
-  // useGameSession;
+  const [gameSession] = useState(() => new GameSession());
 
   return (
-    <GameSessionProvider>
+    <GameSessionContext.Provider value={gameSession}>
       <div className="h-screen w-screen">
         <div className="relative size-full bg-background dark">
           <div className="absolute size-full z-10">
@@ -54,6 +49,6 @@ export const App = () => {
           </div>
         </div>
       </div>
-    </GameSessionProvider>
+    </GameSessionContext.Provider>
   );
 };

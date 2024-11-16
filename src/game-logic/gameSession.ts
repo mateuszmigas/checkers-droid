@@ -1,4 +1,3 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   GameState,
   createInitialGameState,
@@ -6,162 +5,125 @@ import {
   getPlayerValidMoves,
   GameAction,
 } from "./gameState";
-import {
-  CheckerPosition,
-  CheckerValidMove,
-  CheckerValidMoveMap,
-} from "./types";
+import { CheckerPosition, CheckerValidMoveMap } from "./types";
 import { AIPlayer } from "./aiPlayer";
 import { GameEvent } from "./gameEvent";
+import { EventEmitter } from "../utils/eventEmitter";
 
-type AIReaction = {
-  mood: "happy" | "sad" | "focused";
-  message: string;
-};
+type GameSessionEvent = { type: "stateChanged" };
 
-export interface IPlayer {
-  getMove: (gameState: GameState) => Promise<CheckerValidMove>;
-  getReaction: () => Promise<AIReaction>;
-}
+export class GameSession extends EventEmitter<GameSessionEvent> {
+  private gameState: GameState;
+  private selectedPosition: CheckerPosition | null = null;
+  private validMoves: CheckerValidMoveMap | null = null;
+  private aiPlayer: AIPlayer;
 
-const useTriggerRender = () => {
-  const [, setTriggerRender] = useState(0);
-  return () => setTriggerRender((prev) => prev + 1);
-};
+  constructor() {
+    super();
+    this.gameState = createInitialGameState();
+    this.aiPlayer = new AIPlayer();
+    this.calculateValidMoves();
+  }
 
-export function useGameSession() {
-  const triggerRender = useTriggerRender();
-  const gameStateRef = useRef<GameState>(createInitialGameState());
-  const [selectedPosition, setSelectedPosition] =
-    useState<CheckerPosition | null>(null);
-  const [validMoves, setValidMoves] = useState<CheckerValidMoveMap | null>(
-    null
-  );
-  const aiPlayer = useMemo(() => new AIPlayer(), []);
+  private isAiPlayer(gameState: GameState) {
+    return gameState.gameStatus === "PLAYER_TWO";
+  }
 
-  const isAiPlayer = (gameState: GameState) =>
-    gameState.gameStatus === "PLAYER_TWO";
-
-  // const getCurrentPlayer = useCallback(() => {
-  //   return gameState.gameStatus;
-  // }, [gameState.gameStatus]);
-
-  // Calculate valid moves only when necessary
-  useEffect(() => {
-    if (gameStateRef.current.gameStatus === "GAME_OVER") {
-      setValidMoves(null);
+  private calculateValidMoves() {
+    if (this.gameState.gameStatus === "GAME_OVER") {
+      this.validMoves = null;
       return;
     }
 
-    // Only calculate moves for the current player
-    const moves = getPlayerValidMoves(
-      gameStateRef.current.gameStatus,
-      gameStateRef.current
+    this.validMoves = getPlayerValidMoves(
+      this.gameState.gameStatus,
+      this.gameState
     );
-    setValidMoves(moves);
-  }, [gameStateRef.current.gameStatus, gameStateRef.current.grid]); // Only recalculate when these change
+  }
 
-  const invokeGameAction = useCallback(
-    (action: GameAction) => {
-      console.log("invokeGameAction", action);
-      const { state: newState, events } = updateGameState(
-        gameStateRef.current,
-        action
-      );
-      gameStateRef.current = newState;
-      handleEvents(events);
-      triggerRender();
-    },
-    [gameStateRef]
-  );
+  private invokeGameAction(action: GameAction) {
+    const { state: newState, events } = updateGameState(this.gameState, action);
+    this.gameState = newState;
+    this.calculateValidMoves();
+    this.handleEvents(events);
+    this.emit("stateChanged");
+  }
 
-  const handlePieceClick = useCallback(
-    (position: CheckerPosition) => {
-      // Prevent moves during AI turn
-      if (gameStateRef.current.gameStatus === "PLAYER_TWO") return;
+  handlePieceClick = (position: CheckerPosition) => {
+    if (this.gameState.gameStatus === "PLAYER_TWO") return;
 
-      const piece = gameStateRef.current.grid[position.row][position.col];
-      if (!piece) return;
+    const piece = this.gameState.grid[position.row][position.col];
+    if (!piece) return;
 
-      if (piece.player === gameStateRef.current.gameStatus) {
-        if (
-          selectedPosition?.row === position.row &&
-          selectedPosition?.col === position.col
-        ) {
-          setSelectedPosition(null);
-        } else {
-          setSelectedPosition(position);
-        }
+    if (piece.player === this.gameState.gameStatus) {
+      if (
+        this.selectedPosition?.row === position.row &&
+        this.selectedPosition?.col === position.col
+      ) {
+        this.selectedPosition = null;
+      } else {
+        this.selectedPosition = position;
       }
-    },
-    [gameStateRef, selectedPosition]
-  );
+      console.log("triggering state changed");
+      // this.emit("stateChanged");
+    }
+  };
 
-  const handleMoveClick = useCallback(
-    (targetPosition: CheckerPosition) => {
-      // Prevent moves during AI turn
-      if (gameStateRef.current.gameStatus === "PLAYER_TWO") return;
+  handleMoveClick = (targetPosition: CheckerPosition) => {
+    if (this.gameState.gameStatus === "PLAYER_TWO") return;
 
-      if (selectedPosition) {
-        const previousPlayer = gameStateRef.current.gameStatus;
-        invokeGameAction({
-          type: "MOVE_PIECE",
-          from: selectedPosition,
-          to: targetPosition,
-        });
+    if (this.selectedPosition) {
+      const previousPlayer = this.gameState.gameStatus;
+      this.invokeGameAction({
+        type: "MOVE_PIECE",
+        from: this.selectedPosition,
+        to: targetPosition,
+      });
 
-        if (gameStateRef.current.gameStatus !== previousPlayer) {
-          setSelectedPosition(null);
-        } else {
-          setSelectedPosition(targetPosition);
-        }
+      if (this.gameState.gameStatus !== previousPlayer) {
+        this.selectedPosition = null;
+      } else {
+        this.selectedPosition = targetPosition;
       }
-    },
-    [selectedPosition, gameStateRef]
-  );
+    }
+  };
 
-  const handleEvents = (events: GameEvent[]) => {
-    events.forEach(async (event) => {
+  private async handleEvents(events: GameEvent[]) {
+    for (const event of events) {
       switch (event.type) {
         case "PIECE_CROWNED":
-          // Handle crowning animation or notification
           break;
         case "TURN_CHANGED":
-          if (isAiPlayer(gameStateRef.current)) {
-            const aiMove = await aiPlayer.getMove(gameStateRef.current);
+          if (this.isAiPlayer(this.gameState)) {
+            const aiMove = await this.aiPlayer.getMove(this.gameState);
             if (aiMove) {
-              invokeGameAction({
+              this.invokeGameAction({
                 type: "MOVE_PIECE",
                 from: aiMove.from,
                 to: aiMove.to,
               });
             }
           } else {
-            setSelectedPosition(null);
+            this.selectedPosition = null;
+            this.emit("stateChanged");
           }
           break;
       }
-    });
+    }
+  }
+
+  resetGame = () => {
+    this.gameState = createInitialGameState();
+    this.selectedPosition = null;
+    this.calculateValidMoves();
+    this.emit("stateChanged");
   };
 
-  const resetGame = useCallback(() => {
-    // setGameState(createInitialGameState());
-    // setSelectedPosition(null);
-  }, []);
-
-  return {
-    gameState: gameStateRef.current,
-    selectedPosition,
-    validMoves,
-    handlePieceClick,
-    handleMoveClick,
-    resetGame,
-  };
-  //getMoves
-  //getCheckers
-  //getSelected
-  //handleSelection
-  //handleMove
-  //resetGame
+  getState() {
+    return {
+      gameState: this.gameState,
+      selectedPosition: this.selectedPosition,
+      validMoves: this.validMoves,
+    };
+  }
 }
-

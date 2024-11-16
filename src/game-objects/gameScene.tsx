@@ -8,6 +8,8 @@ import { Selection, Select } from "@react-three/postprocessing";
 import { SciFiRoom } from "./SciFiRoom";
 import { CheckerPiece, CheckerPosition } from "@/game-logic/types";
 import { useGameSessionContext } from "../game-logic/gameSessionContext";
+import { useState } from "react";
+import { useEventListener } from "@/hooks/useEventListener";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -25,13 +27,14 @@ interface GameSceneProps {
 }
 
 export const GameScene = ({ expression }: GameSceneProps) => {
-  const {
-    gameState,
-    selectedPosition,
-    validMoves,
-    handlePieceClick,
-    handleMoveClick,
-  } = useGameSessionContext();
+  const gameSession = useGameSessionContext();
+  const { gameState, selectedPosition, validMoves } = gameSession.getState();
+  const [, setTriggerRender] = useState(0);
+
+  useEventListener(gameSession, ["stateChanged"], () => {
+    console.log("state changed");
+    // console.log(gameSession.getState().gameState);
+  });
 
   // Convert grid to pieces array for rendering
   const pieces: (CheckerPiece & { position: CheckerPosition })[] = [];
@@ -53,6 +56,8 @@ export const GameScene = ({ expression }: GameSceneProps) => {
     ? validMoves?.get(selectedPosition) || []
     : [];
 
+  console.log("render scene");
+
   return (
     <>
       {/* <EffectComposer>
@@ -66,28 +71,34 @@ export const GameScene = ({ expression }: GameSceneProps) => {
         <TurnIndicator player={gameState.gameStatus} />
       )}
       <Selection>
-        {pieces.map((piece) => (
-          <Select
-            key={piece.id}
-            enabled={
-              piece.position.row === selectedPosition?.row &&
-              piece.position.col === selectedPosition?.col
-            }
-          >
-            <Checker
-              position={positionToCoordinates(piece.position)}
-              piece={piece}
-              mustCapture={mustCapture(piece.position)}
-              onClick={() => handlePieceClick(piece.position)}
-            />
-          </Select>
-        ))}
+        {pieces.map((piece) => {
+          console.log("piece", piece);
+          return (
+            <Select
+              key={piece.id}
+              enabled={
+                piece.position.row === selectedPosition?.row &&
+                piece.position.col === selectedPosition?.col
+              }
+            >
+              <Checker
+                position={positionToCoordinates(piece.position)}
+                piece={piece}
+                mustCapture={mustCapture(piece.position)}
+                onClick={() => {
+                  console.log("clicked piece", piece);
+                  gameSession.handlePieceClick(piece.position);
+                }}
+              />
+            </Select>
+          );
+        })}
       </Selection>
       {possibleMoves.map((move, index) => (
         <MoveIndicator
           key={`move-${index}`}
           position={positionToCoordinates(move.targetPosition)}
-          onClick={() => handleMoveClick(move.targetPosition)}
+          onClick={() => gameSession.handleMoveClick(move.targetPosition)}
           isCapture={move.isCapture}
         />
       ))}
