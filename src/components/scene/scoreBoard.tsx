@@ -3,6 +3,7 @@ import { useGameSessionContext } from "@/hooks/useGameSessionContext";
 import { useRef } from "react";
 import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
 import { renderBoard } from "./texture-renderers/renderBoard";
+import { BasicGlowMaterial } from "./materials/glowMaterial";
 
 const MAX_EVENTS = 8;
 
@@ -29,15 +30,20 @@ export const ScoreBoard = () => {
   );
 
   const { context, textureRef } = useCanvas2dTexture({
-    width: 512,
-    height: 512,
+    width: 768,
+    height: 768,
   });
 
   return (
-    <group position={[6, 3, 0]} rotation={[0, -Math.PI / 2, 0]}>
+    <group position={[8, 3, 0]} rotation={[0, -Math.PI / 2, 0]}>
       <mesh>
-        <planeGeometry args={[3, 2]} />
-        <meshBasicMaterial map={textureRef.current} transparent={true} />
+        <planeGeometry args={[9, 6]} />
+        <BasicGlowMaterial
+          map={textureRef.current}
+          transparent={true}
+          color={[1, 1, 1]}
+          intensity={15}
+        />
       </mesh>
     </group>
   );
