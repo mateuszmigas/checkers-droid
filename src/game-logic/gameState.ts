@@ -308,6 +308,7 @@ export const updateGameState = (
 
       const piece = getPieceAtPosition(state, action.from);
       if (!piece || piece.player !== state.gameStatus) {
+        console.log("1", piece, state.gameStatus);
         return checkForNoMoves(state);
       }
 

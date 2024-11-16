@@ -4,32 +4,40 @@ import { useState } from "react";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import { GameSession } from "./game-logic/gameSession";
 import { GameSessionContext } from "./hooks/useGameSessionContext";
+import { SelectGameMode } from "./components/selectGameMode";
 
 type Expression = "happy" | "sad" | "focused";
 
 export const App = () => {
   const [expression, setExpression] = useState<Expression>("happy");
-  const [gameSession] = useState(() => new GameSession("HUMAN_VS_AI"));
+  const [gameSession, setGameSession] = useState<GameSession | null>(null);
 
   return (
     <GameSessionContext.Provider value={gameSession}>
       <div className="h-screen w-screen">
         <div className="relative size-full bg-background dark">
-          <div className="absolute size-full z-10">
-            <Canvas
-              camera={{ position: [0, 6, 7] }}
-              shadows
-              gl={{
-                toneMapping: ACESFilmicToneMapping,
-                outputColorSpace: SRGBColorSpace,
-              }}
-            >
-              <GameScene expression={expression} />
-            </Canvas>
-          </div>
-          {/* <div className="absolute inset-0 z-20 flex items-center justify-center">
-            <WrongBrowserAlert />
-          </div> */}
+          {gameSession ? (
+            <div className="absolute size-full z-10">
+              <Canvas
+                camera={{ position: [0, 6, 7] }}
+                shadows
+                gl={{
+                  toneMapping: ACESFilmicToneMapping,
+                  outputColorSpace: SRGBColorSpace,
+                }}
+              >
+                <GameScene expression={expression} />
+              </Canvas>
+            </div>
+          ) : (
+            <div className="absolute inset-0 z-20 flex items-center justify-center">
+              <SelectGameMode
+                onSelect={(gameMode) =>
+                  setGameSession(new GameSession(gameMode))
+                }
+              />
+            </div>
+          )}
           <div className="absolute z-20">
             <button onClick={() => setExpression("happy")}>Happy</button>
             <button onClick={() => setExpression("sad")}>Sad</button>

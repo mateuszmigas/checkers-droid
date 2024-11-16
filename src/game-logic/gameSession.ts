@@ -2,10 +2,10 @@ import {
   GameState,
   createInitialGameState,
   updateGameState,
-  getPlayerValidMoves,
   GameAction,
+  getPlayerValidMoves,
 } from "./gameState";
-import { CheckerPosition, CheckerValidMoveMap } from "./types";
+import { CheckerPosition, CheckerValidMoveMap, PlayerType } from "./types";
 import { GameEvent } from "./gameEvent";
 import { EventEmitter } from "../utils/eventEmitter";
 import {
@@ -20,7 +20,6 @@ export type GameSessionEvent = { type: "stateChanged" };
 export class GameSession extends EventEmitter<GameSessionEvent> {
   private gameState: GameState;
   private selectedCheckerPosition: CheckerPosition | null = null;
-  private validMoves: CheckerValidMoveMap | null = null;
   private playerOne: GamePlayer;
   private playerTwo: GamePlayer;
 
@@ -31,12 +30,12 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
 
     switch (gameMode) {
       case "AI_VS_AI":
-        this.playerOne = createAIPlayer();
-        this.playerTwo = createAIPlayer();
+        this.playerOne = createAIPlayer("PLAYER_ONE");
+        this.playerTwo = createAIPlayer("PLAYER_TWO");
         break;
       case "HUMAN_VS_AI":
         this.playerOne = createHumanPlayer();
-        this.playerTwo = createAIPlayer();
+        this.playerTwo = createAIPlayer("PLAYER_TWO");
         break;
       case "HUMAN_VS_HUMAN":
         this.playerOne = createHumanPlayer();
@@ -44,25 +43,15 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
         break;
     }
 
-    this.calculateValidMoves();
-  }
-
-  private calculateValidMoves() {
-    if (this.gameState.gameStatus === "GAME_OVER") {
-      this.validMoves = null;
-      return;
-    }
-
-    this.validMoves = getPlayerValidMoves(
-      this.gameState.gameStatus,
-      this.gameState
-    );
+    setTimeout(() => {
+      this.triggerAutomaticMoves();
+    }, 1000);
   }
 
   private invokeGameAction(action: GameAction) {
+    console.log("invokeGameAction", action, this.gameState);
     const { state, events } = updateGameState(this.gameState, action);
     this.gameState = state;
-    this.calculateValidMoves();
     this.handleEvents(events);
     this.emit("stateChanged");
   }
@@ -114,21 +103,16 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
   }
 
   private async handleEvents(events: GameEvent[]) {
+    console.log("handleEvents", events);
     for (const event of events) {
       switch (event.type) {
         case "PIECE_CROWNED":
           break;
+        case "PIECE_CAPTURED":
         case "TURN_CHANGED":
-          const currentPlayer = this.getCurrentPlayer();
-
-          if (currentPlayer && currentPlayer.type === "AI") {
-            const agentMove = await currentPlayer
-              .getInstance()
-              .getMove(this.gameState);
-
-            if (agentMove) {
-              this.invokeGameAction({ type: "MOVE_PIECE", ...agentMove });
-            }
+          console.log("TURN_CHANGED", this.getCurrentPlayer()?.type);
+          if (this.getCurrentPlayer()?.type === "AI") {
+            this.triggerAutomaticMoves();
           } else {
             this.selectedCheckerPosition = null;
             this.emit("stateChanged");
@@ -138,10 +122,31 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     }
   }
 
+  private async triggerAutomaticMoves() {
+    console.log("triggerAutomaticMoves");
+    const currentPlayer = this.getCurrentPlayer();
+    if (!currentPlayer || currentPlayer.type !== "AI") return;
+
+    const agentMove = await currentPlayer.getInstance().getMove(this.gameState);
+
+    if (agentMove) {
+      this.invokeGameAction({ type: "MOVE_PIECE", ...agentMove });
+    }
+  }
+
+  getHumanValidMoves(): CheckerValidMoveMap | null {
+    const currentPlayer = this.getCurrentPlayer();
+    if (!currentPlayer || currentPlayer.type !== "HUMAN") return null;
+
+    return getPlayerValidMoves(
+      this.gameState.gameStatus as PlayerType,
+      this.gameState
+    );
+  }
+
   restart = () => {
     this.gameState = createInitialGameState();
     this.selectedCheckerPosition = null;
-    this.calculateValidMoves();
     this.emit("stateChanged");
   };
 
@@ -149,7 +154,6 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     return {
       gameState: this.gameState,
       selectedPosition: this.selectedCheckerPosition,
-      validMoves: this.validMoves,
     };
   }
 }

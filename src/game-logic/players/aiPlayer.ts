@@ -4,16 +4,18 @@ import {
   CheckerPosition,
   CheckerValidMove,
   CheckerValidMoveMap,
+  PlayerType,
 } from "../types";
 
 export class AIPlayer {
+  constructor(private readonly playerType: PlayerType) {}
   async getMove(
     gameState: GameState
   ): Promise<{ from: CheckerPosition; to: CheckerPosition } | null> {
     // Get all valid moves for black pieces
-    await delay(Math.random() * 1000 + 1000);
+    await delay(Math.random() * 250);
     const validMoves: CheckerValidMoveMap = getPlayerValidMoves(
-      "PLAYER_TWO",
+      this.playerType,
       gameState
     );
 

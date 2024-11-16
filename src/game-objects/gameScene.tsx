@@ -28,7 +28,8 @@ interface GameSceneProps {
 
 export const GameScene = ({ expression }: GameSceneProps) => {
   const gameSession = useGameSessionContext();
-  const { gameState, selectedPosition, validMoves } = gameSession.getState();
+  const { gameState, selectedPosition } = gameSession.getState();
+  const humanValidMoves = gameSession.getHumanValidMoves();
   const triggerRender = useTriggerRender();
 
   useEventListener(gameSession, ["stateChanged"], triggerRender);
@@ -38,22 +39,17 @@ export const GameScene = ({ expression }: GameSceneProps) => {
   gameState.grid.forEach((row, rowIndex) => {
     row.forEach((piece, colIndex) => {
       if (piece) {
-        pieces.push({
-          ...piece,
-          position: { row: rowIndex, col: colIndex },
-        });
+        pieces.push({ ...piece, position: { row: rowIndex, col: colIndex } });
       }
     });
   });
 
   const mustCapture = (position: CheckerPosition): boolean =>
-    (validMoves?.get(position) ?? []).some((move) => move.isCapture);
+    (humanValidMoves?.get(position) ?? []).some((move) => move.isCapture);
 
   const possibleMoves = selectedPosition
-    ? validMoves?.get(selectedPosition) || []
+    ? humanValidMoves?.get(selectedPosition) || []
     : [];
-
-  console.log("render scene");
 
   return (
     <>
