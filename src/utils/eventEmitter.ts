@@ -1,5 +1,4 @@
 // simple implementation on node EventEmitter in browser
-
 type EventWithListener<
   EventType,
   EventUnion extends { type: string }
@@ -42,32 +41,4 @@ export class EventEmitter<T extends { type: string; payload?: unknown }> {
     eventListeners.forEach((listener) => listener(payload));
   }
 }
-
-// type TabEvents =
-//   | { type: "closed"; payload: { id: string } }
-//   | { type: "all-closed" }
-//   | {
-//       type: "resized";
-//       payload: {
-//         id: string;
-//         newSize: {
-//           width: number;
-//           height: number;
-//         };
-//       };
-//     };
-
-// class Tab extends EventEmitter<TabEvents> {}
-// const tab = new Tab();
-
-// tab.on("resized", (payload) => {
-//   payload.id; //{id: string, newSize: {width: number, height: number}}
-// });
-// tab.emit("resized", {
-//   id: "tab-id",
-//   newSize: { width: 100, height: 200 },
-// });
-
-// tab.on("all-closed", () => {});
-// tab.emit("all-closed");
 
