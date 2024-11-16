@@ -8,8 +8,8 @@ import { Selection, Select } from "@react-three/postprocessing";
 import { SciFiRoom } from "./SciFiRoom";
 import { CheckerPiece, CheckerPosition } from "@/game-logic/types";
 import { useGameSessionContext } from "../game-logic/gameSessionContext";
-import { useState } from "react";
 import { useEventListener } from "@/hooks/useEventListener";
+import { useTriggerRender } from "@/hooks/useTriggerRender";
 
 // Helper function to convert logical position to 3D coordinates
 const positionToCoordinates = (
@@ -29,13 +29,9 @@ interface GameSceneProps {
 export const GameScene = ({ expression }: GameSceneProps) => {
   const gameSession = useGameSessionContext();
   const { gameState, selectedPosition, validMoves } = gameSession.getState();
-  const [, setTriggerRender] = useState(0);
+  const triggerRender = useTriggerRender();
 
-  useEventListener(gameSession, ["stateChanged"], () => {
-    console.log("state changed");
-    setTriggerRender((prev) => prev + 1);
-    // console.log(gameSession.getState().gameState);
-  });
+  useEventListener(gameSession, ["stateChanged"], triggerRender);
 
   // Convert grid to pieces array for rendering
   const pieces: (CheckerPiece & { position: CheckerPosition })[] = [];
@@ -100,7 +96,6 @@ export const GameScene = ({ expression }: GameSceneProps) => {
           isCapture={move.isCapture}
         />
       ))}
-
       <Robot
         expression={expression}
         speechText="Hello, I'm a friendly robot! and this is some long text"
