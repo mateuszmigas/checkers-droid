@@ -57,10 +57,9 @@ export class AIPlayer {
     return null;
   }
 
-  async reactToEvent(_event: GameEvent): Promise<string> {
+  async notify(): Promise<string> {
     return Promise.resolve("Calculating next move...");
   }
 
   async reset() {}
 }
-
