@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { GameSession } from "./gameSession";
+import { GameSession } from "../game-logic/gameSession";
 
 export const GameSessionContext = createContext<GameSession | null>(null);
 

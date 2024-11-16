@@ -3,13 +3,13 @@ import { GameScene } from "./game-objects/gameScene";
 import { useState } from "react";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import { GameSession } from "./game-logic/gameSession";
-import { GameSessionContext } from "./game-logic/gameSessionContext";
+import { GameSessionContext } from "./hooks/useGameSessionContext";
 
 type Expression = "happy" | "sad" | "focused";
 
 export const App = () => {
   const [expression, setExpression] = useState<Expression>("happy");
-  const [gameSession] = useState(() => new GameSession());
+  const [gameSession] = useState(() => new GameSession("HUMAN_VS_AI"));
 
   return (
     <GameSessionContext.Provider value={gameSession}>
@@ -52,3 +52,4 @@ export const App = () => {
     </GameSessionContext.Provider>
   );
 };
+

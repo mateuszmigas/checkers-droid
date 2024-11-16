@@ -1,16 +1,12 @@
 import { delay } from "@/utils/promise";
-import { GameState, getPlayerValidMoves } from "./gameState";
+import { GameState, getPlayerValidMoves } from "../gameState";
 import {
   CheckerPosition,
   CheckerValidMove,
   CheckerValidMoveMap,
-} from "./types";
+} from "../types";
 
 export class AIPlayer {
-  public static checkCapability() {
-    return true;
-  }
-
   async getMove(
     gameState: GameState
   ): Promise<{ from: CheckerPosition; to: CheckerPosition } | null> {
@@ -62,3 +58,4 @@ export class AIPlayer {
 
   async reset() {}
 }
+
