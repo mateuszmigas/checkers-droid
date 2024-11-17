@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import {
   CanvasTexture,
   MagnificationTextureFilter,
@@ -31,5 +31,13 @@ export const useCanvas2dTexture = (
     })()
   );
 
-  return { context, textureRef };
+  const updateTexture = useCallback(
+    (draw: (context: CanvasRenderingContext2D) => void) => {
+      draw(context);
+      textureRef.current.needsUpdate = true;
+    },
+    [context, textureRef]
+  );
+
+  return { textureRef, updateTexture };
 };

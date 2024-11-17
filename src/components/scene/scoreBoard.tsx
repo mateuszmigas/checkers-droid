@@ -11,6 +11,11 @@ export const ScoreBoard = () => {
   const gameSession = useGameSessionContext();
   const eventsRef = useRef<string[]>([]);
 
+  const { updateTexture, textureRef } = useCanvas2dTexture({
+    width: 768,
+    height: 768,
+  });
+
   useEventListener(
     gameSession,
     [
@@ -22,17 +27,11 @@ export const ScoreBoard = () => {
     ],
     (event) => {
       eventsRef.current = [...eventsRef.current, event.type].slice(-MAX_EVENTS);
-      if (context) {
-        renderBoard({ context, events: [...eventsRef.current] });
-        textureRef.current.needsUpdate = true;
-      }
+      updateTexture((context) =>
+        renderBoard({ context, events: [...eventsRef.current] })
+      );
     }
   );
-
-  const { context, textureRef } = useCanvas2dTexture({
-    width: 768,
-    height: 768,
-  });
 
   return (
     <group position={[8, 3, 0]} rotation={[0, -Math.PI / 2, 0]}>
@@ -48,4 +47,3 @@ export const ScoreBoard = () => {
     </group>
   );
 };
-

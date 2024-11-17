@@ -15,15 +15,14 @@ export const Robot = (props: RobotProps) => {
   const robotRef = useRef<Group>(null);
   const headRef = useRef<Group>(null);
 
-  const { context, textureRef } = useCanvas2dTexture({
+  const { updateTexture, textureRef } = useCanvas2dTexture({
     width: textureSize,
     height: textureSize,
   });
 
   useEffect(() => {
-    renderRobotFace(context, "happy");
-    textureRef.current.needsUpdate = true;
-  }, [context, textureRef]);
+    updateTexture((context) => renderRobotFace(context, "happy"));
+  }, [updateTexture, textureRef]);
 
   useFrame((state) => {
     if (!headRef.current) {
