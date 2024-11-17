@@ -35,7 +35,6 @@ export const App = () => {
                     ? { position: [0, 6, -7] }
                     : { position: [-7, 6, 0] }
                 }
-                shadows
                 gl={{
                   toneMapping: ACESFilmicToneMapping,
                   outputColorSpace: SRGBColorSpace,

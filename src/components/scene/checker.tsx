@@ -53,16 +53,16 @@ export const Checker = (props: CheckerProps) => {
       onPointerOver={() => (document.body.style.cursor = "pointer")}
       onPointerOut={() => (document.body.style.cursor = "default")}
     >
-      <mesh castShadow receiveShadow>
+      <mesh>
         <cylinderGeometry args={[0.4, 0.4, 0.15, 32]} />
         <meshStandardMaterial {...materialProps} />
       </mesh>
-      <mesh castShadow receiveShadow position={[0, 0.075, 0]}>
+      <mesh position={[0, 0.075, 0]}>
         <cylinderGeometry args={[0.35, 0.35, 0.1, 32]} />
         <meshStandardMaterial {...materialProps} />
       </mesh>
       {isKing && (
-        <mesh castShadow receiveShadow position={[0, 0.2, 0]}>
+        <mesh position={[0, 0.2, 0]}>
           <sphereGeometry args={[0.15, 32, 32]} />
           <meshStandardMaterial {...materialProps} />
         </mesh>

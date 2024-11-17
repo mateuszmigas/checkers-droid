@@ -6,20 +6,13 @@ export const Room = () => {
   return (
     <>
       <spotLight
-        castShadow
         position={[0, 10, 0]}
         angle={0.3}
         penumbra={0.5}
         intensity={1}
         color="#b0e0e6"
       />
-      <directionalLight
-        position={[5, 15, 5]}
-        intensity={0.5}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-      />
+      <directionalLight position={[5, 15, 5]} intensity={0.5} />
       <ambientLight intensity={0.1} />
       <ambientLight intensity={0.1} color="#b0e0e6" />
 
@@ -27,7 +20,7 @@ export const Room = () => {
 
       {/* Table */}
       <group position={[0, -0.1, 0]}>
-        <mesh castShadow receiveShadow>
+        <mesh>
           <boxGeometry args={[12, 0.2, 12]} />
           <meshStandardMaterial
             color="#000000"
