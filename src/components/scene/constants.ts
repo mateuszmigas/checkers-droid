@@ -2,8 +2,11 @@ import { CheckerPosition } from "@/game-logic/types";
 
 export const constants = {
   textureSize: 512,
-  PlayerOneColor: "#ffff20",
-  PlayerTwoColor: "#f0f0f0",
+  playerOneColor: "#ffff20",
+  playerTwoColor: "#f0f0f0",
+  checkerGridBlackColor: "#481808",
+  checkerGridWhiteColor: "#ffffff",
+  checkerGridSize: 8,
 };
 
 export const mapCheckerPosition = (

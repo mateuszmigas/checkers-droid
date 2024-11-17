@@ -20,8 +20,8 @@ export const Checker = (props: CheckerProps) => {
 
   const color =
     player === "PLAYER_ONE"
-      ? constants.PlayerOneColor
-      : constants.PlayerTwoColor;
+      ? constants.playerOneColor
+      : constants.playerTwoColor;
 
   const materialProps = { color, roughness: 0.1 };
 

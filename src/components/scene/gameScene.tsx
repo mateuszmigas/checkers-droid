@@ -1,4 +1,4 @@
-import { CheckersBoard } from "./checkersBoard";
+import { CheckerGrid } from "./checkerGrid";
 import { Checker } from "./checker";
 import { MoveIndicator } from "./moveIndicator";
 import { TurnIndicator } from "./turnIndicator";
@@ -15,6 +15,7 @@ import { useEventListener } from "@/hooks/useEventListener";
 import { useTriggerRender } from "@/hooks/useTriggerRender";
 import { ScoreBoard } from "./scoreBoard";
 import { mapPieces } from "@/utils/board";
+import { memo } from "react";
 
 const getCheckerMustCapture = (
   allValidMoves: CheckerValidMoveMap | null,
@@ -29,7 +30,7 @@ const getCheckerValidMoves = (
   position: CheckerPosition | null
 ): CheckerValidMove[] => (position ? allValidMoves?.get(position) || [] : []);
 
-export const GameScene = () => {
+export const GameScene = memo(() => {
   const gameSession = useGameSessionContext();
   const { gameState, selectedPosition: selectedCheckerPosition } =
     gameSession.getState();
@@ -47,7 +48,7 @@ export const GameScene = () => {
 
       <Room />
       <ScoreBoard />
-      <CheckersBoard />
+      <CheckerGrid />
 
       {/* Turn Indicator */}
       {gameState.gameStatus !== "GAME_OVER" && (
@@ -97,4 +98,4 @@ export const GameScene = () => {
       <Stats />
     </>
   );
-};
+});
