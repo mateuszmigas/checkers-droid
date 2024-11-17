@@ -11,11 +11,18 @@ import { GameEvent } from "../gameEvent";
 
 export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: string }
-  | { type: "COMMENT_CHANGED"; message: string };
+  | { type: "MESSAGE_CHANGED"; message: string };
 
 export class AIPlayer extends EventEmitter<AIPlayerEvents> {
   constructor(private readonly playerType: PlayerType) {
     super();
+
+    setTimeout(() => {
+      this.emit({
+        type: "MESSAGE_CHANGED",
+        message: "Hello, I'm your AI opponent!",
+      });
+    }, Math.random() * 1000);
   }
 
   async getMove(
@@ -67,20 +74,22 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
     const types = gameEvents.map((event) => event.type);
 
     if (types.includes("PIECE_CAPTURED")) {
+      console.log("PIECE_CAPTURED");
       setTimeout(() => {
         this.emit({
-          type: "COMMENT_CHANGED",
+          type: "MESSAGE_CHANGED",
           message: "I'm so happy for you!",
         });
-      }, 500);
+      }, Math.random() * 1000);
+      return;
     }
     if (types.includes("PIECE_MOVED")) {
       setTimeout(() => {
         this.emit({
-          type: "COMMENT_CHANGED",
+          type: "MESSAGE_CHANGED",
           message: "Oh no, you moved a piece!",
         });
-      }, 500);
+      }, Math.random() * 1000);
     }
   }
 }

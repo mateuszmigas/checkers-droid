@@ -16,11 +16,6 @@ import { useTriggerRender } from "@/hooks/useTriggerRender";
 import { ScoreBoard } from "./scoreBoard";
 import { mapPieces } from "@/utils/board";
 import { memo } from "react";
-import {
-  EffectComposer,
-  Bloom,
-  ToneMapping,
-} from "@react-three/postprocessing";
 
 const getCheckerMustCapture = (
   allValidMoves: CheckerValidMoveMap | null,
@@ -46,10 +41,10 @@ export const GameScene = memo(() => {
 
   return (
     <>
-      <EffectComposer>
+      {/* <EffectComposer>
         <Bloom mipmapBlur intensity={0.5} luminanceThreshold={1} />
         <ToneMapping />
-      </EffectComposer>
+      </EffectComposer> */}
 
       <Room />
       <ScoreBoard />
@@ -85,12 +80,12 @@ export const GameScene = memo(() => {
 
       {/* First AI Robot */}
       {gameSession.getPlayer("PLAYER_ONE").type === "AI" && (
-        <Robot player={"PLAYER_ONE"} />
+        <Robot playerType={"PLAYER_ONE"} />
       )}
 
       {/* Second AI Robot */}
       {gameSession.getPlayer("PLAYER_TWO").type === "AI" && (
-        <Robot player={"PLAYER_TWO"} />
+        <Robot playerType={"PLAYER_TWO"} />
       )}
 
       <OrbitControls

@@ -1,11 +1,14 @@
+import { useTypewriter } from "@/hooks/useTypeWriter";
 import { useState } from "react";
+import { Typewriter } from "./typeWriter";
 
-type RobotMessageProps = {
+type RobotSpeechBubbleProps = {
   message?: string;
 };
 
-export const RobotMessage = ({ message }: RobotMessageProps) => {
+export const RobotSpeechBubble = ({ message }: RobotSpeechBubbleProps) => {
   const [opacity] = useState(0.7);
+  const typewriter = useTypewriter(message ?? "");
 
   if (!message) return null;
 
@@ -23,7 +26,11 @@ export const RobotMessage = ({ message }: RobotMessageProps) => {
         textAlign: "center",
       }}
     >
-      {message}
+      <Typewriter
+        className="font-mono text-sm"
+        text={message}
+        typingDurationSeconds={typewriter.typingDurationSeconds}
+      />
     </div>
   );
 };

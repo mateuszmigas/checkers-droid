@@ -13,4 +13,3 @@ export const createAIPlayer = (playerType: PlayerType): GamePlayer => {
   const aiPlayer = new AIPlayer(playerType);
   return { type: "AI", getInstance: () => aiPlayer };
 };
-

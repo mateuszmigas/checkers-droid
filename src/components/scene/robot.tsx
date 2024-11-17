@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
 import { Box, RoundedBox, Html } from "@react-three/drei";
@@ -6,15 +6,37 @@ import { PlayerType } from "@/game-logic/types";
 import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
 import { renderRobotFace } from "./texture-renderers/renderRobotFace";
 import { BasicGlowMaterial } from "./materials/glowMaterial";
-import { RobotMessage } from "../robotMessage";
+import { RobotSpeechBubble } from "../robotSpeechBubble";
+import { constants } from "./constants";
+import { useGameSessionContext } from "@/hooks/useGameSessionContext";
+import { useEventListener } from "@/hooks/useEventListener";
 
-type RobotProps = { player: PlayerType };
+type RobotProps = { playerType: PlayerType };
 const textureSize = 512;
 
 export const Robot = (props: RobotProps) => {
-  const { player } = props;
+  const { playerType } = props;
   const headRef = useRef<Group>(null);
   const robotRef = useRef<Group>(null);
+  const gameSession = useGameSessionContext();
+  const [message, setMessage] = useState<string | null>(null);
+  const aiInstance = useMemo(() => {
+    const player = gameSession.getPlayer(playerType);
+    if (player.type !== "AI") {
+      throw new Error("Player is not an AI");
+    }
+    return player.getInstance();
+  }, [gameSession, playerType]);
+
+  useEventListener(
+    aiInstance,
+    ["MESSAGE_CHANGED", "EMOTION_CHANGED"],
+    (event) => {
+      if (event.type === "MESSAGE_CHANGED") {
+        setMessage(event.message);
+      }
+    }
+  );
 
   const { updateTexture: updateFaceTexture, textureRef: faceTextureRef } =
     useCanvas2dTexture({
@@ -33,18 +55,23 @@ export const Robot = (props: RobotProps) => {
     headRef.current.rotation.y = Math.sin(state.clock.elapsedTime) * 0.2;
   });
 
-  const color = player === "PLAYER_ONE" ? "#FF0000" : "#ffffff";
+  const color =
+    playerType === "PLAYER_ONE"
+      ? constants.playerOneColor
+      : constants.playerTwoColor;
 
   return (
     <group
       ref={robotRef}
-      position={[0, 2, player === "PLAYER_ONE" ? -5 : 5]}
-      rotation={[0, player === "PLAYER_ONE" ? 0 : Math.PI, 0]}
+      position={[0, 2, playerType === "PLAYER_ONE" ? -5 : 5]}
+      rotation={[0, playerType === "PLAYER_ONE" ? 0 : Math.PI, 0]}
       scale={2}
     >
-      <Html position={[0, 0.5, 0]} center>
-        <RobotMessage message="Hello how are you today!" />
-      </Html>
+      {message && (
+        <Html position={[0, 0.5, 0]} center>
+          <RobotSpeechBubble message={message} />
+        </Html>
+      )}
 
       {/* Head */}
       <group ref={headRef}>
