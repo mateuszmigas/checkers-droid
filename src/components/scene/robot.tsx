@@ -1,28 +1,41 @@
 import { useEffect, useRef } from "react";
 import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
-import { Box, RoundedBox } from "@react-three/drei";
+import { Box, RoundedBox, Plane, Billboard } from "@react-three/drei";
 import { PlayerType } from "@/game-logic/types";
 import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
 import { renderRobotFace } from "./texture-renderers/renderRobotFace";
 import { BasicGlowMaterial } from "./materials/glowMaterial";
+import { renderRobotMessage } from "./texture-renderers/renderRobotMessage";
 
 type RobotProps = { player: PlayerType };
 const textureSize = 512;
 
 export const Robot = (props: RobotProps) => {
   const { player } = props;
-  const robotRef = useRef<Group>(null);
   const headRef = useRef<Group>(null);
 
-  const { updateTexture, textureRef } = useCanvas2dTexture({
-    width: textureSize,
-    height: textureSize,
-  });
+  const { updateTexture: updateFaceTexture, textureRef: faceTextureRef } =
+    useCanvas2dTexture({
+      width: textureSize,
+      height: textureSize,
+    });
+
+  const { updateTexture: updateMessageTexture, textureRef: messageTextureRef } =
+    useCanvas2dTexture({
+      width: textureSize,
+      height: textureSize,
+    });
 
   useEffect(() => {
-    updateTexture((context) => renderRobotFace(context, "happy"));
-  }, [updateTexture, textureRef]);
+    updateFaceTexture((context) => renderRobotFace(context, "happy"));
+  }, [updateFaceTexture, faceTextureRef]);
+
+  useEffect(() => {
+    updateMessageTexture((context) =>
+      renderRobotMessage(context, "Hello how are you tday!")
+    );
+  }, [updateMessageTexture, messageTextureRef]);
 
   useFrame((state) => {
     if (!headRef.current) {
@@ -36,7 +49,6 @@ export const Robot = (props: RobotProps) => {
 
   return (
     <group
-      ref={robotRef}
       position={[0, 2, player === "PLAYER_ONE" ? -5 : 5]}
       rotation={[0, player === "PLAYER_ONE" ? 0 : Math.PI, 0]}
       scale={2}
@@ -49,13 +61,28 @@ export const Robot = (props: RobotProps) => {
         <Box args={[0.65, 0.5, 0.25]} position={[0, 0, 0.3]}>
           <BasicGlowMaterial
             attach="material-4"
-            map={textureRef.current}
+            map={faceTextureRef.current}
             transparent={true}
             color={[1, 1, 1]}
             intensity={15}
           />
         </Box>
       </group>
+
+      {/* Message - moved above head */}
+      <Billboard>
+        <Plane args={[1.3, 0.8]} position={[0, 1.2, 0]}>
+          <BasicGlowMaterial
+            attach="material"
+            map={messageTextureRef.current}
+            color={[1, 1, 1]}
+            intensity={15}
+            transparent={true}
+            opacity={0.7}
+            side={2}
+          />
+        </Plane>
+      </Billboard>
 
       {/* Torso */}
       <RoundedBox

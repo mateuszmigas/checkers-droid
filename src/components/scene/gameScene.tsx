@@ -16,6 +16,11 @@ import { useTriggerRender } from "@/hooks/useTriggerRender";
 import { ScoreBoard } from "./scoreBoard";
 import { mapPieces } from "@/utils/board";
 import { memo } from "react";
+import {
+  EffectComposer,
+  Bloom,
+  ToneMapping,
+} from "@react-three/postprocessing";
 
 const getCheckerMustCapture = (
   allValidMoves: CheckerValidMoveMap | null,
@@ -41,10 +46,10 @@ export const GameScene = memo(() => {
 
   return (
     <>
-      {/* <EffectComposer>
+      <EffectComposer>
         <Bloom mipmapBlur intensity={0.5} luminanceThreshold={1} />
         <ToneMapping />
-      </EffectComposer> */}
+      </EffectComposer>
 
       <Room />
       <ScoreBoard />

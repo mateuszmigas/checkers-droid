@@ -1,4 +1,4 @@
-export type FaceExpression = "happy" | "sad" | "focused";
+type FaceExpression = "happy" | "sad" | "focused";
 
 interface FaceParams {
   leftEyebrowAngle: number;
@@ -84,4 +84,3 @@ export const renderRobotFace = (
 
   context.fillRect(mouthX, mouthY, mouthWidth, mouthHeight);
 };
-
