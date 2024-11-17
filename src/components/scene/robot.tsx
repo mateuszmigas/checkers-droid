@@ -1,20 +1,29 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Group } from "three";
 import { useFrame } from "@react-three/fiber";
-import { RoundedBox } from "@react-three/drei";
-import { RobotFace } from "./robotFace";
+import { Box, RoundedBox } from "@react-three/drei";
 import { PlayerType } from "@/game-logic/types";
+import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
+import { renderRobotFace } from "./texture-renderers/renderRobotFace";
+import { BasicGlowMaterial } from "./materials/glowMaterial";
 
 type RobotProps = { player: PlayerType };
+const textureSize = 512;
 
 export const Robot = (props: RobotProps) => {
   const { player } = props;
   const robotRef = useRef<Group>(null);
   const headRef = useRef<Group>(null);
 
-  // const gameSession = useGameSessionContext();
+  const { context, textureRef } = useCanvas2dTexture({
+    width: textureSize,
+    height: textureSize,
+  });
 
-  // useEventListener(gameSession)
+  useEffect(() => {
+    renderRobotFace(context, "happy");
+    textureRef.current.needsUpdate = true;
+  }, [context, textureRef]);
 
   useFrame((state) => {
     if (!headRef.current) {
@@ -33,14 +42,20 @@ export const Robot = (props: RobotProps) => {
       rotation={[0, player === "PLAYER_ONE" ? 0 : Math.PI, 0]}
       scale={2}
     >
-      {/* Speech Bubble */}
-
       {/* Head */}
       <group ref={headRef}>
         <RoundedBox args={[1, 0.9, 0.75]} radius={0.2} smoothness={5}>
           <meshStandardMaterial color={color} roughness={0.1} />
         </RoundedBox>
-        <RobotFace expression={"focused"} speechText={"hehe"} />
+        <Box args={[0.65, 0.5, 0.25]} position={[0, 0, 0.3]}>
+          <BasicGlowMaterial
+            attach="material-4"
+            map={textureRef.current}
+            transparent={true}
+            color={[1, 1, 1]}
+            intensity={15}
+          />
+        </Box>
       </group>
 
       {/* Torso */}

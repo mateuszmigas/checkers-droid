@@ -1,22 +1,28 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { CheckerPiece } from "@/game-logic/types";
+import { CheckerPosition, CheckerPiece as Piece } from "@/game-logic/types";
 import * as THREE from "three";
 import { useSpring, animated } from "@react-spring/three";
+import { constants, mapCheckerPosition } from "./constants";
 
 interface CheckerProps {
-  position: [number, number, number];
+  position: CheckerPosition;
   mustCapture: boolean;
   onClick?: () => void;
-  piece: CheckerPiece;
+  piece: Piece;
 }
 
 export const Checker = (props: CheckerProps) => {
-  const { position, mustCapture, piece, onClick } = props;
+  const { mustCapture, piece, onClick } = props;
+  const position = mapCheckerPosition(props.position);
   const groupRef = useRef<THREE.Group>(null);
   const { player, isKing } = piece;
 
-  const color = player === "PLAYER_ONE" ? "#ff2020" : "#f0f0f0";
+  const color =
+    player === "PLAYER_ONE"
+      ? constants.PlayerOneColor
+      : constants.PlayerTwoColor;
+
   const materialProps = { color, roughness: 0.1 };
 
   const { x, z } = useSpring({

@@ -1,6 +1,6 @@
 import { useGLTF } from "@react-three/drei";
 
-export const SciFiRoom = () => {
+export const Room = () => {
   const { scene } = useGLTF("/room.glb");
 
   return (
@@ -40,4 +40,3 @@ export const SciFiRoom = () => {
     </>
   );
 };
-

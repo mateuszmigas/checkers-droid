@@ -6,16 +6,7 @@ import {
   updateGameState,
 } from "./gameState";
 import { PlayerType, CheckerPiece } from "./types";
-
-const forEachCell = (callback: (row: number, col: number) => void) => {
-  for (let row = 0; row < 8; row++) {
-    for (let col = 0; col < 8; col++) {
-      callback(row, col);
-    }
-  }
-};
-
-const isDarkSquare = (row: number, col: number) => (row + col) % 2 !== 0;
+import { forEachCell, isDarkSquare } from "@/utils/board";
 
 const createEmptyGameState = (
   currentPlayer: PlayerType = "PLAYER_ONE"
@@ -1057,4 +1048,3 @@ describe("draw conditions", () => {
     expect(hasCaptures).toBe(false);
   });
 });
-

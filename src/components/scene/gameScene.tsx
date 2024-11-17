@@ -4,101 +4,89 @@ import { MoveIndicator } from "./moveIndicator";
 import { TurnIndicator } from "./turnIndicator";
 import { Robot } from "./robot";
 import { OrbitControls, Stars, Stats } from "@react-three/drei";
+import { Room } from "./room";
 import {
-  Selection,
-  Select,
-  EffectComposer,
-  Bloom,
-  ToneMapping,
-} from "@react-three/postprocessing";
-import { SciFiRoom } from "./SciFiRoom";
-import { CheckerPiece, CheckerPosition } from "@/game-logic/types";
+  CheckerPosition,
+  CheckerValidMove,
+  CheckerValidMoveMap,
+} from "@/game-logic/types";
 import { useGameSessionContext } from "../../hooks/useGameSessionContext";
 import { useEventListener } from "@/hooks/useEventListener";
 import { useTriggerRender } from "@/hooks/useTriggerRender";
 import { ScoreBoard } from "./scoreBoard";
+import { mapPieces } from "@/utils/board";
 
-// Helper function to convert logical position to 3D coordinates
-const positionToCoordinates = (
-  position: CheckerPosition
-): [number, number, number] => {
-  const size = 1;
-  const x = position.col * size - 3.5 * size;
-  const y = 0.125; // Height of checker above board
-  const z = position.row * size - 3.5 * size;
-  return [x, y, z];
-};
+const getCheckerMustCapture = (
+  allValidMoves: CheckerValidMoveMap | null,
+  position: CheckerPosition | null
+): boolean =>
+  position
+    ? (allValidMoves?.get(position) ?? []).some((move) => move.isCapture)
+    : false;
+
+const getCheckerValidMoves = (
+  allValidMoves: CheckerValidMoveMap | null,
+  position: CheckerPosition | null
+): CheckerValidMove[] => (position ? allValidMoves?.get(position) || [] : []);
 
 export const GameScene = () => {
   const gameSession = useGameSessionContext();
-  const { gameState, selectedPosition } = gameSession.getState();
-  const humanValidMoves = gameSession.getHumanValidMoves();
+  const { gameState, selectedPosition: selectedCheckerPosition } =
+    gameSession.getState();
+  const allValidMoves = gameSession.getHumanValidMoves();
+
   const triggerRender = useTriggerRender();
-
   useEventListener(gameSession, ["stateChanged"], triggerRender);
-
-  // Convert grid to pieces array for rendering
-  const pieces: (CheckerPiece & { position: CheckerPosition })[] = [];
-  gameState.grid.forEach((row, rowIndex) => {
-    row.forEach((piece, colIndex) => {
-      if (piece) {
-        pieces.push({ ...piece, position: { row: rowIndex, col: colIndex } });
-      }
-    });
-  });
-
-  const mustCapture = (position: CheckerPosition): boolean =>
-    (humanValidMoves?.get(position) ?? []).some((move) => move.isCapture);
-
-  const possibleMoves = selectedPosition
-    ? humanValidMoves?.get(selectedPosition) || []
-    : [];
 
   return (
     <>
-      <EffectComposer>
+      {/* <EffectComposer>
         <Bloom mipmapBlur intensity={0.5} luminanceThreshold={1} />
         <ToneMapping />
-      </EffectComposer>
+      </EffectComposer> */}
 
-      <SciFiRoom />
+      <Room />
+      <ScoreBoard />
       <CheckersBoard />
+
+      {/* Turn Indicator */}
       {gameState.gameStatus !== "GAME_OVER" && (
         <TurnIndicator player={gameState.gameStatus} />
       )}
-      <ScoreBoard />
-      <Selection>
-        {pieces.map((piece) => (
-          <Select
-            key={piece.id}
-            enabled={
-              piece.position.row === selectedPosition?.row &&
-              piece.position.col === selectedPosition?.col
-            }
-          >
-            <Checker
-              position={positionToCoordinates(piece.position)}
-              piece={piece}
-              mustCapture={mustCapture(piece.position)}
-              onClick={() => gameSession.handlePieceClick(piece.position)}
-            />
-          </Select>
-        ))}
-      </Selection>
-      {possibleMoves.map((move, index) => (
-        <MoveIndicator
-          key={`move-${index}`}
-          position={positionToCoordinates(move.targetPosition)}
-          onClick={() => gameSession.handleMoveClick(move.targetPosition)}
-          isCapture={move.isCapture}
+
+      {/* Checkers */}
+      {mapPieces(gameState.grid).map((piece) => (
+        <Checker
+          key={piece.id}
+          position={piece.position}
+          piece={piece}
+          mustCapture={getCheckerMustCapture(allValidMoves, piece.position)}
+          onClick={() => gameSession.handlePieceClick(piece.position)}
         />
       ))}
+
+      {/* Valid Moves */}
+      {getCheckerValidMoves(allValidMoves, selectedCheckerPosition).map(
+        (move, index) => (
+          <MoveIndicator
+            key={`move-${index}`}
+            position={move.targetPosition}
+            onClick={() => gameSession.handleMoveClick(move.targetPosition)}
+            isCapture={move.isCapture}
+          />
+        )
+      )}
+
+      {/* First AI Robot */}
       {gameSession.getPlayer("PLAYER_ONE").type === "AI" && (
         <Robot player={"PLAYER_ONE"} />
       )}
+
+      {/* Second AI Robot */}
       {gameSession.getPlayer("PLAYER_TWO").type === "AI" && (
         <Robot player={"PLAYER_TWO"} />
       )}
+
       <OrbitControls
         target={[0, 1.42, 0]}
         maxDistance={20}

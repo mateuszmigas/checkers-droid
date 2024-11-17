@@ -499,4 +499,3 @@ const checkForNoMoves = (state: GameState): GameStateUpdate => {
 
   return { state, events: [{ type: "INVALID_MOVE" }] };
 };
-
