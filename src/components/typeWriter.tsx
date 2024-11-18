@@ -11,6 +11,8 @@ export const Typewriter = memo(
     const getIsMounted = useIsMounted();
 
     useEffect(() => {
+      setDisplayedText("");
+
       if (typeof text === "string") {
         setFullText(text);
       } else {
