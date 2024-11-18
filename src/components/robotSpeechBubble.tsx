@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Typewriter } from "./typeWriter";
+import { TypewriterEffect } from "./typeWriterEffect";
 
 export const RobotSpeechBubble = memo(
   (props: { message: string | ReadableStream<string> }) => {
@@ -10,7 +10,7 @@ export const RobotSpeechBubble = memo(
         -translate-y-1/2 w-max max-w-[300px] whitespace-normal text-center break-words select-none
       `}
       >
-        <Typewriter className="font-mono text-sm" text={message} />
+        <TypewriterEffect className="font-mono text-sm" text={message} />
       </div>
     );
   }

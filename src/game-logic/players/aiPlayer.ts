@@ -24,6 +24,12 @@ Watch and respond to player moves. Never ask for coordinates.
 Use plain text + emojis. Keep responses brief.
 `;
 
+// me/you close to king
+// me/you lost a piece
+// me/you captured a piece
+// me/you moved a piece
+// game over
+
 const welcomePrompt =
   "Say hello to the player, and tell them you are waiting for their move";
 // const movePrompt = (moves: CheckerValidMoveMap) =>
