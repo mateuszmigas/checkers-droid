@@ -1,6 +1,7 @@
 import { delay } from "@/utils/promise";
 import { GameState, getPlayerValidMoves } from "../gameState";
 import {
+  AIPlayerEmotion,
   CheckerPosition,
   CheckerValidMove,
   CheckerValidMoveMap,
@@ -10,7 +11,7 @@ import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
 
 export type AIPlayerEvents =
-  | { type: "EMOTION_CHANGED"; emotion: string }
+  | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
   | { type: "MESSAGE_CHANGED"; message: string };
 
 export class AIPlayer extends EventEmitter<AIPlayerEvents> {
@@ -74,11 +75,14 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
     const types = gameEvents.map((event) => event.type);
 
     if (types.includes("PIECE_CAPTURED")) {
-      console.log("PIECE_CAPTURED");
       setTimeout(() => {
         this.emit({
           type: "MESSAGE_CHANGED",
           message: "I'm so happy for you!",
+        });
+        this.emit({
+          type: "EMOTION_CHANGED",
+          emotion: "happy",
         });
       }, Math.random() * 1000);
       return;
@@ -89,7 +93,12 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
           type: "MESSAGE_CHANGED",
           message: "Oh no, you moved a piece!",
         });
+        this.emit({
+          type: "EMOTION_CHANGED",
+          emotion: "sad",
+        });
       }, Math.random() * 1000);
     }
   }
 }
+

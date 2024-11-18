@@ -5,7 +5,6 @@ import { Box, RoundedBox, Html } from "@react-three/drei";
 import { PlayerType } from "@/game-logic/types";
 import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
 import { renderRobotFace } from "./texture-renderers/renderRobotFace";
-import { BasicGlowMaterial } from "./materials/glowMaterial";
 import { RobotSpeechBubble } from "../robotSpeechBubble";
 import { constants } from "./constants";
 import { useGameSessionContext } from "@/hooks/useGameSessionContext";
@@ -34,6 +33,9 @@ export const Robot = (props: RobotProps) => {
     (event) => {
       if (event.type === "MESSAGE_CHANGED") {
         setMessage(event.message);
+      }
+      if (event.type === "EMOTION_CHANGED") {
+        updateFaceTexture((context) => renderRobotFace(context, event.emotion));
       }
     }
   );
@@ -79,12 +81,11 @@ export const Robot = (props: RobotProps) => {
           <meshStandardMaterial color={color} roughness={0.1} />
         </RoundedBox>
         <Box args={[0.65, 0.5, 0.25]} position={[0, 0, 0.3]}>
-          <BasicGlowMaterial
+          <meshBasicMaterial
             attach="material-4"
             map={faceTextureRef.current}
             transparent={true}
             color={[1, 1, 1]}
-            intensity={15}
           />
         </Box>
       </group>
@@ -121,3 +122,4 @@ export const Robot = (props: RobotProps) => {
     </group>
   );
 };
+

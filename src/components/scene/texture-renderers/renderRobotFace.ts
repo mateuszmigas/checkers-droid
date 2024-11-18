@@ -1,4 +1,4 @@
-type FaceExpression = "happy" | "sad" | "focused";
+import { AIPlayerEmotion } from "@/game-logic/types";
 
 interface FaceParams {
   leftEyebrowAngle: number;
@@ -8,7 +8,7 @@ interface FaceParams {
   mouthY: number;
 }
 
-const expressionParams: Record<FaceExpression, FaceParams> = {
+const expressionParams: Record<AIPlayerEmotion, FaceParams> = {
   happy: {
     leftEyebrowAngle: -0.3,
     rightEyebrowAngle: 0.3,
@@ -34,10 +34,10 @@ const expressionParams: Record<FaceExpression, FaceParams> = {
 
 export const renderRobotFace = (
   context: CanvasRenderingContext2D,
-  expression: FaceExpression
+  emotion: AIPlayerEmotion
 ) => {
   const { width, height } = context.canvas;
-  const params = expressionParams[expression];
+  const params = expressionParams[emotion];
 
   // Clear background
   context.fillStyle = "black";
@@ -84,3 +84,4 @@ export const renderRobotFace = (
 
   context.fillRect(mouthX, mouthY, mouthWidth, mouthHeight);
 };
+

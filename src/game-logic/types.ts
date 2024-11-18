@@ -23,3 +23,5 @@ export type CheckerValidMoveMap = CustomMap<
   CheckerValidMove[]
 >;
 
+export type AIPlayerEmotion = "happy" | "sad" | "focused";
+
