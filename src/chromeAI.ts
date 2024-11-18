@@ -1,5 +1,10 @@
+export type ChromeSession = {
+  prompt: (prompt: string) => Promise<string>;
+  promptStreaming: (prompt: string) => ReadableStream<string>;
+};
+
 export const chromeApi = {
-  isAvilable: async () => {
+  isAvailable: async () => {
     try {
       const capabilities = await window.ai.languageModel.capabilities();
       return capabilities.available === "readily";
@@ -7,11 +12,14 @@ export const chromeApi = {
       return false;
     }
   },
-  createSession: async (systemPrompt: string) => {
-    return await window.ai.languageModel.create({
+  createSession: async (systemPrompt: string): Promise<ChromeSession> => {
+    const model = await window.ai.languageModel.create({
       systemPrompt,
     });
-  },
-  //sequential promises?
-};
 
+    return {
+      prompt: (prompt: string) => model.prompt(prompt),
+      promptStreaming: (prompt: string) => model.promptStreaming(prompt),
+    };
+  },
+};

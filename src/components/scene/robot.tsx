@@ -18,7 +18,9 @@ export const Robot = (props: RobotProps) => {
   const headRef = useRef<Group>(null);
   const robotRef = useRef<Group>(null);
   const gameSession = useGameSessionContext();
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<
+    string | ReadableStream<string> | null
+  >(null);
   const aiInstance = useMemo(() => {
     const player = gameSession.getPlayer(playerType);
     if (player.type !== "AI") {
@@ -122,4 +124,3 @@ export const Robot = (props: RobotProps) => {
     </group>
   );
 };
-
