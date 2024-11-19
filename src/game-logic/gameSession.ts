@@ -56,9 +56,9 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     events.forEach((event) => this.emit(event));
 
     if (this.playerOne.type === "AI")
-      this.playerOne.getInstance().notify(events);
+      this.playerOne.getInstance().notify(this.gameState, events);
     if (this.playerTwo.type === "AI")
-      this.playerTwo.getInstance().notify(events);
+      this.playerTwo.getInstance().notify(this.gameState, events);
   }
 
   private getCurrentPlayer(): GamePlayer | null {
@@ -166,3 +166,4 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     };
   }
 }
+

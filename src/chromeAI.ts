@@ -1,7 +1,12 @@
+import { PromiseQueue } from "./utils/promise";
+
 export type ChromeSession = {
   prompt: (prompt: string) => Promise<string>;
   promptStreaming: (prompt: string) => ReadableStream<string>;
+  destroy: () => void;
 };
+
+const promiseQueue = new PromiseQueue();
 
 export const chromeApi = {
   isAvailable: async () => {
@@ -13,13 +18,17 @@ export const chromeApi = {
     }
   },
   createSession: async (systemPrompt: string): Promise<ChromeSession> => {
-    const model = await window.ai.languageModel.create({
+    const languageModel = await window.ai.languageModel.create({
       systemPrompt,
     });
 
     return {
-      prompt: (prompt: string) => model.prompt(prompt),
-      promptStreaming: (prompt: string) => model.promptStreaming(prompt),
+      prompt: (prompt: string) =>
+        promiseQueue.push(() => languageModel.prompt(prompt)),
+      promptStreaming: (prompt: string) =>
+        languageModel.promptStreaming(prompt),
+      destroy: () => languageModel.destroy(),
     };
   },
 };
+

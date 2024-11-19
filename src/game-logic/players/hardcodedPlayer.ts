@@ -1,7 +1,6 @@
 import { delay } from "@/utils/promise";
 import { GameState, getPlayerValidMoves } from "../gameState";
 import {
-  AIPlayerEmotion,
   CheckerPosition,
   CheckerValidMove,
   CheckerValidMoveMap,
@@ -9,42 +8,25 @@ import {
 } from "../types";
 import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
-import { chromeApi, ChromeSession } from "@/chromeAI";
-import { createEventsPrompt, systemPrompt, welcomePrompt } from "./aiPrompt";
+import { AIPlayerEvents } from "./aiPlayer";
 
-export type AIPlayerEvents =
-  | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
-  | { type: "MESSAGE_CHANGED"; message: string | ReadableStream<string> };
-
-export class AIPlayer extends EventEmitter<AIPlayerEvents> {
-  private session: ChromeSession | undefined;
-
+export class HardcodedAIPlayer extends EventEmitter<AIPlayerEvents> {
   constructor(private readonly playerType: PlayerType) {
     super();
 
-    chromeApi.createSession(systemPrompt).then((session) => {
-      this.session = session;
-      const promptStream = this.session.promptStreaming(welcomePrompt);
-
-      setTimeout(() => {
-        this.emit({
-          type: "MESSAGE_CHANGED",
-          message: promptStream,
-        });
-
-        this.emit({
-          type: "EMOTION_CHANGED",
-          emotion: "happy",
-        });
-      }, 500);
-    });
+    setTimeout(() => {
+      this.emit({
+        type: "MESSAGE_CHANGED",
+        message: "Hello, I'm your AI opponent!",
+      });
+    }, Math.random() * 1000);
   }
 
   async getMove(
     gameState: GameState
   ): Promise<{ from: CheckerPosition; to: CheckerPosition } | null> {
     // Get all valid moves for black pieces
-    await delay(Math.random() * 1000 + 1000);
+    await delay(Math.random() * 250);
     const validMoves: CheckerValidMoveMap = getPlayerValidMoves(
       this.playerType,
       gameState
@@ -85,32 +67,34 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
     return null;
   }
 
-  async notify(gameState: GameState, gameEvents: GameEvent[]) {
-    if (gameState.gameStatus !== this.playerType) return;
+  async notify(gameEvents: GameEvent[]) {
+    const types = gameEvents.map((event) => event.type);
 
-    console.log("notify", gameEvents);
-    const prompt = createEventsPrompt(gameEvents, this.playerType);
-    console.log(prompt);
-
-    const response = await this.session!.prompt(prompt);
-
-    try {
-      console.log("response:", response);
-      const parsedResponse = JSON.parse(response) as {
-        message: string;
-        emotion: AIPlayerEmotion;
-      };
-
-      if (parsedResponse.message) {
+    if (types.includes("PIECE_CAPTURED")) {
+      setTimeout(() => {
         this.emit({
           type: "MESSAGE_CHANGED",
-          message: parsedResponse.message,
+          message: "I'm so happy for you!",
         });
-      }
-    } catch (error) {
-      console.error("Error in notify:", error);
+        this.emit({
+          type: "EMOTION_CHANGED",
+          emotion: "happy",
+        });
+      }, Math.random() * 1000);
+      return;
     }
-    // console.log("response:", response);
+    if (types.includes("PIECE_MOVED")) {
+      setTimeout(() => {
+        this.emit({
+          type: "MESSAGE_CHANGED",
+          message: "Oh no, you moved a piece!",
+        });
+        this.emit({
+          type: "EMOTION_CHANGED",
+          emotion: "sad",
+        });
+      }, Math.random() * 1000);
+    }
   }
 }
 
