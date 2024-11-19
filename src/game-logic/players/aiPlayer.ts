@@ -13,10 +13,7 @@ import { chromeApi, ChromeSession } from "@/chromeAI";
 
 export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
-  | {
-      type: "MESSAGE_CHANGED";
-      message: string | ReadableStream<string>;
-    };
+  | { type: "MESSAGE_CHANGED"; message: string | ReadableStream<string> };
 
 const systemPrompt = `
 You are Checker Droid, a skilled but casual checkers bot.
@@ -228,3 +225,4 @@ export class HardcodedAIPlayer extends EventEmitter<AIPlayerEvents> {
 }
 
 // export const AIPlayer = ChromeAIPlayer;
+

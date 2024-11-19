@@ -9,8 +9,9 @@ export const TypewriterEffect = memo(
     const getIsMounted = useIsMounted();
 
     useEffect(() => {
+      const abortController = new AbortController();
+      const reader = createTypingStream(text, abortController).getReader();
       setDisplayedText("");
-      const reader = createTypingStream(text).getReader();
 
       const typeText = async () => {
         try {
@@ -26,9 +27,7 @@ export const TypewriterEffect = memo(
 
       typeText();
 
-      return () => {
-        reader.cancel();
-      };
+      return () => abortController.abort();
     }, [text, getIsMounted]);
 
     return <div className={className}>{displayedText}</div>;
