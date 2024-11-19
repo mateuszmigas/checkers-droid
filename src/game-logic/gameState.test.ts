@@ -129,6 +129,7 @@ describe("movement rules for men", () => {
       type: "PIECE_MOVED",
       from: { row: 2, col: 1 },
       to: { row: 3, col: 2 },
+      player: "PLAYER_ONE",
     });
 
     const playerTwoPiece = moveRight.state.grid[5][2];
@@ -144,6 +145,7 @@ describe("movement rules for men", () => {
       type: "PIECE_MOVED",
       from: { row: 5, col: 2 },
       to: { row: 4, col: 1 },
+      player: "PLAYER_TWO",
     });
 
     // Invalid move - moving two squares without capture
@@ -222,6 +224,7 @@ describe("movement rules for kings", () => {
       type: "PIECE_MOVED",
       from: { row: 3, col: 4 },
       to: { row: 4, col: 5 },
+      player: "PLAYER_ONE",
     });
 
     const moveBackwardLeft = updateGameState(gameState, {
@@ -235,6 +238,7 @@ describe("movement rules for kings", () => {
       type: "PIECE_MOVED",
       from: { row: 3, col: 4 },
       to: { row: 2, col: 3 },
+      player: "PLAYER_ONE",
     });
 
     const moveBackwardRight = updateGameState(gameState, {
@@ -248,6 +252,7 @@ describe("movement rules for kings", () => {
       type: "PIECE_MOVED",
       from: { row: 3, col: 4 },
       to: { row: 2, col: 5 },
+      player: "PLAYER_ONE",
     });
 
     const moveForwardLeft = updateGameState(gameState, {
@@ -261,6 +266,7 @@ describe("movement rules for kings", () => {
       type: "PIECE_MOVED",
       from: { row: 3, col: 4 },
       to: { row: 4, col: 3 },
+      player: "PLAYER_ONE",
     });
   });
 
@@ -287,6 +293,7 @@ describe("movement rules for kings", () => {
       type: "PIECE_MOVED",
       from: { row: 3, col: 3 },
       to: { row: 6, col: 6 },
+      player: "PLAYER_ONE",
     });
 
     const moveBackwardLeft = updateGameState(gameState, {
@@ -300,6 +307,7 @@ describe("movement rules for kings", () => {
       type: "PIECE_MOVED",
       from: { row: 3, col: 3 },
       to: { row: 0, col: 0 },
+      player: "PLAYER_ONE",
     });
 
     const moveBackwardRight = updateGameState(gameState, {
@@ -313,6 +321,7 @@ describe("movement rules for kings", () => {
       type: "PIECE_MOVED",
       from: { row: 3, col: 3 },
       to: { row: 0, col: 6 },
+      player: "PLAYER_ONE",
     });
 
     const moveForwardLeft = updateGameState(gameState, {
@@ -326,6 +335,7 @@ describe("movement rules for kings", () => {
       type: "PIECE_MOVED",
       from: { row: 3, col: 3 },
       to: { row: 6, col: 0 },
+      player: "PLAYER_ONE",
     });
   });
 
@@ -396,6 +406,7 @@ describe("capturing rules", () => {
       type: "PIECE_CAPTURED",
       position: { row: 4, col: 4 },
       piece: playerTwoPiece,
+      player: "PLAYER_ONE",
     });
     expect(validMove.state.grid[4][4]).toBeNull(); // Captured piece should be removed
     expect(validMove.state.grid[5][5]).toEqual(playerOnePiece);
@@ -434,6 +445,7 @@ describe("capturing rules", () => {
       type: "PIECE_CAPTURED",
       position: { row: 3, col: 3 },
       piece: playerTwoPiece,
+      player: "PLAYER_ONE",
     });
   });
 
@@ -486,6 +498,7 @@ describe("capturing rules", () => {
         type: "PIECE_CAPTURED",
         position: { row: 5, col: 5 },
         piece: playerTwoPieces[0],
+        player: "PLAYER_ONE",
       });
       expect(validMove.state.grid[5][5]).toBeNull(); // Captured piece should be removed
       expect(validMove.state.grid[6][6]).toEqual(playerOnePiece);
@@ -534,6 +547,7 @@ describe("capturing rules", () => {
         type: "PIECE_CAPTURED",
         position: { row: 3, col: 3 },
         piece: opponentPieces[0],
+        player: "PLAYER_ONE",
       });
 
       // Reset game state for forward capture test
@@ -556,6 +570,7 @@ describe("capturing rules", () => {
         type: "PIECE_CAPTURED",
         position: { row: 5, col: 3 },
         piece: opponentPieces[1],
+        player: "PLAYER_ONE",
       });
     });
 
@@ -607,6 +622,7 @@ describe("capturing rules", () => {
         type: "PIECE_CAPTURED",
         position: { row: 3, col: 3 },
         piece: opponentPieces[0],
+        player: "PLAYER_ONE",
       });
 
       expect(firstCapture.state.gameStatus).toBe("PLAYER_ONE"); // Turn shouldn't change yet
@@ -626,6 +642,7 @@ describe("capturing rules", () => {
         type: "PIECE_CAPTURED",
         position: { row: 5, col: 5 },
         piece: opponentPieces[1],
+        player: "PLAYER_ONE",
       });
       expect(secondCapture.state.gameStatus).toBe("PLAYER_TWO"); // Turn should change after all captures
     });
@@ -692,6 +709,7 @@ describe("capturing rules", () => {
       type: "PIECE_CAPTURED",
       position: { row: 4, col: 4 },
       piece: playerTwoPieces[0],
+      player: "PLAYER_ONE",
     });
 
     // Reset and try second capture sequence
@@ -706,6 +724,7 @@ describe("capturing rules", () => {
       type: "PIECE_CAPTURED",
       position: { row: 4, col: 2 },
       piece: playerTwoPieces[1],
+      player: "PLAYER_ONE",
     });
   });
 
@@ -785,6 +804,7 @@ describe("capturing rules", () => {
         type: "PIECE_CAPTURED",
         position: { row: 3, col: 3 },
         piece: playerTwoPieces[0],
+        player: "PLAYER_ONE",
       });
       expect(firstCapture.state.gameStatus).toBe("PLAYER_ONE"); // Turn shouldn't change yet
 
@@ -803,6 +823,7 @@ describe("capturing rules", () => {
         type: "PIECE_CAPTURED",
         position: { row: 5, col: 3 },
         piece: playerTwoPieces[1],
+        player: "PLAYER_ONE",
       });
       expect(secondCapture.state.gameStatus).toBe("PLAYER_TWO"); // Turn should change after all captures
     });
@@ -832,6 +853,7 @@ describe("promotion to king", () => {
     expect(result.events).toContainEqual({
       type: "PIECE_CROWNED",
       position: { row: 7, col: 2 },
+      player: "PLAYER_ONE",
     });
 
     // Test PLAYER_TWO promotion
@@ -853,6 +875,7 @@ describe("promotion to king", () => {
     expect(result2.events).toContainEqual({
       type: "PIECE_CROWNED",
       position: { row: 0, col: 2 },
+      player: "PLAYER_TWO",
     });
   });
 
@@ -887,10 +910,12 @@ describe("promotion to king", () => {
       type: "PIECE_CAPTURED",
       position: { row: 6, col: 2 },
       piece: expect.objectContaining({ player: "PLAYER_TWO" }),
+      player: "PLAYER_ONE",
     });
     expect(result.events).toContainEqual({
       type: "PIECE_CROWNED",
       position: { row: 7, col: 3 },
+      player: "PLAYER_ONE",
     });
   });
 
@@ -1048,3 +1073,4 @@ describe("draw conditions", () => {
     expect(hasCaptures).toBe(false);
   });
 });
+

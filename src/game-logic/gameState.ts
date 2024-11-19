@@ -351,6 +351,7 @@ export const updateGameState = (
             type: "PIECE_CAPTURED",
             position: { row: jumpedRow, col: jumpedCol },
             piece: jumpedPiece,
+            player: state.gameStatus,
           });
         }
       }
@@ -370,6 +371,7 @@ export const updateGameState = (
         events.push({
           type: "PIECE_CROWNED",
           position: action.to,
+          player: state.gameStatus,
         });
       }
 
@@ -377,6 +379,7 @@ export const updateGameState = (
         type: "PIECE_MOVED",
         from: action.from,
         to: action.to,
+        player: state.gameStatus,
       });
 
       // Check if this move was a capture move
@@ -499,3 +502,4 @@ const checkForNoMoves = (state: GameState): GameStateUpdate => {
 
   return { state, events: [{ type: "INVALID_MOVE" }] };
 };
+
