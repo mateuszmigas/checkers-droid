@@ -102,13 +102,13 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
         parsedResponse.shot >= 0 && parsedResponse.shot < moves.length;
       const move = isValidIndex ? moves[parsedResponse.shot] : moves[0];
       return move;
-    } catch (error) {
+    } catch {
       return moves[0];
     }
   }
 
   async notify(gameState: GameState, gameEvents: GameEvent[]) {
-    if (gameState.gameStatus !== this.playerType) {
+    if (gameState.gameStatus === this.playerType) {
       return;
     }
 
@@ -136,4 +136,3 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
     }
   }
 }
-
