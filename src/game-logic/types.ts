@@ -13,14 +13,14 @@ export type CheckerPiece = {
   isKing: boolean;
 };
 
-export type CheckerValidMove = {
+export type CheckerPossibleTarget = {
   targetPosition: CheckerPosition;
   isCapture: boolean;
 };
 
 export type CheckerValidMoveMap = CustomMap<
   CheckerPosition,
-  CheckerValidMove[]
+  CheckerPossibleTarget[]
 >;
 
 export type AIPlayerEmotion = "happy" | "sad" | "focused";

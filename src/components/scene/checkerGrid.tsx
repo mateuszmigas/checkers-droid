@@ -4,14 +4,20 @@ import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
 import { renderCheckerGrid } from "./texture-renderers/renderCheckerGrid";
 import { constants } from "./constants";
 
+const debug = true;
+const cellSize = debug ? 100 : 1;
+
 export const CheckerGrid = () => {
   const { updateTexture, textureRef } = useCanvas2dTexture(
-    { width: constants.checkerGridSize, height: constants.checkerGridSize },
+    {
+      width: cellSize * constants.checkerGridSize,
+      height: cellSize * constants.checkerGridSize,
+    },
     { minFilter: NearestFilter, magFilter: NearestFilter }
   );
 
   useEffect(() => {
-    updateTexture(renderCheckerGrid);
+    updateTexture((context) => renderCheckerGrid(context, cellSize, debug));
   }, [updateTexture, textureRef]);
 
   return (
@@ -23,3 +29,4 @@ export const CheckerGrid = () => {
     </mesh>
   );
 };
+

@@ -4,7 +4,7 @@ import {
   CheckerPosition,
   CheckerPiece,
   PlayerType,
-  CheckerValidMove,
+  CheckerPossibleTarget,
   CheckerValidMoveMap,
 } from "./types";
 
@@ -65,7 +65,7 @@ export const createInitialGameState = (): GameState => {
 };
 
 const createPositionMap = () =>
-  new CustomMap<CheckerPosition, CheckerValidMove[]>(
+  new CustomMap<CheckerPosition, CheckerPossibleTarget[]>(
     (position) => `${position.row}-${position.col}`
   );
 
@@ -77,7 +77,7 @@ const getPieceAtPosition = (
 export const getPlayerCaptures = (
   player: PlayerType,
   gameState: GameState
-): CheckerValidMove[] =>
+): CheckerPossibleTarget[] =>
   Array.from(getPlayerValidMoves(player, gameState).values())
     .flatMap((moves) => moves)
     .filter((move) => move.isCapture);

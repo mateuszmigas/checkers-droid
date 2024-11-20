@@ -7,7 +7,7 @@ import { OrbitControls, Stars, Stats } from "@react-three/drei";
 import { Room } from "./room";
 import {
   CheckerPosition,
-  CheckerValidMove,
+  CheckerPossibleTarget,
   CheckerValidMoveMap,
 } from "@/game-logic/types";
 import { useGameSessionContext } from "../../hooks/useGameSessionContext";
@@ -28,7 +28,8 @@ const getCheckerMustCapture = (
 const getCheckerValidMoves = (
   allValidMoves: CheckerValidMoveMap | null,
   position: CheckerPosition | null
-): CheckerValidMove[] => (position ? allValidMoves?.get(position) || [] : []);
+): CheckerPossibleTarget[] =>
+  position ? allValidMoves?.get(position) || [] : [];
 
 export const GameScene = memo(() => {
   const gameSession = useGameSessionContext();
@@ -99,3 +100,4 @@ export const GameScene = memo(() => {
     </>
   );
 });
+

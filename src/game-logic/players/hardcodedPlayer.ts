@@ -2,7 +2,7 @@ import { delay } from "@/utils/promise";
 import { GameState, getPlayerValidMoves } from "../gameState";
 import {
   CheckerPosition,
-  CheckerValidMove,
+  CheckerPossibleTarget,
   CheckerValidMoveMap,
   PlayerType,
 } from "../types";
@@ -33,7 +33,8 @@ export class HardcodedAIPlayer extends EventEmitter<AIPlayerEvents> {
     );
 
     // Convert the map to an array of moves with their starting positions
-    const allMoves: { from: CheckerPosition; move: CheckerValidMove }[] = [];
+    const allMoves: { from: CheckerPosition; move: CheckerPossibleTarget }[] =
+      [];
 
     // Use entries() to iterate over the CustomMap
     validMoves.entries().forEach(([position, moves]) => {

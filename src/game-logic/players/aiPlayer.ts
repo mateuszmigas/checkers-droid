@@ -3,7 +3,9 @@ import { AIPlayerEmotion, CheckerPosition, PlayerType } from "../types";
 import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
 import { chromeApi, ChromeSession } from "@/chromeAI";
-import { createEventsPrompt, systemPrompt, welcomePrompt } from "./aiPrompt";
+import { createEventsPrompt, welcomePrompt } from "./aiPrompt";
+import { createMovePrompt } from "./prompts/movePrompt";
+import { createSystemPrompt } from "./prompts/systemPrompt";
 
 export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
@@ -16,14 +18,37 @@ export type AIPlayerEvents =
   4. ai will evaluate move + state after move
 */
 
-const simulateMove = (
+export type MoveConsequence =
+  | "TURN_DIDNT_CHANGE"
+  | "PROMOTED_TO_KING"
+  | "EXPOSES_TO_OPPONENT_CAPTURE";
+
+const simulateMoveConsequences = (
   gameState: GameState,
   move: { from: CheckerPosition; to: CheckerPosition }
-) =>
-  updateGameState(gameState, {
+): MoveConsequence[] => {
+  const me = gameState.gameStatus as PlayerType;
+  const { state, events } = updateGameState(gameState, {
     type: "MOVE_PIECE",
     ...move,
   });
+  const opponent = me === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+
+  const exposesToOpponentCapture = getPlayerValidMoves(opponent, state)
+    .entries()
+    .some((e) => e[1].some((m) => m.isCapture));
+  const turnDidntChange = events.every(
+    (event) => event.type !== "TURN_CHANGED"
+  );
+  const promotedToKing = events.some((event) => event.type === "PIECE_CROWNED");
+
+  const consequences: MoveConsequence[] = [];
+  if (promotedToKing) consequences.push("PROMOTED_TO_KING");
+  if (turnDidntChange) consequences.push("TURN_DIDNT_CHANGE");
+  if (exposesToOpponentCapture)
+    consequences.push("EXPOSES_TO_OPPONENT_CAPTURE");
+  return consequences;
+};
 
 export class AIPlayer extends EventEmitter<AIPlayerEvents> {
   private session: ChromeSession | undefined;
@@ -31,67 +56,70 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
   constructor(private readonly playerType: PlayerType) {
     super();
 
-    chromeApi.createSession(systemPrompt).then((session) => {
-      this.session = session;
-      const promptStream = this.session.promptStreaming(welcomePrompt);
+    chromeApi
+      .createSession(createSystemPrompt(playerType, "AI"))
+      .then((session) => {
+        this.session = session;
+        const promptStream = this.session.promptStreaming(welcomePrompt);
 
-      setTimeout(() => {
-        this.emit({
-          type: "MESSAGE_CHANGED",
-          message: promptStream,
-        });
-
-        this.emit({
-          type: "EMOTION_CHANGED",
-          emotion: "happy",
-        });
-      }, 500);
-    });
+        setTimeout(() => {
+          this.emit({
+            type: "MESSAGE_CHANGED",
+            message: promptStream,
+          });
+          this.emit({
+            type: "EMOTION_CHANGED",
+            emotion: "happy",
+          });
+        }, 100);
+      });
   }
 
   async getMove(
     gameState: GameState
   ): Promise<{ from: CheckerPosition; to: CheckerPosition } | null> {
-    const validMovesMap = getPlayerValidMoves(this.playerType, gameState)
+    const moves = getPlayerValidMoves(this.playerType, gameState)
       .entries()
       .flatMap(([position, moves]) =>
-        moves.map((move) => ({ from: position, to: move.targetPosition }))
+        moves.map((move) => {
+          const consequences = simulateMoveConsequences(gameState, {
+            from: position,
+            to: move.targetPosition,
+          });
+          return { from: position, to: move.targetPosition, consequences };
+        })
       );
 
-    //map moves for ai
-    const aiMoves = validMovesMap.map((move) => {
-      const simulatedGameState = simulateMove(gameState, move);
-      const simulatedValidMoves = getPlayerValidMoves(
-        this.playerType,
-        simulatedGameState.state
-      );
+    if (moves.length === 0) return null;
 
-      //count captures
-
-      return {
-        from: move.from,
-        to: move.to,
-        score: 0,
+    try {
+      const prompt = createMovePrompt(moves);
+      const response = await this.session!.prompt(prompt);
+      const parsedResponse = JSON.parse(response) as {
+        shot: number;
       };
-    });
-
-    return null;
+      const isValidIndex =
+        parsedResponse.shot >= 0 && parsedResponse.shot < moves.length;
+      const move = isValidIndex ? moves[parsedResponse.shot] : moves[0];
+      return move;
+    } catch (error) {
+      return moves[0];
+    }
   }
 
   async notify(gameState: GameState, gameEvents: GameEvent[]) {
-    if (gameState.gameStatus !== this.playerType) return;
+    if (gameState.gameStatus !== this.playerType) {
+      return;
+    }
 
     const filteredEvents = gameEvents.filter(
       (event) => event.type !== "GAME_OVER"
     );
-    // console.log("notify", gameEvents);
     const prompt = createEventsPrompt(filteredEvents, this.playerType);
-    // console.log(prompt);
 
     const response = await this.session!.prompt(prompt);
 
     try {
-      // console.log("response:", response);
       const parsedResponse = JSON.parse(response) as {
         message: string;
         emotion: AIPlayerEmotion;
@@ -108,3 +136,4 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
     }
   }
 }
+

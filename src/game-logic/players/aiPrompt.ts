@@ -103,7 +103,7 @@ ${eventDescriptions}
   "message": "Concise, event-focused comment",
   "emotion": "Emotion matching game state"
 }
-</Response>
+</Response Format>
   `;
 };
 
