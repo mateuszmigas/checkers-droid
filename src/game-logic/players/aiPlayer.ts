@@ -136,3 +136,23 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
     }
   }
 }
+// // Create a TransformStream to process the emotion and message
+// const transformStream = new TransformStream({
+//   transform: (chunk, controller) => {
+//     const text = chunk.toString();
+//     if (text.includes("|")) {
+//       const [emotion, message] = text.split("|");
+//       // Emit emotion change if it's a valid AIPlayerEmotion
+//       if (emotion.trim() as AIPlayerEmotion) {
+//         console.log("emotion", emotion.trim());
+//         // this.emit({
+//         //   type: "EMOTION_CHANGED",
+//         //   emotion: emotion.trim() as AIPlayerEmotion,
+//         // });
+//       }
+//       controller.enqueue(message);
+//     } else {
+//       controller.enqueue(chunk);
+//     }
+//   },
+// });
