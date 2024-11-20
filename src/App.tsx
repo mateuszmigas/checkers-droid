@@ -1,7 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { GameScene } from "./components/scene/gameScene";
 import { useEffect, useState } from "react";
-import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import { GameSession } from "./game-logic/gameSession";
 import { GameSessionContext } from "./hooks/useGameSessionContext";
 import { SelectGameMode } from "./components/selectGameMode";
@@ -14,14 +13,14 @@ export const App = () => {
   >("loading");
 
   // //temp
-  // useEffect(() => {
-  //   const gs = new GameSession("HUMAN_VS_AI");
-  //   setGameSession(gs);
+  useEffect(() => {
+    const gs = new GameSession("HUMAN_VS_AI");
+    setGameSession(gs);
 
-  //   gs.on("GAME_OVER", () => {
-  //     gs.restart();
-  //   });
-  // }, []);
+    gs.on("GAME_OVER", () => {
+      gs.restart();
+    });
+  }, []);
 
   useEffect(() => {
     chromeApi.isAvailable().then((isAvailable) => {
@@ -42,10 +41,6 @@ export const App = () => {
                       ? { position: [0, 6, -7] }
                       : { position: [-7, 6, 0] }
                   }
-                  gl={{
-                    toneMapping: ACESFilmicToneMapping,
-                    outputColorSpace: SRGBColorSpace,
-                  }}
                 >
                   <GameScene />
                 </Canvas>
@@ -75,4 +70,3 @@ export const App = () => {
     </GameSessionContext.Provider>
   );
 };
-

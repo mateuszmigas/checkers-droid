@@ -25,4 +25,3 @@ export const TurnIndicator: React.FC<TurnIndicatorProps> = ({ player }) => {
     </animated.mesh>
   );
 };
-
