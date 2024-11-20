@@ -1,12 +1,5 @@
-import { delay } from "@/utils/promise";
-import { GameState, getPlayerValidMoves } from "../gameState";
-import {
-  AIPlayerEmotion,
-  CheckerPosition,
-  CheckerValidMove,
-  CheckerValidMoveMap,
-  PlayerType,
-} from "../types";
+import { GameState, getPlayerValidMoves, updateGameState } from "../gameState";
+import { AIPlayerEmotion, CheckerPosition, PlayerType } from "../types";
 import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
 import { chromeApi, ChromeSession } from "@/chromeAI";
@@ -15,6 +8,22 @@ import { createEventsPrompt, systemPrompt, welcomePrompt } from "./aiPrompt";
 export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
   | { type: "MESSAGE_CHANGED"; message: string | ReadableStream<string> };
+
+/*
+  1. get all valid moves
+  2. select capture moves if any, otherwise select all moves
+  3. for each move, simulate a state after the move
+  4. ai will evaluate move + state after move
+*/
+
+const simulateMove = (
+  gameState: GameState,
+  move: { from: CheckerPosition; to: CheckerPosition }
+) =>
+  updateGameState(gameState, {
+    type: "MOVE_PIECE",
+    ...move,
+  });
 
 export class AIPlayer extends EventEmitter<AIPlayerEvents> {
   private session: ChromeSession | undefined;
@@ -43,44 +52,28 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
   async getMove(
     gameState: GameState
   ): Promise<{ from: CheckerPosition; to: CheckerPosition } | null> {
-    // Get all valid moves for black pieces
-    await delay(Math.random() * 1000 + 1000);
-    const validMoves: CheckerValidMoveMap = getPlayerValidMoves(
-      this.playerType,
-      gameState
-    );
+    const validMovesMap = getPlayerValidMoves(this.playerType, gameState)
+      .entries()
+      .flatMap(([position, moves]) =>
+        moves.map((move) => ({ from: position, to: move.targetPosition }))
+      );
 
-    // Convert the map to an array of moves with their starting positions
-    const allMoves: { from: CheckerPosition; move: CheckerValidMove }[] = [];
+    //map moves for ai
+    const aiMoves = validMovesMap.map((move) => {
+      const simulatedGameState = simulateMove(gameState, move);
+      const simulatedValidMoves = getPlayerValidMoves(
+        this.playerType,
+        simulatedGameState.state
+      );
 
-    // Use entries() to iterate over the CustomMap
-    validMoves.entries().forEach(([position, moves]) => {
-      moves.forEach((move) => {
-        allMoves.push({ from: position, move });
-      });
+      //count captures
+
+      return {
+        from: move.from,
+        to: move.to,
+        score: 0,
+      };
     });
-
-    // Prioritize capture moves
-    const captureMoves = allMoves.filter(({ move }) => move.isCapture);
-
-    if (captureMoves.length > 0) {
-      // Choose a random capture move
-      const randomMove =
-        captureMoves[Math.floor(Math.random() * captureMoves.length)];
-      return {
-        from: randomMove.from,
-        to: randomMove.move.targetPosition,
-      };
-    }
-
-    // If no capture moves, choose a random regular move
-    if (allMoves.length > 0) {
-      const randomMove = allMoves[Math.floor(Math.random() * allMoves.length)];
-      return {
-        from: randomMove.from,
-        to: randomMove.move.targetPosition,
-      };
-    }
 
     return null;
   }
@@ -88,14 +81,17 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
   async notify(gameState: GameState, gameEvents: GameEvent[]) {
     if (gameState.gameStatus !== this.playerType) return;
 
-    console.log("notify", gameEvents);
-    const prompt = createEventsPrompt(gameEvents, this.playerType);
-    console.log(prompt);
+    const filteredEvents = gameEvents.filter(
+      (event) => event.type !== "GAME_OVER"
+    );
+    // console.log("notify", gameEvents);
+    const prompt = createEventsPrompt(filteredEvents, this.playerType);
+    // console.log(prompt);
 
     const response = await this.session!.prompt(prompt);
 
     try {
-      console.log("response:", response);
+      // console.log("response:", response);
       const parsedResponse = JSON.parse(response) as {
         message: string;
         emotion: AIPlayerEmotion;
@@ -110,7 +106,5 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
     } catch (error) {
       console.error("Error in notify:", error);
     }
-    // console.log("response:", response);
   }
 }
-

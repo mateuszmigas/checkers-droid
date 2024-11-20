@@ -22,13 +22,25 @@ export const chromeApi = {
       systemPrompt,
     });
 
-    return {
-      prompt: (prompt: string) =>
-        promiseQueue.push(() => languageModel.prompt(prompt)),
+    const session = {
+      prompt: async (prompt: string) => {
+        console.log("🤖 Prompt:", prompt);
+        const startTime = performance.now();
+        const promise = await promiseQueue.push(() =>
+          languageModel.prompt(prompt)
+        );
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+        console.log(`⏱️ Prompt duration: ${duration.toFixed(2)}ms`);
+        const response = await promise;
+        console.log("🤖 Response:", response);
+        return response;
+      },
       promptStreaming: (prompt: string) =>
         languageModel.promptStreaming(prompt),
       destroy: () => languageModel.destroy(),
     };
+
+    return session;
   },
 };
-
