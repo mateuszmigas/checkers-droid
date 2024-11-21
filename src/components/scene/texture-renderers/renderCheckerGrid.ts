@@ -12,6 +12,10 @@ export const renderCheckerGrid = (
       : constants.checkerGridWhiteColor;
     context.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
 
+    context.lineWidth = 2;
+    context.strokeStyle = constants.checkerGridBlackColor;
+    context.strokeRect(col * cellSize, row * cellSize, cellSize, cellSize);
+
     if (debug) {
       context.fillStyle = "white";
       context.font = "20px Arial";
@@ -19,4 +23,3 @@ export const renderCheckerGrid = (
     }
   });
 };
-

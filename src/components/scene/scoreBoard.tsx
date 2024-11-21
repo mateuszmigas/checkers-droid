@@ -27,9 +27,7 @@ export const ScoreBoard = () => {
     ],
     (event) => {
       eventsRef.current = [...eventsRef.current, event.type].slice(-MAX_EVENTS);
-      updateTexture((context) =>
-        renderBoard({ context, events: [...eventsRef.current] })
-      );
+      updateTexture((context) => renderBoard(context, eventsRef.current));
     }
   );
 

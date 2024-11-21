@@ -1,37 +1,41 @@
-interface RenderBoardProps {
-  context: CanvasRenderingContext2D;
-  events: string[];
-}
-
-export const renderBoard = ({ context, events }: RenderBoardProps) => {
+export const renderBoard = (
+  context: CanvasRenderingContext2D,
+  events: string[]
+) => {
   const { width, height } = context.canvas;
 
-  // Clear background
-  context.fillStyle = "rgba(0, 0, 0, 0.9)";
+  // Background
+  context.fillStyle = "rgba(0, 0, 0, 0.75)";
   context.fillRect(0, 0, width, height);
 
-  // Add matrix-style gradient with blue
-  const gradient = context.createLinearGradient(0, 0, 0, height);
-  gradient.addColorStop(0, "rgba(0, 149, 255, 0.1)");
-  gradient.addColorStop(1, "rgba(0, 149, 255, 0.2)");
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, width, height);
+  // Draw columns
+  const columnWidth = width / 2;
+  const padding = 20;
+  const borderColor = "#0095ff"; // Cyberpunk blue
+  const borderWidth = 2;
 
-  // Setup text style for main text
-  context.fillStyle = "#0095ff"; // Cyberpunk blue
-  context.font = "bold 56px 'Courier New'";
-  context.shadowColor = "#0095ff";
-  context.shadowBlur = 10;
+  // Left column
+  context.strokeStyle = borderColor;
+  context.lineWidth = borderWidth;
+  context.strokeRect(
+    padding,
+    padding,
+    columnWidth - padding * 1.5,
+    height - padding * 2
+  );
 
-  // Render events from bottom to top with a typing effect
-  events.reverse().forEach((event, index) => {
-    const y = height - (index + 1) * 70;
-    const opacity = 1 - index * 0.15;
-    context.fillStyle = `rgba(0, 149, 255, ${opacity})`;
-    context.fillText(event, 30, y);
+  // Right column
+  context.strokeRect(
+    columnWidth + padding / 2,
+    padding,
+    columnWidth - padding * 1.5,
+    height - padding * 2
+  );
+
+  // Display events in the left column if needed
+  context.fillStyle = borderColor;
+  context.font = "16px 'Courier New'";
+  events.slice(0, 10).forEach((event, index) => {
+    context.fillText(event, padding * 2, padding * 2 + index * 24);
   });
-
-  // Reset shadow
-  context.shadowBlur = 0;
 };
-
