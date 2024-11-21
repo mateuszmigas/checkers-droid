@@ -87,27 +87,27 @@ export const Room = () => {
           position={[0, 0, 0]}
         >
           <planeGeometry args={[40, 40]} />
-          <meshStandardMaterial color="#ffffff" />
+          <meshStandardMaterial color="#005066" />
         </mesh>
         <Wall
           rotation={[0, 0, 0]}
           position={[0, 10, 20]}
-          lightColor="#FF1350"
+          lightColor="#4F7988"
         />
         <Wall
           rotation={[0, Math.PI / 2, 0]}
           position={[20, 10, 0]}
-          lightColor="#FF00A1"
+          lightColor="#4F7988"
         />
         <Wall
           rotation={[0, -Math.PI, 0]}
           position={[0, 10, -20]}
-          lightColor="#FE76FE"
+          lightColor="#4F7988"
         />
         <Wall
           rotation={[0, -Math.PI / 2, 0]}
           position={[-20, 10, 0]}
-          lightColor="#7B03EC"
+          lightColor="#4F7988"
         />
       </group>
 
