@@ -44,8 +44,8 @@ export const renderRobotFace = (
   context.fillRect(0, 0, width, height);
 
   // Common settings for drawing
-  context.strokeStyle = "blue";
-  context.fillStyle = "blue";
+  context.strokeStyle = "#00DAEF";
+  context.fillStyle = "#00DAEF";
   context.lineWidth = 20;
 
   // Draw eyes (always circles)
@@ -84,4 +84,3 @@ export const renderRobotFace = (
 
   context.fillRect(mouthX, mouthY, mouthWidth, mouthHeight);
 };
-

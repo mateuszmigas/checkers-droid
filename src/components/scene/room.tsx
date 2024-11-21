@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
+
 interface WallProps {
   rotation?: [number, number, number];
   position: [number, number, number];
@@ -32,7 +35,30 @@ const Wall = ({ rotation, position, lightColor }: WallProps) => {
   );
 };
 
+const shadowSize = 256;
+
 export const Room = () => {
+  const { updateTexture, textureRef } = useCanvas2dTexture({
+    width: shadowSize,
+    height: shadowSize,
+  });
+
+  // const shadow = useTexture("shadow-png.png");
+
+  useEffect(() => {
+    updateTexture((ctx) => {
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 25;
+      ctx.fillStyle = "red";
+      ctx.fillRect(
+        shadowSize * 0.2,
+        shadowSize * 0.2,
+        shadowSize * 0.6,
+        shadowSize * 0.6
+      );
+    });
+  }, [updateTexture]);
+
   return (
     <>
       {/* Table spotlight */}
@@ -86,20 +112,15 @@ export const Room = () => {
       </group>
 
       {/* Table */}
-      <group position={[0, -2, 0]}>
+      <group position={[0, -1.5, 0]}>
         <mesh>
-          <boxGeometry args={[10, 4, 10]} />
+          <boxGeometry args={[10, 3, 10]} />
           <meshStandardMaterial color="#ffffff" roughness={0.5} />
         </mesh>
-        {/* <mesh position={[0, -0.95, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[12, 12]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent={true}
-            opacity={0.5}
-            depthWrite={false}
-          />
-        </mesh> */}
+        <mesh position={[0, -1.47, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[16, 16]} />
+          <meshBasicMaterial map={textureRef.current} transparent={true} />
+        </mesh>
       </group>
     </>
   );

@@ -67,7 +67,7 @@ export const Robot = (props: RobotProps) => {
   return (
     <group
       ref={robotRef}
-      position={[0, 2, playerType === "PLAYER_ONE" ? -5 : 5]}
+      position={[0, 2, playerType === "PLAYER_ONE" ? -6 : 6]}
       rotation={[0, playerType === "PLAYER_ONE" ? 0 : Math.PI, 0]}
       scale={2}
     >
@@ -116,6 +116,26 @@ export const Robot = (props: RobotProps) => {
       <RoundedBox
         position={[0.5, -0.8, 0]}
         args={[0.2, 0.6, 0.2]}
+        radius={0.05}
+        smoothness={4}
+      >
+        <meshStandardMaterial color={color} roughness={0.1} />
+      </RoundedBox>
+
+      {/* Left Leg */}
+      <RoundedBox
+        position={[-0.25, -1.8, 0]}
+        args={[0.2, 1.5, 0.2]}
+        radius={0.05}
+        smoothness={4}
+      >
+        <meshStandardMaterial color={color} roughness={0.1} />
+      </RoundedBox>
+
+      {/* Right Leg */}
+      <RoundedBox
+        position={[0.25, -1.8, 0]}
+        args={[0.2, 1.5, 0.2]}
         radius={0.05}
         smoothness={4}
       >
