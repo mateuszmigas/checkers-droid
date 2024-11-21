@@ -13,14 +13,14 @@ export const App = () => {
   >("loading");
 
   // //temp
-  useEffect(() => {
-    const gs = new GameSession("HUMAN_VS_AI");
-    setGameSession(gs);
+  // useEffect(() => {
+  //   const gs = new GameSession("HUMAN_VS_AI");
+  //   setGameSession(gs);
 
-    gs.on("GAME_OVER", () => {
-      gs.restart();
-    });
-  }, []);
+  //   gs.on("GAME_OVER", () => {
+  //     gs.restart();
+  //   });
+  // }, []);
 
   useEffect(() => {
     chromeApi.isAvailable().then((isAvailable) => {
@@ -70,3 +70,4 @@ export const App = () => {
     </GameSessionContext.Provider>
   );
 };
+
