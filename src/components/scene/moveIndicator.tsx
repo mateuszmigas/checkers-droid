@@ -1,16 +1,11 @@
 import { CheckerPosition } from "@/game-logic/types";
 import { mapCheckerPosition } from "./constants";
 
-interface MoveIndicatorProps {
+export const MoveIndicator = (props: {
   position: CheckerPosition;
   onClick: () => void;
-  isCapture?: boolean;
-}
-
-export const MoveIndicator: React.FC<MoveIndicatorProps> = ({
-  position,
-  onClick,
 }) => {
+  const { position, onClick } = props;
   return (
     <group position={mapCheckerPosition(position)}>
       {/* Outer glow/outline cylinder */}
@@ -41,3 +36,4 @@ export const MoveIndicator: React.FC<MoveIndicatorProps> = ({
     </group>
   );
 };
+

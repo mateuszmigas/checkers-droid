@@ -23,5 +23,12 @@ export type CheckerValidMoveMap = CustomMap<
   CheckerPossibleTarget[]
 >;
 
-export type AIPlayerEmotion = "happy" | "sad" | "focused";
+export const aiPlayerEmotions = [
+  "Joy",
+  "Surprise",
+  "Frustration",
+  "Thoughtfulness",
+  "Sadness",
+];
+export type AIPlayerEmotion = (typeof aiPlayerEmotions)[number];
 

@@ -3,7 +3,7 @@ import { Checker } from "./checker";
 import { MoveIndicator } from "./moveIndicator";
 import { TurnIndicator } from "./turnIndicator";
 import { Robot } from "./robot";
-import { OrbitControls, Stars, Stats } from "@react-three/drei";
+import { OrbitControls, Stats } from "@react-three/drei";
 import { Room } from "./room";
 import {
   CheckerPosition,
@@ -13,9 +13,10 @@ import {
 import { useGameSessionContext } from "../../hooks/useGameSessionContext";
 import { useEventListener } from "@/hooks/useEventListener";
 import { useTriggerRender } from "@/hooks/useTriggerRender";
-import { ScoreBoard } from "./scoreBoard";
 import { mapPieces } from "@/utils/board";
 import { memo } from "react";
+import { PlayerScoreBoard } from "./playerScoreBoard";
+import { constants } from "./constants";
 
 const getCheckerMustCapture = (
   allValidMoves: CheckerValidMoveMap | null,
@@ -33,8 +34,7 @@ const getCheckerValidMoves = (
 
 export const GameScene = memo(() => {
   const gameSession = useGameSessionContext();
-  const { gameState, selectedPosition: selectedCheckerPosition } =
-    gameSession.getState();
+  const { gameState, selectedPosition } = gameSession.getState();
   const allValidMoves = gameSession.getHumanValidMoves();
 
   const triggerRender = useTriggerRender();
@@ -42,16 +42,9 @@ export const GameScene = memo(() => {
 
   return (
     <>
-      {/* <EffectComposer>
-        <Bloom mipmapBlur intensity={0.5} luminanceThreshold={1} />
-        <ToneMapping />
-      </EffectComposer> */}
-
       <Room />
-      <ScoreBoard />
       <CheckerGrid />
 
-      {/* Turn Indicator */}
       {gameState.gameStatus !== "GAME_OVER" && (
         <TurnIndicator player={gameState.gameStatus} />
       )}
@@ -61,41 +54,43 @@ export const GameScene = memo(() => {
         <Checker
           key={piece.id}
           position={piece.position}
-          piece={piece}
+          player={piece.player}
+          isKing={piece.isKing}
           mustCapture={getCheckerMustCapture(allValidMoves, piece.position)}
           onClick={() => gameSession.handlePieceClick(piece.position)}
         />
       ))}
 
       {/* Valid Moves */}
-      {getCheckerValidMoves(allValidMoves, selectedCheckerPosition).map(
+      {getCheckerValidMoves(allValidMoves, selectedPosition).map(
         (move, index) => (
           <MoveIndicator
             key={`move-${index}`}
             position={move.targetPosition}
             onClick={() => gameSession.handleMoveClick(move.targetPosition)}
-            isCapture={move.isCapture}
           />
         )
       )}
 
-      {/* First AI Robot */}
+      {/* AI Robots */}
       {gameSession.getPlayer("PLAYER_ONE").type === "AI" && (
         <Robot playerType={"PLAYER_ONE"} />
       )}
-
-      {/* Second AI Robot */}
       {gameSession.getPlayer("PLAYER_TWO").type === "AI" && (
         <Robot playerType={"PLAYER_TWO"} />
       )}
 
+      {/* Score Boards */}
+      <PlayerScoreBoard position={[0, 0.1, 4]} playerType={"PLAYER_ONE"} />
+      <PlayerScoreBoard position={[0, 0.1, -4]} playerType={"PLAYER_TWO"} />
+
       <OrbitControls
-        target={[0, 1.42, 0]}
+        target={[0, constants.tableHeight, 0]}
+        enablePan={false}
         maxDistance={20}
         minDistance={5}
         maxPolarAngle={Math.PI / 2.1}
       />
-      <Stars />
       <Stats />
     </>
   );

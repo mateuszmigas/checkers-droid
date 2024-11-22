@@ -13,14 +13,14 @@ export const App = () => {
   >("loading");
 
   // //temp
-  // useEffect(() => {
-  //   const gs = new GameSession("HUMAN_VS_AI");
-  //   setGameSession(gs);
+  useEffect(() => {
+    const gs = new GameSession("HUMAN_VS_AI");
+    setGameSession(gs);
 
-  //   gs.on("GAME_OVER", () => {
-  //     gs.restart();
-  //   });
-  // }, []);
+    gs.on("GAME_OVER", () => {
+      gs.restart();
+    });
+  }, []);
 
   useEffect(() => {
     chromeApi.isAvailable().then((isAvailable) => {
@@ -71,10 +71,3 @@ export const App = () => {
   );
 };
 
-/*
-#E4EFF0
-#78CCE2
-#4F7988
-#005066
-#002439
-*/

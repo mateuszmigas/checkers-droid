@@ -67,18 +67,18 @@ export const Robot = (props: RobotProps) => {
   return (
     <group
       ref={robotRef}
-      position={[0, 2, playerType === "PLAYER_ONE" ? -6 : 6]}
+      position={[0, 0, playerType === "PLAYER_ONE" ? -7 : 7]}
       rotation={[0, playerType === "PLAYER_ONE" ? 0 : Math.PI, 0]}
-      scale={2}
+      scale={1.75}
     >
       {message && (
-        <Html position={[0, 0.5, 0]} center>
+        <Html position={[0, 3.5, 0]} center>
           <RobotSpeechBubble message={message} />
         </Html>
       )}
 
       {/* Head */}
-      <group ref={headRef}>
+      <group position={[0, 2.95, 0]} ref={headRef}>
         <RoundedBox args={[1, 0.9, 0.75]} radius={0.2} smoothness={5}>
           <meshStandardMaterial color={color} roughness={0.1} />
         </RoundedBox>
@@ -94,53 +94,57 @@ export const Robot = (props: RobotProps) => {
 
       {/* Torso */}
       <RoundedBox
-        position={[0, -1, 0]}
-        args={[0.8, 1, 0.5]}
+        position={[0, 1.9, 0]}
+        args={[0.8, 1.2, 0.5]}
         radius={0.1}
         smoothness={4}
       >
         <meshStandardMaterial color={color} roughness={0.1} />
       </RoundedBox>
 
-      {/* Left Arm */}
-      <RoundedBox
-        position={[-0.5, -0.8, 0]}
-        args={[0.2, 0.6, 0.2]}
-        radius={0.05}
-        smoothness={4}
-      >
-        <meshStandardMaterial color={color} roughness={0.1} />
-      </RoundedBox>
+      {/* Arms   */}
+      <group rotation={[-Math.PI / 4, 0, 0]} position={[0, 2, 0.3]}>
+        <RoundedBox
+          position={[-0.5, 0, 0]}
+          args={[0.2, 0.8, 0.2]}
+          radius={0.05}
+          smoothness={4}
+        >
+          <meshStandardMaterial color={color} roughness={0.1} />
+        </RoundedBox>
+        <RoundedBox
+          position={[0.5, 0, 0]}
+          args={[0.2, 0.8, 0.2]}
+          radius={0.05}
+          smoothness={4}
+        >
+          <meshStandardMaterial color={color} roughness={0.1} />
+        </RoundedBox>
+      </group>
 
-      {/* Right Arm */}
-      <RoundedBox
-        position={[0.5, -0.8, 0]}
-        args={[0.2, 0.6, 0.2]}
-        radius={0.05}
-        smoothness={4}
-      >
-        <meshStandardMaterial color={color} roughness={0.1} />
-      </RoundedBox>
+      {/* Legs */}
+      <group position={[0, 0.6, 0]}>
+        {/* Left Leg */}
+        <RoundedBox
+          position={[-0.25, 0, 0]}
+          args={[0.2, 1.5, 0.2]}
+          radius={0.05}
+          smoothness={4}
+        >
+          <meshStandardMaterial color={color} roughness={0.1} />
+        </RoundedBox>
 
-      {/* Left Leg */}
-      <RoundedBox
-        position={[-0.25, -1.8, 0]}
-        args={[0.2, 1.5, 0.2]}
-        radius={0.05}
-        smoothness={4}
-      >
-        <meshStandardMaterial color={color} roughness={0.1} />
-      </RoundedBox>
-
-      {/* Right Leg */}
-      <RoundedBox
-        position={[0.25, -1.8, 0]}
-        args={[0.2, 1.5, 0.2]}
-        radius={0.05}
-        smoothness={4}
-      >
-        <meshStandardMaterial color={color} roughness={0.1} />
-      </RoundedBox>
+        {/* Right Leg */}
+        <RoundedBox
+          position={[0.25, 0, 0]}
+          args={[0.2, 1.5, 0.2]}
+          radius={0.05}
+          smoothness={4}
+        >
+          <meshStandardMaterial color={color} roughness={0.1} />
+        </RoundedBox>
+      </group>
     </group>
   );
 };
+

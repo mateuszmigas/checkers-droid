@@ -1,5 +1,10 @@
 import { GameState, getPlayerValidMoves, updateGameState } from "../gameState";
-import { AIPlayerEmotion, CheckerPosition, PlayerType } from "../types";
+import {
+  AIPlayerEmotion,
+  aiPlayerEmotions,
+  CheckerPosition,
+  PlayerType,
+} from "../types";
 import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
 import { chromeApi, ChromeSession } from "@/chromeAI";
@@ -11,17 +16,17 @@ export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
   | { type: "MESSAGE_CHANGED"; message: string | ReadableStream<string> };
 
-/*
-  1. get all valid moves
-  2. select capture moves if any, otherwise select all moves
-  3. for each move, simulate a state after the move
-  4. ai will evaluate move + state after move
-*/
-
 export type MoveConsequence =
   | "TURN_DIDNT_CHANGE"
   | "PROMOTED_TO_KING"
   | "EXPOSES_TO_OPPONENT_CAPTURE";
+
+const isValidEmotion = (emotion: string): emotion is AIPlayerEmotion => {
+  return (
+    typeof emotion === "string" &&
+    aiPlayerEmotions.map((e) => e.toLowerCase()).includes(emotion.toLowerCase())
+  );
+};
 
 const simulateMoveConsequences = (
   gameState: GameState,
@@ -131,8 +136,13 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
           message: parsedResponse.message,
         });
       }
-    } catch (error) {
-      console.error("Error in notify:", error);
+
+      const emotion = parsedResponse.emotion;
+      if (isValidEmotion(emotion)) {
+        this.emit({ type: "EMOTION_CHANGED", emotion });
+      }
+    } catch {
+      // ignore
     }
   }
 }
@@ -156,3 +166,4 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
 //     }
 //   },
 // });
+

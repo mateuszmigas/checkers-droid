@@ -1,127 +1,103 @@
 import { useEffect } from "react";
 import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
+import { renderRectangleShadow } from "./texture-renderers/renderRectangleShadow";
+import { constants } from "./constants";
 
-interface WallProps {
-  rotation?: [number, number, number];
-  position: [number, number, number];
-  lightColor: string;
-}
-
-const Wall = ({ rotation, position, lightColor }: WallProps) => {
-  const wallHeight = 20;
-  return (
-    <group position={position} rotation={rotation}>
-      <mesh>
-        <boxGeometry args={[40, wallHeight, 0]} />
-        <meshStandardMaterial color={lightColor} />
-      </mesh>
-      {/* <spotLight
-        position={[0, 0, -2]}
-        angle={0.5}
-        penumbra={0.5}
-        intensity={100}
-        color={lightColor}
-      /> */}
-      {/* <RectAreaLight
-        rotation={[0, 0, 0]}
-        position={[0, -wallHeight / 2, -0.1]}
-        width={40}
-        height={0.1}
-        intensity={50}
-        color="#ffffff"
-        showHelper={true}
-      /> */}
-    </group>
-  );
-};
-
-const shadowSize = 256;
+const renderWall = (
+  position: [number, number, number],
+  rotation: [number, number, number],
+  lightColor: string
+) => (
+  <mesh position={position} rotation={rotation}>
+    <planeGeometry args={[constants.roomWidth, constants.roomHeight]} />
+    <meshStandardMaterial color={lightColor} />
+  </mesh>
+);
 
 export const Room = () => {
   const { updateTexture, textureRef } = useCanvas2dTexture({
-    width: shadowSize,
-    height: shadowSize,
+    width: constants.tableShadowSize,
+    height: constants.tableShadowSize,
   });
 
-  // const shadow = useTexture("shadow-png.png");
-
   useEffect(() => {
-    updateTexture((ctx) => {
-      ctx.shadowColor = "black";
-      ctx.shadowBlur = 25;
-      ctx.fillStyle = "red";
-      ctx.fillRect(
-        shadowSize * 0.2,
-        shadowSize * 0.2,
-        shadowSize * 0.6,
-        shadowSize * 0.6
-      );
-    });
+    updateTexture((context) =>
+      renderRectangleShadow(context, constants.tableShadowSize)
+    );
   }, [updateTexture]);
 
   return (
     <>
       {/* Table spotlight */}
       <spotLight
-        position={[0, 10, 0]}
+        position={[0, constants.roomHeight / 2, 0]}
         angle={Math.PI / 2}
         penumbra={0.25}
         intensity={200}
-        color="#ffffff"
       />
 
       {/* Subtle ambient light */}
       <ambientLight intensity={0.4} />
 
-      <group position={[0, -3, 0]}>
+      <group>
         {/* Ceiling */}
-        <mesh position={[0, 20, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[40, 40]} />
-          <meshStandardMaterial color="#f0f0f0" />
+        <mesh
+          position={[0, constants.roomHeight, 0]}
+          rotation={[Math.PI / 2, 0, 0]}
+        >
+          <planeGeometry args={[constants.roomWidth, constants.roomWidth]} />
+          <meshStandardMaterial color={constants.ceilingColor} />
         </mesh>
 
         {/* Floor */}
-        <mesh
-          receiveShadow
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, 0, 0]}
-        >
-          <planeGeometry args={[40, 40]} />
-          <meshStandardMaterial color="#005066" />
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[constants.roomWidth, constants.roomWidth]} />
+          <meshStandardMaterial color={constants.floorColor} />
         </mesh>
-        <Wall
-          rotation={[0, 0, 0]}
-          position={[0, 10, 20]}
-          lightColor="#4F7988"
-        />
-        <Wall
-          rotation={[0, Math.PI / 2, 0]}
-          position={[20, 10, 0]}
-          lightColor="#4F7988"
-        />
-        <Wall
-          rotation={[0, -Math.PI, 0]}
-          position={[0, 10, -20]}
-          lightColor="#4F7988"
-        />
-        <Wall
-          rotation={[0, -Math.PI / 2, 0]}
-          position={[-20, 10, 0]}
-          lightColor="#4F7988"
-        />
+
+        {/* Walls */}
+        {renderWall(
+          [0, constants.roomHeight / 2, constants.roomWidth / 2],
+          [0, Math.PI, 0],
+          constants.wallColor
+        )}
+        {renderWall(
+          [constants.roomWidth / 2, constants.roomHeight / 2, 0],
+          [0, Math.PI * 1.5, 0],
+          constants.wallColor
+        )}
+        {renderWall(
+          [0, constants.roomHeight / 2, -constants.roomWidth / 2],
+          [0, 0, 0],
+          constants.wallColor
+        )}
+        {renderWall(
+          [-constants.roomWidth / 2, constants.roomHeight / 2, 0],
+          [0, Math.PI / 2, 0],
+          constants.wallColor
+        )}
       </group>
 
       {/* Table */}
-      <group position={[0, -1.5, 0]}>
-        <mesh>
-          <boxGeometry args={[10, 3, 10]} />
-          <meshStandardMaterial color="#ffffff" roughness={0.5} />
+      <group>
+        <mesh position={[0, constants.tableHeight / 2, 0]}>
+          <boxGeometry
+            args={[
+              constants.tableSize,
+              constants.tableHeight,
+              constants.tableSize,
+            ]}
+          />
+          <meshStandardMaterial color={constants.tableColor} roughness={0.5} />
         </mesh>
-        <mesh position={[0, -1.47, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[16, 16]} />
+        <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry
+            args={[constants.tableSize + 8, constants.tableSize + 8]}
+          />
           <meshBasicMaterial map={textureRef.current} transparent={true} />
         </mesh>
       </group>
     </>
   );
 };
+
