@@ -68,7 +68,7 @@ const drawEventsRect = (
 
 export const renderBoard = (
   context: CanvasRenderingContext2D,
-  events: string[]
+  _events: string[]
 ) => {
   const { width, height } = context.canvas;
 
