@@ -5,7 +5,7 @@ import { Box, RoundedBox, Html } from "@react-three/drei";
 import { PlayerType } from "@/game-logic/types";
 import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
 import { renderRobotFace } from "./texture-renderers/renderRobotFace";
-import { RobotSpeechBubble } from "../robotSpeechBubble";
+import { RobotSpeechBubble } from "../ui/robotSpeechBubble";
 import { constants } from "./constants";
 import { useGameSessionContext } from "@/hooks/useGameSessionContext";
 import { useEventListener } from "@/hooks/useEventListener";

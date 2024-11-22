@@ -12,7 +12,6 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.1.0",
     "@react-spring/three": "^9.7.5",
     "@react-three/drei": "^9.115.0",
     "@react-three/fiber": "^8.17.10",
@@ -20,9 +19,6 @@
     "@types/dom-chromium-ai": "^0.0.2",
     "@types/node": "^22.9.0",
     "@types/three": "^0.169.0",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.456.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwind-merge": "^2.5.4",

@@ -3,7 +3,7 @@ import { GameScene } from "./components/scene/gameScene";
 import { useEffect, useState } from "react";
 import { GameSession } from "./game-logic/gameSession";
 import { GameSessionContext } from "./hooks/useGameSessionContext";
-import { SelectGameModePage } from "./components/selectGameMode";
+import { SelectGameModePage } from "./components/ui/selectGameMode";
 import { chromeApi } from "./chromeAI";
 
 export const App = () => {
@@ -30,7 +30,7 @@ export const App = () => {
 
   return (
     <GameSessionContext.Provider value={gameSession}>
-      <div className="size-full bg-background dark">
+      <div className="size-full bg-black">
         {loadingState !== "loading" ? (
           <div className="relative size-full">
             {gameSession ? (

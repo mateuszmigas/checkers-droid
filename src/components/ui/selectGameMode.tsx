@@ -1,5 +1,4 @@
 import { GameMode } from "@/game-logic/gameMode";
-import { cn } from "@/utils/css";
 
 const renderModeCard = (
   title: string,
@@ -10,11 +9,11 @@ const renderModeCard = (
   return (
     <div
       onClick={onClick}
-      className={cn(
-        "cursor-pointer rounded-lg overflow-hidden border border-gray-200 shadow-md hover:shadow-lg transition-shadow",
-        "flex flex-col w-[250px]",
-        className
-      )}
+      className={`
+        cursor-pointer rounded-lg overflow-hidden border border-gray-200 shadow-md hover:shadow-lg transition-shadow
+        flex flex-col w-[250px]
+        ${className}
+      `}
     >
       <div className="h-[200px] w-full">
         <img
