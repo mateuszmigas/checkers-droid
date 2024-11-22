@@ -30,19 +30,24 @@ const renderModeCard = (
   );
 };
 
-export const SelectGameMode = (props: {
+export const SelectGameModePage = (props: {
   onSelect: (gameMode: GameMode) => void;
 }) => {
   const { onSelect } = props;
   return (
-    <div className="flex flex-wrap gap-6 justify-center items-center py-12 p-4">
-      {renderModeCard("Human vs AI", "human_vs_ai.webp", () =>
-        onSelect("HUMAN_VS_AI")
-      )}
-      {renderModeCard("Human vs Human", "human_vs_human.webp", () =>
-        onSelect("HUMAN_VS_HUMAN")
-      )}
-      {renderModeCard("AI vs AI", "ai_vs_ai.webp", () => onSelect("AI_VS_AI"))}
+    <div className="absolute inset-0 z-20 flex items-center justify-center">
+      <div className="flex flex-wrap gap-6 justify-center items-center py-12 p-4">
+        {renderModeCard("Human vs AI", "human_vs_ai.webp", () =>
+          onSelect("HUMAN_VS_AI")
+        )}
+        {renderModeCard("Human vs Human", "human_vs_human.webp", () =>
+          onSelect("HUMAN_VS_HUMAN")
+        )}
+        {renderModeCard("AI vs AI", "ai_vs_ai.webp", () =>
+          onSelect("AI_VS_AI")
+        )}
+      </div>
     </div>
   );
 };
+

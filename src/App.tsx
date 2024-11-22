@@ -3,7 +3,7 @@ import { GameScene } from "./components/scene/gameScene";
 import { useEffect, useState } from "react";
 import { GameSession } from "./game-logic/gameSession";
 import { GameSessionContext } from "./hooks/useGameSessionContext";
-import { SelectGameMode } from "./components/selectGameMode";
+import { SelectGameModePage } from "./components/selectGameMode";
 import { chromeApi } from "./chromeAI";
 
 export const App = () => {
@@ -48,14 +48,15 @@ export const App = () => {
             ) : (
               <div className="absolute inset-0 z-20 flex items-center justify-center">
                 {loadingState === "ready" ? (
-                  <SelectGameMode
+                  <SelectGameModePage
                     onSelect={(gameMode) =>
                       setGameSession(new GameSession(gameMode))
                     }
                   />
                 ) : (
-                  <div className="text-white text-2xl">
-                    Browser not supported
+                  <div className="text-white text-2xl absolute inset-0 z-20 flex items-center justify-center">
+                    Looks like this browser doesn't support Chrome AI or it's
+                    not enabled.
                   </div>
                 )}
               </div>
