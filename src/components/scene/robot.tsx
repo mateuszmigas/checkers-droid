@@ -49,7 +49,7 @@ export const Robot = (props: RobotProps) => {
     });
 
   useEffect(() => {
-    updateFaceTexture((context) => renderRobotFace(context, "happy"));
+    updateFaceTexture((context) => renderRobotFace(context, "joy"));
   }, [updateFaceTexture, faceTextureRef]);
 
   useFrame((state) => {

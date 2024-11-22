@@ -1,18 +1,14 @@
 import { GameState, getPlayerValidMoves, updateGameState } from "../gameState";
-import {
-  AIPlayerEmotion,
-  aiPlayerEmotions,
-  CheckerPosition,
-  PlayerType,
-} from "../types";
+import { AIPlayerEmotion, CheckerPosition, PlayerType } from "../types";
 import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
 import { chromeApi, ChromeAiSession } from "@/chromeAI";
 import { createMovePromptRequest } from "./prompts/movePrompt";
 import { createSystemPrompt } from "./prompts/systemPrompt";
 import { createWelcomePrompt } from "./prompts/welcomePrompt";
-import { createEventsPrompt } from "./prompts/eventsPrompt";
 import { runWithStructuredOutput } from "@/utils/prompt";
+import { createEventsPromptRequest } from "./prompts/eventsPrompt";
+
 export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
   | { type: "MESSAGE_CHANGED"; message: string | ReadableStream<string> };
@@ -21,13 +17,6 @@ export type MoveConsequence =
   | "TURN_DIDNT_CHANGE"
   | "PROMOTED_TO_KING"
   | "EXPOSES_TO_OPPONENT_CAPTURE";
-
-const isValidEmotion = (emotion: string): emotion is AIPlayerEmotion => {
-  return (
-    typeof emotion === "string" &&
-    aiPlayerEmotions.map((e) => e.toLowerCase()).includes(emotion.toLowerCase())
-  );
-};
 
 const simulateMoveConsequences = (
   gameState: GameState,
@@ -74,7 +63,7 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
         });
         this.emit({
           type: "EMOTION_CHANGED",
-          emotion: "happy",
+          emotion: "joy",
         });
       }, 100);
     });
@@ -118,29 +107,21 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
       (event) => event.type !== "GAME_OVER"
     );
 
-    const prompt = createEventsPrompt(filteredEvents, this.playerType);
-    const response = await this.session!.prompt(prompt);
+    const promptRequest = createEventsPromptRequest(
+      filteredEvents,
+      this.playerType,
+      { message: "...", emotion: "joy" }
+    );
 
-    try {
-      const parsedResponse = JSON.parse(response) as {
-        message: string;
-        emotion: AIPlayerEmotion;
-      };
+    const response = await runWithStructuredOutput(
+      this.session!,
+      promptRequest
+    );
 
-      if (parsedResponse.message) {
-        this.emit({
-          type: "MESSAGE_CHANGED",
-          message: parsedResponse.message,
-        });
-      }
+    console.log(response);
 
-      const emotion = parsedResponse.emotion;
-      if (isValidEmotion(emotion)) {
-        this.emit({ type: "EMOTION_CHANGED", emotion });
-      }
-    } catch {
-      // ignore
-    }
+    this.emit({ type: "MESSAGE_CHANGED", message: response.data.message! });
+    this.emit({ type: "EMOTION_CHANGED", emotion: response.data.emotion! });
   }
 }
 // // Create a TransformStream to process the emotion and message

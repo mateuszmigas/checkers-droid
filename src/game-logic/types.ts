@@ -24,11 +24,11 @@ export type CheckerValidMoveMap = CustomMap<
 >;
 
 export const aiPlayerEmotions = [
-  "Joy",
-  "Surprise",
-  "Frustration",
-  "Thoughtfulness",
-  "Sadness",
-];
+  "joy",
+  "surprise",
+  "frustration",
+  "thoughtfulness",
+  "sadness",
+] as const;
 export type AIPlayerEmotion = (typeof aiPlayerEmotions)[number];
 

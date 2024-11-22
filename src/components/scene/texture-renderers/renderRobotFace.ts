@@ -9,21 +9,35 @@ interface FaceParams {
 }
 
 const expressionParams: Record<AIPlayerEmotion, FaceParams> = {
-  happy: {
+  joy: {
     leftEyebrowAngle: -0.3,
     rightEyebrowAngle: 0.3,
     mouthWidth: 0.4,
     mouthHeight: 0.15,
     mouthY: 0.65,
   },
-  sad: {
+  sadness: {
     leftEyebrowAngle: 0.3,
     rightEyebrowAngle: -0.3,
     mouthWidth: 0.3,
     mouthHeight: 0.08,
     mouthY: 0.75,
   },
-  focused: {
+  thoughtfulness: {
+    leftEyebrowAngle: 0,
+    rightEyebrowAngle: 0,
+    mouthWidth: 0.25,
+    mouthHeight: 0.05,
+    mouthY: 0.7,
+  },
+  surprise: {
+    leftEyebrowAngle: 0,
+    rightEyebrowAngle: 0,
+    mouthWidth: 0.25,
+    mouthHeight: 0.05,
+    mouthY: 0.7,
+  },
+  frustration: {
     leftEyebrowAngle: 0,
     rightEyebrowAngle: 0,
     mouthWidth: 0.25,
@@ -84,3 +98,4 @@ export const renderRobotFace = (
 
   context.fillRect(mouthX, mouthY, mouthWidth, mouthHeight);
 };
+

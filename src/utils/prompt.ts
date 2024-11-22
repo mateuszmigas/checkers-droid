@@ -20,7 +20,7 @@ export const runWithStructuredOutput = async <T extends z.ZodType>(
     const parsed = JSON.parse(cleanJSONString(result));
     const validated = resultSchema.safeParse(parsed);
 
-    if (validated.success && validator?.(validated.data)) {
+    if (validated.success && (!validator || validator(validated.data))) {
       return {
         success: true,
         data: { ...defaultValue, ...validated.data },

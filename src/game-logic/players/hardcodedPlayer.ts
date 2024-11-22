@@ -68,34 +68,6 @@ export class HardcodedAIPlayer extends EventEmitter<AIPlayerEvents> {
     return null;
   }
 
-  async notify(gameEvents: GameEvent[]) {
-    const types = gameEvents.map((event) => event.type);
-
-    if (types.includes("PIECE_CAPTURED")) {
-      setTimeout(() => {
-        this.emit({
-          type: "MESSAGE_CHANGED",
-          message: "I'm so happy for you!",
-        });
-        this.emit({
-          type: "EMOTION_CHANGED",
-          emotion: "happy",
-        });
-      }, Math.random() * 1000);
-      return;
-    }
-    if (types.includes("PIECE_MOVED")) {
-      setTimeout(() => {
-        this.emit({
-          type: "MESSAGE_CHANGED",
-          message: "Oh no, you moved a piece!",
-        });
-        this.emit({
-          type: "EMOTION_CHANGED",
-          emotion: "sad",
-        });
-      }, Math.random() * 1000);
-    }
-  }
+  async notify(_gameEvents: GameEvent[]) {}
 }
 

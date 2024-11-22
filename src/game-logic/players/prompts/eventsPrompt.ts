@@ -1,5 +1,16 @@
 import { GameEvent } from "../../gameEvent";
-import { CheckerPosition, PlayerType } from "../../types";
+import { aiPlayerEmotions, CheckerPosition, PlayerType } from "../../types";
+import { z } from "zod";
+
+const resultSchema = z
+  .object({
+    message: z.string(),
+    emotion: z
+      .string()
+      .transform((val) => val.toLowerCase())
+      .pipe(z.enum(aiPlayerEmotions)),
+  })
+  .partial();
 
 export const mapEvent = (
   event: GameEvent,
@@ -44,10 +55,7 @@ export const mapEvent = (
   }
 };
 
-export const createEventsPrompt = (
-  events: GameEvent[],
-  aiPlayerType: PlayerType
-) => {
+const createEventsPrompt = (events: GameEvent[], aiPlayerType: PlayerType) => {
   const eventDescriptions = events
     .map((event) => mapEvent(event, aiPlayerType))
     .join("\n");
@@ -64,7 +72,7 @@ export const createEventsPrompt = (
 </Constraints>
 
 <Emotion Options>
-["Happy", "Sad", "Surprised", "Angry", "Confident", "Anxious", "Neutral"]
+["${aiPlayerEmotions.join(", ")}"]
 
 <Context Interpretation Guidelines>
 - Observe precise movement details
@@ -84,4 +92,14 @@ ${eventDescriptions}
 </Response Format>
   `;
 };
+
+export const createEventsPromptRequest = (
+  events: GameEvent[],
+  aiPlayerType: PlayerType,
+  defaultValue: z.infer<typeof resultSchema>
+) => ({
+  prompt: createEventsPrompt(events, aiPlayerType),
+  resultSchema,
+  defaultValue,
+});
 

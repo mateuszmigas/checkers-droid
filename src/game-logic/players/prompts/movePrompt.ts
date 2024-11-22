@@ -12,9 +12,6 @@ const consequenceMap: Record<MoveConsequence, string> = {
   EXPOSES_TO_OPPONENT_CAPTURE: "I risk being captured",
 };
 
-// const positionToString = (position: CheckerPosition) =>
-//   `(${position.row},${position.col})`;
-
 const mapConsequences = (consequences: MoveConsequence[]) => {
   if (consequences.length === 0) return "Neutral move";
   return consequences
