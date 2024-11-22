@@ -7,11 +7,12 @@ import {
 } from "../types";
 import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
-import { chromeApi, ChromeSession } from "@/chromeAI";
-import { createEventsPrompt, welcomePrompt } from "./aiPrompt";
-import { createMovePrompt } from "./prompts/movePrompt";
+import { chromeApi, ChromeAiSession } from "@/chromeAI";
+import { createMovePromptRequest } from "./prompts/movePrompt";
 import { createSystemPrompt } from "./prompts/systemPrompt";
-
+import { createWelcomePrompt } from "./prompts/welcomePrompt";
+import { createEventsPrompt } from "./prompts/eventsPrompt";
+import { runWithStructuredOutput } from "@/utils/prompt";
 export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
   | { type: "MESSAGE_CHANGED"; message: string | ReadableStream<string> };
@@ -56,33 +57,30 @@ const simulateMoveConsequences = (
 };
 
 export class AIPlayer extends EventEmitter<AIPlayerEvents> {
-  private session: ChromeSession | undefined;
+  private session: ChromeAiSession | undefined;
 
   constructor(private readonly playerType: PlayerType) {
     super();
 
-    chromeApi
-      .createSession(createSystemPrompt(playerType, "AI"))
-      .then((session) => {
-        this.session = session;
-        const promptStream = this.session.promptStreaming(welcomePrompt);
+    const systemPrompt = createSystemPrompt("AI");
+    chromeApi.createSession(systemPrompt).then((session) => {
+      this.session = session;
+      const promptStream = this.session.promptStreaming(createWelcomePrompt());
 
-        setTimeout(() => {
-          this.emit({
-            type: "MESSAGE_CHANGED",
-            message: promptStream,
-          });
-          this.emit({
-            type: "EMOTION_CHANGED",
-            emotion: "happy",
-          });
-        }, 100);
-      });
+      setTimeout(() => {
+        this.emit({
+          type: "MESSAGE_CHANGED",
+          message: promptStream,
+        });
+        this.emit({
+          type: "EMOTION_CHANGED",
+          emotion: "happy",
+        });
+      }, 100);
+    });
   }
 
-  async getMove(
-    gameState: GameState
-  ): Promise<{ from: CheckerPosition; to: CheckerPosition } | null> {
+  async getMove(gameState: GameState) {
     const moves = getPlayerValidMoves(this.playerType, gameState)
       .entries()
       .flatMap(([position, moves]) =>
@@ -97,19 +95,18 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
 
     if (moves.length === 0) return null;
 
-    try {
-      const prompt = createMovePrompt(moves);
-      const response = await this.session!.prompt(prompt);
-      const parsedResponse = JSON.parse(response) as {
-        shot: number;
-      };
-      const isValidIndex =
-        parsedResponse.shot >= 0 && parsedResponse.shot < moves.length;
-      const move = isValidIndex ? moves[parsedResponse.shot] : moves[0];
-      return move;
-    } catch {
-      return moves[0];
-    }
+    const promptRequest = createMovePromptRequest(
+      moves,
+      { shot: 0 },
+      ({ shot }) => shot >= 0 && shot < moves.length
+    );
+
+    const response = await runWithStructuredOutput(
+      this.session!,
+      promptRequest
+    );
+
+    return moves[response.data.shot];
   }
 
   async notify(gameState: GameState, gameEvents: GameEvent[]) {
@@ -120,8 +117,8 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
     const filteredEvents = gameEvents.filter(
       (event) => event.type !== "GAME_OVER"
     );
-    const prompt = createEventsPrompt(filteredEvents, this.playerType);
 
+    const prompt = createEventsPrompt(filteredEvents, this.playerType);
     const response = await this.session!.prompt(prompt);
 
     try {

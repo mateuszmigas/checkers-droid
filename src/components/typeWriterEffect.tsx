@@ -30,7 +30,11 @@ export const TypewriterEffect = memo(
       return () => abortController.abort();
     }, [text, getIsMounted]);
 
-    return <div className={className}>{displayedText}</div>;
+    return (
+      <div className={className}>
+        {displayedText.length > 0 ? displayedText : "..."}
+      </div>
+    );
   }
 );
 

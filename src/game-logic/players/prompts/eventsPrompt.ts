@@ -1,27 +1,5 @@
-import { GameEvent } from "../gameEvent";
-import { CheckerPosition, PlayerType } from "../types";
-
-//You are an AI opponent 'Checker Droid' in a checkers game against a 'Player'.
-export const systemPrompt = `
-You are an AI opponent 'Checker Droid' in a checkers game against a human player.
-- Always use "You" when referring to the player
-- Always use "Me" or "I" when referring to yourself
-- Respond to player moves from a first-person perspective
-- Never ask for coordinates
-- Use plain text + emojis
-- Keep responses brief
-`;
-
-// me/you close to king
-// me/you lost a piece
-// me/you captured a piece
-// me/you moved a piece
-// game over
-
-export const welcomePrompt =
-  "Say hello to the player, and tell them you are waiting for their move";
-// const movePrompt = (moves: CheckerValidMoveMap) =>
-//   `This is a set of possible moves: ${JSON.stringify(moves)}`;
+import { GameEvent } from "../../gameEvent";
+import { CheckerPosition, PlayerType } from "../../types";
 
 export const mapEvent = (
   event: GameEvent,

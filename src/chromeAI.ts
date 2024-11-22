@@ -1,6 +1,6 @@
 import { PromiseQueue } from "./utils/promise";
 
-export type ChromeSession = {
+export type ChromeAiSession = {
   prompt: (prompt: string) => Promise<string>;
   promptStreaming: (prompt: string) => ReadableStream<string>;
   destroy: () => void;
@@ -17,7 +17,7 @@ export const chromeApi = {
       return false;
     }
   },
-  createSession: async (systemPrompt: string): Promise<ChromeSession> => {
+  createSession: async (systemPrompt: string): Promise<ChromeAiSession> => {
     const languageModel = await window.ai.languageModel.create({
       systemPrompt,
     });
@@ -44,3 +44,4 @@ export const chromeApi = {
     return session;
   },
 };
+

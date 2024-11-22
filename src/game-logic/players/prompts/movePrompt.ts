@@ -1,5 +1,10 @@
 import { CheckerPosition } from "@/game-logic/types";
 import { MoveConsequence } from "../aiPlayer";
+import { z } from "zod";
+
+const resultSchema = z.object({
+  shot: z.number(),
+});
 
 const consequenceMap: Record<MoveConsequence, string> = {
   TURN_DIDNT_CHANGE: "I keep my turn",
@@ -54,27 +59,22 @@ ${mapMoves(moves)}
 </Response Format>
 `;
 
-/* example
-Given a set of possible moves select the best and return index
+export const createMovePromptRequest = (
+  moves: {
+    from: CheckerPosition;
+    to: CheckerPosition;
+    consequences: MoveConsequence[];
+  }[],
+  defaultValue: z.infer<typeof resultSchema>,
+  validator?: (result: z.infer<typeof resultSchema>) => boolean | string
+) => ({
+  prompt: createMovePrompt(moves),
+  resultSchema,
+  defaultValue,
+  validator,
+});
 
-<Moves>
-1. From: (5,0), To: (4,1), Consequences: None
-2. From: (5,2), To: (4,3), Consequences: None
-3. From: (5,2), To: (4,1), Consequences: None
-4. From: (5,4), To: (4,5), Consequences: Exposes to opponent capture
-5. From: (5,4), To: (4,3), Consequences: None
-6. From: (5,6), To: (4,7), Consequences: None
-7. From: (5,6), To: (4,5), Consequences: Exposes to opponent capture
-</Moves>
-
-<Response Format>
-{
-  "shot": index
-}
-</Response Format>
-*/
-
-// const systemPrompt = `
+// const systemPrompt = `;
 // You're a billiards bot playing as a skilled but casual player. Given a set of possible shots, each with:
 // - Type: direct, wall-first, double wall hit
 // - Chance to score (percentage)
