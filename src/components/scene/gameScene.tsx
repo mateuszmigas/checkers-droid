@@ -1,7 +1,6 @@
 import { CheckerGrid } from "./checkerGrid";
 import { Checker } from "./checker";
 import { MoveIndicator } from "./moveIndicator";
-import { TurnIndicator } from "./turnIndicator";
 import { Robot } from "./robot";
 import { OrbitControls, Stats } from "@react-three/drei";
 import { Room } from "./room";
@@ -45,10 +44,6 @@ export const GameScene = memo(() => {
       <Room />
       <CheckerGrid />
 
-      {gameState.gameStatus !== "GAME_OVER" && (
-        <TurnIndicator player={gameState.gameStatus} />
-      )}
-
       {/* Checkers */}
       {mapPieces(gameState.grid).map((piece) => (
         <Checker
@@ -81,8 +76,8 @@ export const GameScene = memo(() => {
       )}
 
       {/* Score Boards */}
-      <PlayerScoreBoard position={[0, 0.1, 4]} playerType={"PLAYER_ONE"} />
-      <PlayerScoreBoard position={[0, 0.1, -4]} playerType={"PLAYER_TWO"} />
+      <PlayerScoreBoard playerType={"PLAYER_ONE"} />
+      <PlayerScoreBoard playerType={"PLAYER_TWO"} />
 
       <OrbitControls
         target={[0, constants.tableHeight, 0]}

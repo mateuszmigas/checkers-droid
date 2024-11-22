@@ -1,37 +1,132 @@
-interface RenderBoardProps {
-  context: CanvasRenderingContext2D;
-  events: string[];
-}
+const padding = 10;
+const color = "#0DE8E9";
 
-export const renderBoard = ({ context, events }: RenderBoardProps) => {
+type Rectangle = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+const drawScoreRect = (
+  context: CanvasRenderingContext2D,
+  rect: Rectangle,
+  scored: number
+) => {
+  context.fillStyle = color;
+  const sections = 12;
+  const gap = 2;
+  const sectionHeight =
+    (rect.height - padding * 2 - gap * (sections - 1)) / sections;
+  const sectionWidth = rect.width - padding * 2;
+  const startX = rect.x + padding;
+
+  for (let i = 0; i < scored; i++) {
+    const y =
+      rect.y + rect.height - padding - (i + 1) * (sectionHeight + gap) + gap;
+    context.fillRect(startX, y, sectionWidth, sectionHeight);
+  }
+};
+
+const drawTurnRect = (
+  context: CanvasRenderingContext2D,
+  rect: Rectangle,
+  text: string
+) => {
+  context.fillStyle = color;
+  context.font = "bold 80px Orbitron, sans-serif";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  const centerX = rect.x + rect.width / 2;
+  const centerY = rect.y + rect.height / 2;
+  context.fillText(text.toUpperCase(), centerX, centerY);
+};
+
+const drawEventsRect = (
+  context: CanvasRenderingContext2D,
+  rect: Rectangle,
+  events: string[]
+) => {
+  context.fillStyle = color;
+  context.font = "20px Orbitron, sans-serif";
+  context.textAlign = "left";
+  context.textBaseline = "top";
+
+  const maxEvents = 8;
+  const lineHeight = 28;
+  const textX = rect.x + padding;
+  const startY = rect.y + padding;
+
+  const recentEvents = events.slice(-maxEvents);
+
+  recentEvents.forEach((event, index) => {
+    const textY = startY + index * lineHeight;
+    const maxWidth = rect.width - padding * 2;
+    context.fillText(event, textX, textY, maxWidth);
+  });
+};
+
+export const renderBoard = (
+  context: CanvasRenderingContext2D,
+  events: string[]
+) => {
   const { width, height } = context.canvas;
 
-  // Clear background
-  context.fillStyle = "rgba(0, 0, 0, 0.9)";
+  context.fillStyle = "black";
   context.fillRect(0, 0, width, height);
 
-  // Add matrix-style gradient with blue
-  const gradient = context.createLinearGradient(0, 0, 0, height);
-  gradient.addColorStop(0, "rgba(0, 149, 255, 0.1)");
-  gradient.addColorStop(1, "rgba(0, 149, 255, 0.2)");
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, width, height);
+  context.strokeStyle = color;
+  context.lineWidth = 2;
 
-  // Setup text style for main text
-  context.fillStyle = "#0095ff"; // Cyberpunk blue
-  context.font = "bold 56px 'Courier New'";
-  context.shadowColor = "#0095ff";
-  context.shadowBlur = 10;
+  /* Score */
+  const scoreRect: Rectangle = {
+    x: padding,
+    y: padding,
+    width: width * 0.1 - padding,
+    height: height - 2 * padding,
+  };
+  context.strokeRect(
+    scoreRect.x,
+    scoreRect.y,
+    scoreRect.width,
+    scoreRect.height
+  );
+  drawScoreRect(context, scoreRect, 5);
 
-  // Render events from bottom to top with a typing effect
-  events.reverse().forEach((event, index) => {
-    const y = height - (index + 1) * 70;
-    const opacity = 1 - index * 0.15;
-    context.fillStyle = `rgba(0, 149, 255, ${opacity})`;
-    context.fillText(event, 30, y);
-  });
+  /* Turn */
+  const turnRect: Rectangle = {
+    x: scoreRect.x + scoreRect.width + padding,
+    y: padding,
+    width: width * 0.5 - padding,
+    height: height - 2 * padding,
+  };
 
-  // Reset shadow
-  context.shadowBlur = 0;
+  context.strokeRect(turnRect.x, turnRect.y, turnRect.width, turnRect.height);
+  drawTurnRect(context, turnRect, "You Lose");
+
+  /* Events */
+  const eventsRect: Rectangle = {
+    x: turnRect.x + turnRect.width + padding,
+    y: padding,
+    width: width * 0.4 - padding * 2,
+    height: height - 2 * padding,
+  };
+
+  context.strokeRect(
+    eventsRect.x,
+    eventsRect.y,
+    eventsRect.width,
+    eventsRect.height
+  );
+  drawEventsRect(context, eventsRect, [
+    "Player 1 draws a card",
+    "Robot plays Ace of Spades",
+    "Player 1 wins the trick",
+    "Robot shuffles the deck",
+    "New round begins",
+    "Player 1 leads with King of Hearts",
+    "Robot follows with Queen of Hearts",
+    "Player 1 takes the lead",
+  ]);
 };
 

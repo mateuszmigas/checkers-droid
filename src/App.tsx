@@ -38,8 +38,8 @@ export const App = () => {
                 <Canvas
                   camera={
                     gameSession.getPlayer("PLAYER_ONE").type === "HUMAN"
-                      ? { position: [0, 6, -7] }
-                      : { position: [-7, 6, 0] }
+                      ? { position: [0, 7, -7.5] }
+                      : { position: [-7.5, 7, 0] }
                   }
                 >
                   <GameScene />
