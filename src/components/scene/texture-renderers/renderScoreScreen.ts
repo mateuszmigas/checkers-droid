@@ -36,12 +36,24 @@ const drawTurnRect = (
   text: string
 ) => {
   context.fillStyle = color;
-  context.font = "bold 80px Orbitron, sans-serif";
+
+  const lines = text.toUpperCase().split("\n");
+  const longestLine = Math.max(...lines.map((line) => line.length));
+  const fontSize = 80 - longestLine * 2;
+  const lineHeight = fontSize * 1.2;
+
+  context.font = `bold ${fontSize}px Orbitron, sans-serif`;
   context.textAlign = "center";
   context.textBaseline = "middle";
+
+  const totalHeight = lineHeight * lines.length;
+  const startY = rect.y + (rect.height - totalHeight) / 2 + lineHeight / 2;
   const centerX = rect.x + rect.width / 2;
-  const centerY = rect.y + rect.height / 2;
-  context.fillText(text.toUpperCase(), centerX, centerY);
+
+  lines.forEach((line, index) => {
+    const centerY = startY + index * lineHeight;
+    context.fillText(line, centerX, centerY);
+  });
 };
 
 const drawEventsRect = (
@@ -70,6 +82,8 @@ const drawEventsRect = (
 
 export const renderScoreScreen = (
   context: OffscreenCanvasRenderingContext2D,
+  scoredPieces: number,
+  playerTurn: string,
   events: string[]
 ) => {
   const { width, height } = context.canvas;
@@ -93,7 +107,7 @@ export const renderScoreScreen = (
     scoreRect.width,
     scoreRect.height
   );
-  drawScoreRect(context, scoreRect, 5);
+  drawScoreRect(context, scoreRect, scoredPieces);
 
   /* Turn */
   const turnRect: Rectangle = {
@@ -104,7 +118,7 @@ export const renderScoreScreen = (
   };
 
   context.strokeRect(turnRect.x, turnRect.y, turnRect.width, turnRect.height);
-  drawTurnRect(context, turnRect, "You Lose");
+  drawTurnRect(context, turnRect, playerTurn);
 
   /* Events */
   const eventsRect: Rectangle = {

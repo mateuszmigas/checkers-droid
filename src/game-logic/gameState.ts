@@ -8,6 +8,8 @@ import {
   CheckerValidMoveMap,
 } from "./types";
 
+const TOTAL_PIECES_COUNT = 12;
+
 export type GameAction = {
   type: "MOVE_PIECE";
   from: CheckerPosition;
@@ -23,7 +25,8 @@ type CheckerGridCell = CheckerPiece | null;
 
 export type GameState = {
   grid: CheckerGridCell[][]; // 8x8 grid representing the board
-  gameStatus: PlayerType | "GAME_OVER";
+  currentTurn: PlayerType;
+  winner?: PlayerType | "DRAW";
 };
 
 export const createInitialGameState = (): GameState => {
@@ -60,7 +63,7 @@ export const createInitialGameState = (): GameState => {
 
   return {
     grid,
-    gameStatus: "PLAYER_ONE",
+    currentTurn: "PLAYER_ONE",
   };
 };
 
@@ -86,6 +89,7 @@ export const getPlayerValidMoves = (
   player: PlayerType,
   gameState: GameState
 ): CheckerValidMoveMap => {
+  if (gameState.winner) return createPositionMap();
   const movesMap = createPositionMap();
 
   // First check for pieces that can capture
@@ -296,7 +300,7 @@ export const updateGameState = (
   state: GameState,
   action: GameAction
 ): GameStateUpdate => {
-  if (state.gameStatus === "GAME_OVER") {
+  if (state.winner) {
     return { state, events: [{ type: "INVALID_MOVE" }] };
   }
 
@@ -307,12 +311,12 @@ export const updateGameState = (
       }
 
       const piece = getPieceAtPosition(state, action.from);
-      if (!piece || piece.player !== state.gameStatus) {
+      if (!piece || piece.player !== state.currentTurn) {
         return checkForNoMoves(state);
       }
 
       // Get valid moves for the selected piece
-      const validMovesMap = getPlayerValidMoves(state.gameStatus, state);
+      const validMovesMap = getPlayerValidMoves(state.currentTurn, state);
       const validMovesForPiece = validMovesMap.get(action.from) || [];
 
       // Check if the target position is in the valid moves
@@ -350,7 +354,7 @@ export const updateGameState = (
           events.push({
             type: "PIECE_CAPTURED",
             position: { row: jumpedRow, col: jumpedCol },
-            player: state.gameStatus,
+            player: state.currentTurn,
           });
         }
       }
@@ -370,7 +374,7 @@ export const updateGameState = (
         events.push({
           type: "PIECE_CROWNED",
           position: action.to,
-          player: state.gameStatus,
+          player: state.currentTurn,
         });
       }
 
@@ -378,7 +382,7 @@ export const updateGameState = (
         type: "PIECE_MOVED",
         from: action.from,
         to: action.to,
-        player: state.gameStatus,
+        player: state.currentTurn,
       });
 
       // Check if this move was a capture move
@@ -401,7 +405,7 @@ export const updateGameState = (
 
       // If it wasn't a capture move, or there are no additional captures, change turns
       const nextPlayer =
-        state.gameStatus === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
+        state.currentTurn === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
       events.push({
         type: "TURN_CHANGED",
         player: nextPlayer,
@@ -419,7 +423,7 @@ export const updateGameState = (
           state: {
             ...state,
             grid: newGrid,
-            gameStatus: "GAME_OVER",
+            winner: piece.player,
           },
           events: [...events, { type: "GAME_OVER", winner: piece.player }],
         };
@@ -429,7 +433,7 @@ export const updateGameState = (
       const opponentMoves = getPlayerValidMoves(nextPlayer, {
         ...state,
         grid: newGrid,
-        gameStatus: nextPlayer,
+        currentTurn: nextPlayer,
       });
 
       // If opponent has no valid moves, current player wins
@@ -438,7 +442,7 @@ export const updateGameState = (
           state: {
             ...state,
             grid: newGrid,
-            gameStatus: "GAME_OVER",
+            winner: piece.player,
           },
           events: [...events, { type: "GAME_OVER", winner: piece.player }],
         };
@@ -452,12 +456,12 @@ export const updateGameState = (
       const playerOneCaptures = getPlayerCaptures("PLAYER_ONE", {
         ...state,
         grid: newGrid,
-        gameStatus: "PLAYER_ONE",
+        currentTurn: "PLAYER_ONE",
       });
       const playerTwoCaptures = getPlayerCaptures("PLAYER_TWO", {
         ...state,
         grid: newGrid,
-        gameStatus: "PLAYER_TWO",
+        currentTurn: "PLAYER_TWO",
       });
       const noCapturePossible =
         playerOneCaptures.length === 0 && playerTwoCaptures.length === 0;
@@ -467,9 +471,9 @@ export const updateGameState = (
           state: {
             ...state,
             grid: newGrid,
-            gameStatus: "GAME_OVER",
+            winner: "DRAW",
           },
-          events: [...events, { type: "GAME_OVER", result: "DRAW" }],
+          events: [...events, { type: "GAME_OVER", winner: "DRAW" }],
         };
       }
 
@@ -477,7 +481,7 @@ export const updateGameState = (
         state: {
           ...state,
           grid: newGrid,
-          gameStatus: nextPlayer,
+          currentTurn: nextPlayer,
         },
         events,
       };
@@ -488,16 +492,24 @@ export const updateGameState = (
 };
 
 const checkForNoMoves = (state: GameState): GameStateUpdate => {
-  const currentPlayer = state.gameStatus as PlayerType;
+  const currentPlayer = state.currentTurn as PlayerType;
   const validMoves = getPlayerValidMoves(currentPlayer, state);
 
   if (validMoves.size() === 0) {
     const winner = currentPlayer === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
     return {
-      state: { ...state, gameStatus: "GAME_OVER" },
+      state: { ...state, winner },
       events: [{ type: "INVALID_MOVE" }, { type: "GAME_OVER", winner }],
     };
   }
 
   return { state, events: [{ type: "INVALID_MOVE" }] };
 };
+
+export const calculateScoredPieces = (state: GameState, player: PlayerType) =>
+  TOTAL_PIECES_COUNT -
+  state.grid
+    .flat()
+    .filter(
+      (cell): cell is CheckerPiece => cell !== null && cell.player !== player
+    ).length;

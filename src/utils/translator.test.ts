@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { translateEvent } from "./translator";
+import { translateEvent, translatePlayerTurn } from "./translator";
 import { GameEvent } from "@/game-logic/gameEvent";
 import { PlayerType } from "@/game-logic/types";
+import { GameState } from "@/game-logic/gameState";
 
 describe("translateEvent", () => {
   it.each([
@@ -16,7 +17,7 @@ describe("translateEvent", () => {
       expected: "Game Over - Opponent Wins!",
     },
     {
-      event: { type: "GAME_OVER", result: "DRAW" },
+      event: { type: "GAME_OVER", winner: "DRAW" },
       player: "PLAYER_ONE",
       expected: "Game Over - It's a Draw!",
     },
@@ -94,6 +95,46 @@ describe("translateEvent", () => {
     "should translate %s event for %s to %s",
     ({ event, player, expected }) => {
       const result = translateEvent(event, player);
+      expect(result).toBe(expected);
+    }
+  );
+});
+
+describe("translatePlayerTurn", () => {
+  it.each([
+    {
+      gameState: { currentTurn: "PLAYER_ONE" },
+      player: "PLAYER_ONE",
+      expected: "Your Turn",
+    },
+    {
+      gameState: { currentTurn: "PLAYER_TWO" },
+      player: "PLAYER_ONE",
+      expected: "Opponent's\nTurn",
+    },
+    {
+      gameState: { winner: "PLAYER_ONE" },
+      player: "PLAYER_ONE",
+      expected: "Game Over\nYou Win!",
+    },
+    {
+      gameState: { winner: "PLAYER_TWO" },
+      player: "PLAYER_ONE",
+      expected: "Game Over\nOpponent Wins!",
+    },
+    {
+      gameState: { winner: "DRAW" },
+      player: "PLAYER_ONE",
+      expected: "Game Over\nIt's a Draw!",
+    },
+  ] as {
+    gameState: GameState;
+    player: PlayerType;
+    expected: string;
+  }[])(
+    "should translate %s game state for %s to %s",
+    ({ gameState, player, expected }) => {
+      const result = translatePlayerTurn(gameState, player);
       expect(result).toBe(expected);
     }
   );

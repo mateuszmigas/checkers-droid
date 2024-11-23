@@ -62,8 +62,8 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
   }
 
   private getCurrentPlayer(): GamePlayer | null {
-    if (this.gameState.gameStatus === "PLAYER_ONE") return this.playerOne;
-    if (this.gameState.gameStatus === "PLAYER_TWO") return this.playerTwo;
+    if (this.gameState.currentTurn === "PLAYER_ONE") return this.playerOne;
+    if (this.gameState.currentTurn === "PLAYER_TWO") return this.playerTwo;
     return null;
   }
 
@@ -74,7 +74,7 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     const piece = this.gameState.grid[position.row][position.col];
     if (!piece) return;
 
-    if (piece.player === this.gameState.gameStatus) {
+    if (piece.player === this.gameState.currentTurn) {
       if (
         this.selectedCheckerPosition?.row === position.row &&
         this.selectedCheckerPosition?.col === position.col
@@ -92,14 +92,14 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     if (!currentPlayer || currentPlayer.type !== "HUMAN") return;
 
     if (this.selectedCheckerPosition) {
-      const previousPlayer = this.gameState.gameStatus;
+      const previousPlayer = this.gameState.currentTurn;
       this.invokeGameAction({
         type: "MOVE_PIECE",
         from: this.selectedCheckerPosition,
         to: targetPosition,
       });
 
-      if (this.gameState.gameStatus !== previousPlayer) {
+      if (this.gameState.currentTurn !== previousPlayer) {
         this.selectedCheckerPosition = null;
       } else {
         this.selectedCheckerPosition = targetPosition;
@@ -146,7 +146,7 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     if (!currentPlayer || currentPlayer.type !== "HUMAN") return null;
 
     return getPlayerValidMoves(
-      this.gameState.gameStatus as PlayerType,
+      this.gameState.currentTurn as PlayerType,
       this.gameState
     );
   }

@@ -23,7 +23,7 @@ const simulateMoveConsequences = (
   gameState: GameState,
   move: { from: CheckerPosition; to: CheckerPosition }
 ): MoveConsequence[] => {
-  const me = gameState.gameStatus as PlayerType;
+  const me = gameState.currentTurn as PlayerType;
   const { state, events } = updateGameState(gameState, {
     type: "MOVE_PIECE",
     ...move,
@@ -102,8 +102,7 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
   }
 
   async notify(gameState: GameState, gameEvents: GameEvent[]) {
-    return;
-    if (gameState.gameStatus === this.playerType) {
+    if (gameState.currentTurn === this.playerType) {
       return;
     }
 

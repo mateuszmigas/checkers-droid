@@ -13,7 +13,7 @@ const createEmptyGameState = (
 ): GameState => {
   const gameState = createInitialGameState();
   gameState.grid.forEach((row) => row.fill(null));
-  gameState.gameStatus = currentPlayer;
+  gameState.currentTurn = currentPlayer;
   return gameState;
 };
 
@@ -73,7 +73,7 @@ describe("turn order", () => {
       to: { row: 3, col: 2 },
     });
 
-    expect(result.state.gameStatus).toBe("PLAYER_TWO");
+    expect(result.state.currentTurn).toBe("PLAYER_TWO");
     expect(result.events).toContainEqual({
       type: "TURN_CHANGED",
       player: "PLAYER_TWO",
@@ -86,7 +86,7 @@ describe("turn order", () => {
     });
 
     expect(invalidMove.events).toContainEqual({ type: "INVALID_MOVE" });
-    expect(invalidMove.state.gameStatus).toBe("PLAYER_TWO");
+    expect(invalidMove.state.currentTurn).toBe("PLAYER_TWO");
   });
 
   test("player one (darker pieces) moves first", () => {
@@ -99,7 +99,7 @@ describe("turn order", () => {
     });
 
     expect(invalidMove.events).toContainEqual({ type: "INVALID_MOVE" });
-    expect(gameState.gameStatus).toBe("PLAYER_ONE");
+    expect(gameState.currentTurn).toBe("PLAYER_ONE");
 
     const validMove = updateGameState(gameState, {
       type: "MOVE_PIECE",
@@ -108,7 +108,7 @@ describe("turn order", () => {
     });
 
     expect(validMove.events).not.toContainEqual({ type: "INVALID_MOVE" });
-    expect(validMove.state.gameStatus).toBe("PLAYER_TWO");
+    expect(validMove.state.currentTurn).toBe("PLAYER_TWO");
   });
 });
 
@@ -619,7 +619,7 @@ describe("capturing rules", () => {
         player: "PLAYER_ONE",
       });
 
-      expect(firstCapture.state.gameStatus).toBe("PLAYER_ONE"); // Turn shouldn't change yet
+      expect(firstCapture.state.currentTurn).toBe("PLAYER_ONE"); // Turn shouldn't change yet
 
       // Second capture
       const secondCapture = updateGameState(firstCapture.state, {
@@ -637,7 +637,7 @@ describe("capturing rules", () => {
         position: { row: 5, col: 5 },
         player: "PLAYER_ONE",
       });
-      expect(secondCapture.state.gameStatus).toBe("PLAYER_TWO"); // Turn should change after all captures
+      expect(secondCapture.state.currentTurn).toBe("PLAYER_TWO"); // Turn should change after all captures
     });
   });
 
@@ -796,7 +796,7 @@ describe("capturing rules", () => {
         position: { row: 3, col: 3 },
         player: "PLAYER_ONE",
       });
-      expect(firstCapture.state.gameStatus).toBe("PLAYER_ONE"); // Turn shouldn't change yet
+      expect(firstCapture.state.currentTurn).toBe("PLAYER_ONE"); // Turn shouldn't change yet
 
       // Change direction for second capture
       const secondCapture = updateGameState(firstCapture.state, {
@@ -814,7 +814,7 @@ describe("capturing rules", () => {
         position: { row: 5, col: 3 },
         player: "PLAYER_ONE",
       });
-      expect(secondCapture.state.gameStatus).toBe("PLAYER_TWO"); // Turn should change after all captures
+      expect(secondCapture.state.currentTurn).toBe("PLAYER_TWO"); // Turn should change after all captures
     });
   });
 });
@@ -975,7 +975,7 @@ describe("winning conditions", () => {
       to: { row: 6, col: 5 },
     });
 
-    expect(result.state.gameStatus).toBe("GAME_OVER");
+    expect(result.state.winner).toBe("PLAYER_ONE");
     expect(result.events).toContainEqual({
       type: "GAME_OVER",
       winner: "PLAYER_ONE",
@@ -1006,7 +1006,7 @@ describe("winning conditions", () => {
 
     // Block all possible moves
     gameState.grid[1][1] = playerOnePieces[0];
-    gameState.gameStatus = "PLAYER_TWO"; // Set it to PLAYER_TWO's turn
+    gameState.currentTurn = "PLAYER_TWO"; // Set it to PLAYER_TWO's turn
 
     // Attempt to move - should result in game over since no moves are possible
     const result = updateGameState(gameState, {
@@ -1020,7 +1020,7 @@ describe("winning conditions", () => {
       type: "GAME_OVER",
       winner: "PLAYER_ONE",
     });
-    expect(result.state.gameStatus).toBe("GAME_OVER");
+    expect(result.state.winner).toBe("PLAYER_ONE");
     expect(getPlayerValidMoves("PLAYER_TWO", gameState).size()).toBe(0);
   });
 });

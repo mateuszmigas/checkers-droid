@@ -13,7 +13,7 @@ import { useEventListener } from "@/components/ui/hooks/useEventListener";
 import { useTriggerRender } from "@/components/ui/hooks/useTriggerRender";
 import { mapPieces } from "@/utils/board";
 import { memo } from "react";
-import { PlayerScoreBoard } from "./playerScoreBoard";
+import { PlayerScoreScreen } from "./playerScoreScreen";
 import { constants } from "./constants";
 import { useSelectableCheckerTexture } from "./hooks/useSelectableCheckerTexture";
 import { useSelectedCheckerTexture } from "./hooks/useSelectedCheckerTexture";
@@ -92,8 +92,8 @@ export const GameScene = memo(() => {
       )}
 
       {/* Score Boards */}
-      <PlayerScoreBoard playerType={"PLAYER_ONE"} />
-      <PlayerScoreBoard playerType={"PLAYER_TWO"} />
+      <PlayerScoreScreen playerType={"PLAYER_ONE"} />
+      <PlayerScoreScreen playerType={"PLAYER_TWO"} />
 
       <OrbitControls
         target={[0, constants.tableHeight, 0]}
@@ -106,4 +106,3 @@ export const GameScene = memo(() => {
     </>
   );
 });
-
