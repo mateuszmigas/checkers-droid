@@ -12,7 +12,7 @@ export const App = (props: { aiAvailable: boolean }) => {
 
   // //temp
   // useEffect(() => {
-  //   const gs = new GameSession("HUMAN_VS_AI");
+  //   const gs = new GameSession("HUMAN_VS_AI", aiAvailable);
   //   setGameSession(gs);
 
   //   gs.on("GAME_OVER", () => {
@@ -54,4 +54,3 @@ export const App = (props: { aiAvailable: boolean }) => {
     </GameSessionContext.Provider>
   );
 };
-

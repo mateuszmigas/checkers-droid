@@ -1,48 +1,49 @@
 import { AIPlayerEmotion } from "@/game-logic/types";
+import { constants } from "../constants";
 
-interface FaceParams {
+type FaceParams = {
   leftEyebrowAngle: number;
   rightEyebrowAngle: number;
   mouthWidth: number;
   mouthHeight: number;
   mouthY: number;
-}
+};
 
 const expressionParams: Record<AIPlayerEmotion, FaceParams> = {
   joy: {
-    leftEyebrowAngle: -0.3,
-    rightEyebrowAngle: 0.3,
-    mouthWidth: 0.4,
-    mouthHeight: 0.15,
-    mouthY: 0.65,
-  },
-  sadness: {
-    leftEyebrowAngle: 0.3,
-    rightEyebrowAngle: -0.3,
-    mouthWidth: 0.3,
-    mouthHeight: 0.08,
-    mouthY: 0.75,
+    leftEyebrowAngle: -0.2,
+    rightEyebrowAngle: 0.2,
+    mouthWidth: 0.5,
+    mouthHeight: 0.2,
+    mouthY: 0.6,
   },
   thoughtfulness: {
-    leftEyebrowAngle: 0,
-    rightEyebrowAngle: 0,
-    mouthWidth: 0.25,
+    leftEyebrowAngle: 0.1,
+    rightEyebrowAngle: 0.1,
+    mouthWidth: 0.3,
     mouthHeight: 0.05,
+    mouthY: 0.65,
+  },
+  frustration: {
+    leftEyebrowAngle: 0.2,
+    rightEyebrowAngle: -0.2,
+    mouthWidth: 0.3,
+    mouthHeight: 0.1,
+    mouthY: 0.7,
+  },
+  sadness: {
+    leftEyebrowAngle: 0.4,
+    rightEyebrowAngle: -0.4,
+    mouthWidth: 0.4,
+    mouthHeight: 0.1,
     mouthY: 0.7,
   },
   surprise: {
-    leftEyebrowAngle: 0,
-    rightEyebrowAngle: 0,
-    mouthWidth: 0.25,
-    mouthHeight: 0.05,
-    mouthY: 0.7,
-  },
-  frustration: {
-    leftEyebrowAngle: 0,
-    rightEyebrowAngle: 0,
-    mouthWidth: 0.25,
-    mouthHeight: 0.05,
-    mouthY: 0.7,
+    leftEyebrowAngle: -0.1,
+    rightEyebrowAngle: -0.1,
+    mouthWidth: 0.6,
+    mouthHeight: 0.25,
+    mouthY: 0.55,
   },
 };
 
@@ -58,8 +59,8 @@ export const renderRobotFace = (
   context.fillRect(0, 0, width, height);
 
   // Common settings for drawing
-  context.strokeStyle = "#00DAEF";
-  context.fillStyle = "#00DAEF";
+  context.strokeStyle = constants.screenColor;
+  context.fillStyle = constants.screenColor;
   context.lineWidth = 20;
 
   // Draw eyes (always circles)

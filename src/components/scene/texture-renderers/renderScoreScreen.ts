@@ -1,5 +1,7 @@
+import { constants } from "../constants";
+
 const padding = 10;
-const color = "#0DE8E9";
+const color = constants.screenColor;
 
 type Rectangle = {
   x: number;

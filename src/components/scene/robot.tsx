@@ -10,7 +10,6 @@ import { useEventListener } from "@/components/ui/hooks/useEventListener";
 import { Group } from "three";
 import { Html } from "@react-three/drei/web/Html";
 import { RoundedBox } from "@react-three/drei/core/RoundedBox";
-import { Box } from "@react-three/drei/core/shapes";
 
 extend({ Group });
 
@@ -86,14 +85,11 @@ export const Robot = (props: RobotProps) => {
         <RoundedBox args={[1, 0.9, 0.75]} radius={0.2} smoothness={5}>
           <meshStandardMaterial color={color} roughness={0.1} />
         </RoundedBox>
-        <Box args={[0.65, 0.5, 0.25]} position={[0, 0, 0.3]}>
-          <meshBasicMaterial
-            attach="material-4"
-            map={faceTextureRef.current}
-            transparent={true}
-            color={[1, 1, 1]}
-          />
-        </Box>
+        {/* Face */}
+        <mesh position={[0, 0, 0.38]}>
+          <planeGeometry args={[0.65, 0.5]} />
+          <meshBasicMaterial map={faceTextureRef.current} transparent={true} />
+        </mesh>
       </group>
 
       {/* Torso */}
@@ -151,4 +147,3 @@ export const Robot = (props: RobotProps) => {
     </group>
   );
 };
-
