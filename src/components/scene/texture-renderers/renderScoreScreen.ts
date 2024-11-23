@@ -1,7 +1,4 @@
-import { constants } from "../constants";
-
 const padding = 10;
-const color = constants.screenColor;
 
 type Rectangle = {
   x: number;
@@ -13,7 +10,8 @@ type Rectangle = {
 const drawScoreRect = (
   context: OffscreenCanvasRenderingContext2D,
   rect: Rectangle,
-  scored: number
+  scored: number,
+  color: string
 ) => {
   context.fillStyle = color;
   const sections = 12;
@@ -33,7 +31,8 @@ const drawScoreRect = (
 const drawTurnRect = (
   context: OffscreenCanvasRenderingContext2D,
   rect: Rectangle,
-  text: string
+  text: string,
+  color: string
 ) => {
   context.fillStyle = color;
 
@@ -59,7 +58,8 @@ const drawTurnRect = (
 const drawEventsRect = (
   context: OffscreenCanvasRenderingContext2D,
   rect: Rectangle,
-  events: string[]
+  events: string[],
+  color: string
 ) => {
   context.fillStyle = color;
   context.font = "20px Orbitron, sans-serif";
@@ -83,8 +83,9 @@ const drawEventsRect = (
 export const renderScoreScreen = (
   context: OffscreenCanvasRenderingContext2D,
   scoredPieces: number,
-  playerTurn: string,
-  events: string[]
+  playerTurnText: string,
+  events: string[],
+  color: string
 ) => {
   const { width, height } = context.canvas;
 
@@ -107,7 +108,7 @@ export const renderScoreScreen = (
     scoreRect.width,
     scoreRect.height
   );
-  drawScoreRect(context, scoreRect, scoredPieces);
+  drawScoreRect(context, scoreRect, scoredPieces, color);
 
   /* Turn */
   const turnRect: Rectangle = {
@@ -118,7 +119,7 @@ export const renderScoreScreen = (
   };
 
   context.strokeRect(turnRect.x, turnRect.y, turnRect.width, turnRect.height);
-  drawTurnRect(context, turnRect, playerTurn);
+  drawTurnRect(context, turnRect, playerTurnText, color);
 
   /* Events */
   const eventsRect: Rectangle = {
@@ -134,5 +135,5 @@ export const renderScoreScreen = (
     eventsRect.width,
     eventsRect.height
   );
-  drawEventsRect(context, eventsRect, events);
+  drawEventsRect(context, eventsRect, events, color);
 };

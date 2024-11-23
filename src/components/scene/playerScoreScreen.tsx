@@ -7,6 +7,7 @@ import { useEventListener } from "@/components/ui/hooks/useEventListener";
 import { translateEvent, translatePlayerTurn } from "@/utils/translator";
 import { GameEvent } from "@/game-logic/gameEvent";
 import { calculateScoredPieces } from "@/game-logic/gameState";
+import { constants } from "./constants";
 
 const MAX_EVENTS = 8;
 const RATIO = 4;
@@ -28,7 +29,10 @@ export const PlayerScoreScreen = (props: { playerType: PlayerType }) => {
         context,
         calculateScoredPieces(state, playerType),
         translatePlayerTurn(state, playerType),
-        [...eventsRef.current]
+        [...eventsRef.current],
+        playerType === "PLAYER_ONE"
+          ? constants.playerOneColor
+          : constants.playerTwoColor
       )
     );
   }, [gameSession, playerType, updateTexture]);
