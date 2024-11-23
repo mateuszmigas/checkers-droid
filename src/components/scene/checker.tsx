@@ -21,7 +21,13 @@ export const Checker = (props: {
       ? constants.playerOneColor
       : constants.playerTwoColor;
 
-  const materialProps = { color, roughness: 0.1 };
+  const materialProps = {
+    // color: "#0000ff",
+    color,
+    roughness: 0.1,
+    // transparent: true,
+    // opacity: 0.5,
+  };
 
   const { x, z } = useSpring({
     x: position[0],
@@ -68,4 +74,3 @@ export const Checker = (props: {
     </animated.group>
   );
 };
-

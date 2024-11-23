@@ -9,7 +9,7 @@ type Rectangle = {
 };
 
 const drawScoreRect = (
-  context: CanvasRenderingContext2D,
+  context: OffscreenCanvasRenderingContext2D,
   rect: Rectangle,
   scored: number
 ) => {
@@ -29,7 +29,7 @@ const drawScoreRect = (
 };
 
 const drawTurnRect = (
-  context: CanvasRenderingContext2D,
+  context: OffscreenCanvasRenderingContext2D,
   rect: Rectangle,
   text: string
 ) => {
@@ -43,7 +43,7 @@ const drawTurnRect = (
 };
 
 const drawEventsRect = (
-  context: CanvasRenderingContext2D,
+  context: OffscreenCanvasRenderingContext2D,
   rect: Rectangle,
   events: string[]
 ) => {
@@ -67,7 +67,7 @@ const drawEventsRect = (
 };
 
 export const renderBoard = (
-  context: CanvasRenderingContext2D,
+  context: OffscreenCanvasRenderingContext2D,
   _events: string[]
 ) => {
   const { width, height } = context.canvas;
@@ -129,4 +129,3 @@ export const renderBoard = (
     "Player 1 takes the lead",
   ]);
 };
-

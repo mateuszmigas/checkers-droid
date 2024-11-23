@@ -15,9 +15,7 @@ export const useCanvas2dTexture = (
   options?: Canvas2dTextureOptions
 ) => {
   const context = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = size.width;
-    canvas.height = size.height;
+    const canvas = new OffscreenCanvas(size.width, size.height);
     return canvas.getContext("2d")!;
   }, [size.height, size.width]);
 
@@ -32,7 +30,7 @@ export const useCanvas2dTexture = (
   );
 
   const updateTexture = useCallback(
-    (draw: (context: CanvasRenderingContext2D) => void) => {
+    (draw: (context: OffscreenCanvasRenderingContext2D) => void) => {
       draw(context);
       textureRef.current.needsUpdate = true;
     },

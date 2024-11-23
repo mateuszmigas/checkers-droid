@@ -1,5 +1,5 @@
 export const renderRectangleShadow = (
-  context: CanvasRenderingContext2D,
+  context: OffscreenCanvasRenderingContext2D,
   size: number
 ) => {
   context.shadowColor = "black";
@@ -7,4 +7,3 @@ export const renderRectangleShadow = (
   context.fillStyle = "black";
   context.fillRect(size * 0.2, size * 0.2, size * 0.6, size * 0.6);
 };
-

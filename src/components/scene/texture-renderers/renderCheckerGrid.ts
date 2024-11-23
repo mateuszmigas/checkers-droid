@@ -1,7 +1,9 @@
 import { forEachCell, isDarkSquare } from "@/utils/board";
 import { constants } from "../constants";
 
-export const renderCheckerGrid = (context: CanvasRenderingContext2D) => {
+export const renderCheckerGrid = (
+  context: OffscreenCanvasRenderingContext2D
+) => {
   forEachCell((row, col) => {
     context.fillStyle = isDarkSquare(row, col)
       ? constants.checkerGridBlackColor
@@ -9,4 +11,3 @@ export const renderCheckerGrid = (context: CanvasRenderingContext2D) => {
     context.fillRect(col, row, 1, 1);
   });
 };
-

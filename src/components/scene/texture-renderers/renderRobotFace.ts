@@ -47,7 +47,7 @@ const expressionParams: Record<AIPlayerEmotion, FaceParams> = {
 };
 
 export const renderRobotFace = (
-  context: CanvasRenderingContext2D,
+  context: OffscreenCanvasRenderingContext2D,
   emotion: AIPlayerEmotion
 ) => {
   const { width, height } = context.canvas;
@@ -98,4 +98,3 @@ export const renderRobotFace = (
 
   context.fillRect(mouthX, mouthY, mouthWidth, mouthHeight);
 };
-
