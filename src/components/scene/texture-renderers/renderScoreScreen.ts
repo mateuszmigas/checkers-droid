@@ -66,7 +66,7 @@ const drawEventsRect = (
   });
 };
 
-export const renderBoard = (
+export const renderScoreScreen = (
   context: OffscreenCanvasRenderingContext2D,
   _events: string[]
 ) => {

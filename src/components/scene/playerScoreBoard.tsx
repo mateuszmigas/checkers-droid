@@ -1,6 +1,6 @@
 import { PlayerType } from "@/game-logic/types";
 import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
-import { renderBoard } from "./texture-renderers/renderBoard";
+import { renderScoreScreen } from "./texture-renderers/renderScoreScreen";
 import { useEffect, useRef } from "react";
 import { useGameSessionContext } from "@/hooks/useGameSessionContext";
 import { useEventListener } from "@/hooks/useEventListener";
@@ -29,12 +29,16 @@ export const PlayerScoreBoard = (props: { playerType: PlayerType }) => {
     ],
     (event) => {
       eventsRef.current = [...eventsRef.current, event.type].slice(-MAX_EVENTS);
-      updateTexture((context) => renderBoard(context, [...eventsRef.current]));
+      updateTexture((context) =>
+        renderScoreScreen(context, [...eventsRef.current])
+      );
     }
   );
 
   useEffect(() => {
-    updateTexture((context) => renderBoard(context, [...eventsRef.current]));
+    updateTexture((context) =>
+      renderScoreScreen(context, [...eventsRef.current])
+    );
   }, []);
 
   return (
@@ -47,4 +51,3 @@ export const PlayerScoreBoard = (props: { playerType: PlayerType }) => {
     </mesh>
   );
 };
-

@@ -16,14 +16,8 @@ import { mapPieces } from "@/utils/board";
 import { memo } from "react";
 import { PlayerScoreBoard } from "./playerScoreBoard";
 import { constants } from "./constants";
-
-const getCheckerMustCapture = (
-  allValidMoves: CheckerValidMoveMap | null,
-  position: CheckerPosition | null
-): boolean =>
-  position
-    ? (allValidMoves?.get(position) ?? []).some((move) => move.isCapture)
-    : false;
+import { useSelectableCheckerTexture } from "./hooks/useSelectableCheckerTexture";
+import { useSelectedCheckerTexture } from "./hooks/useSelectedCheckerTexture";
 
 const getCheckerValidMoves = (
   allValidMoves: CheckerValidMoveMap | null,
@@ -39,6 +33,11 @@ export const GameScene = memo(() => {
   const triggerRender = useTriggerRender();
   useEventListener(gameSession, ["stateChanged"], triggerRender);
 
+  const playerOneSelectedTexture = useSelectedCheckerTexture("PLAYER_ONE");
+  const playerTwoSelectedTexture = useSelectedCheckerTexture("PLAYER_TWO");
+  const playerOneSelectableTexture = useSelectableCheckerTexture("PLAYER_ONE");
+  const playerTwoSelectableTexture = useSelectableCheckerTexture("PLAYER_TWO");
+
   return (
     <>
       <Room />
@@ -51,8 +50,24 @@ export const GameScene = memo(() => {
           position={piece.position}
           player={piece.player}
           isKing={piece.isKing}
-          mustCapture={getCheckerMustCapture(allValidMoves, piece.position)}
+          isSelected={
+            selectedPosition?.col === piece.position.col &&
+            selectedPosition?.row === piece.position.row
+          }
+          isSelectable={
+            getCheckerValidMoves(allValidMoves, piece.position).length > 0
+          }
           onClick={() => gameSession.handlePieceClick(piece.position)}
+          selectedTexture={
+            piece.player === "PLAYER_ONE"
+              ? playerOneSelectedTexture
+              : playerTwoSelectedTexture
+          }
+          selectableTexture={
+            piece.player === "PLAYER_ONE"
+              ? playerOneSelectableTexture
+              : playerTwoSelectableTexture
+          }
         />
       ))}
 
@@ -90,4 +105,3 @@ export const GameScene = memo(() => {
     </>
   );
 });
-

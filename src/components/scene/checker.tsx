@@ -1,47 +1,39 @@
-import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
 import { CheckerPosition, PlayerType } from "@/game-logic/types";
-import * as THREE from "three";
 import { useSpring, animated } from "@react-spring/three";
 import { constants, mapCheckerPosition } from "./constants";
+import { CanvasTexture } from "three";
 
 export const Checker = (props: {
   position: CheckerPosition;
   player: PlayerType;
   isKing: boolean;
-  mustCapture: boolean;
-  onClick?: () => void;
+  isSelected: boolean;
+  isSelectable: boolean;
+  onClick: () => void;
+  selectedTexture: CanvasTexture;
+  selectableTexture: CanvasTexture;
 }) => {
-  const { mustCapture, player, isKing, onClick } = props;
+  const {
+    player,
+    isKing,
+    isSelected,
+    isSelectable,
+    onClick,
+    selectedTexture,
+    selectableTexture,
+  } = props;
   const position = mapCheckerPosition(props.position);
-  const groupRef = useRef<THREE.Group>(null);
 
   const color =
     player === "PLAYER_ONE"
       ? constants.playerOneColor
       : constants.playerTwoColor;
 
-  const materialProps = {
-    // color: "#0000ff",
-    color,
-    roughness: 0.1,
-    // transparent: true,
-    // opacity: 0.5,
-  };
+  const materialProps = { color, roughness: 0.1 };
 
   const { x, z } = useSpring({
     x: position[0],
     z: position[2],
-  });
-
-  useFrame((state) => {
-    if (groupRef.current && mustCapture) {
-      groupRef.current.scale.setScalar(
-        1 + Math.sin(state.clock.elapsedTime * 4) * 0.1
-      );
-    } else if (groupRef.current) {
-      groupRef.current.scale.setScalar(1);
-    }
   });
 
   return (
@@ -49,14 +41,29 @@ export const Checker = (props: {
       position-x={x}
       position-y={position[1]}
       position-z={z}
-      ref={groupRef}
       onPointerDown={(e) => {
         e.stopPropagation();
-        onClick?.();
+        if (isSelectable) onClick();
       }}
-      onPointerOver={() => (document.body.style.cursor = "pointer")}
-      onPointerOut={() => (document.body.style.cursor = "default")}
+      onPointerOver={() => {
+        if (isSelectable) document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = "default";
+      }}
     >
+      {isSelected && (
+        <mesh rotation-x={-Math.PI / 2} position={[0, -0.025, 0]}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial map={selectedTexture} transparent={true} />
+        </mesh>
+      )}
+      {!isSelected && isSelectable && (
+        <mesh rotation-x={-Math.PI / 2} position={[0, -0.025, 0]}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial map={selectableTexture} transparent={true} />
+        </mesh>
+      )}
       <mesh>
         <cylinderGeometry args={[0.4, 0.4, 0.15, 32]} />
         <meshStandardMaterial {...materialProps} />

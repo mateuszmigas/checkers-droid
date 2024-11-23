@@ -1,7 +1,7 @@
 import { CheckerPosition } from "@/game-logic/types";
 
 export const constants = {
-  playerOneColor: "#78CCE2",
+  playerOneColor: "#0DE8E9", //"#78CCE2",
   playerTwoColor: "#f0f0f0",
   checkerGridBlackColor: "#000000",
   checkerGridWhiteColor: "#ffffff",
@@ -34,4 +34,3 @@ export const mapCheckerPosition = (
 #005066
 #002439
 */
-
