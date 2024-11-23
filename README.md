@@ -2,8 +2,6 @@
 
 Todo:
 
-- better selected object
-- better has to capture indicator
 - face expressions
 - refactor robot
-
+- game over dialog
