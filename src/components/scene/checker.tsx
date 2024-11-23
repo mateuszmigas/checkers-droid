@@ -3,6 +3,9 @@ import { useSpring, animated } from "@react-spring/three";
 import { constants, mapCheckerPosition } from "./constants";
 import { CanvasTexture } from "three";
 import { Piece } from "./piece";
+import { extend } from "@react-three/fiber";
+
+extend({ CanvasTexture });
 
 export const Checker = (props: {
   position: CheckerPosition;
@@ -69,3 +72,4 @@ export const Checker = (props: {
     </animated.group>
   );
 };
+

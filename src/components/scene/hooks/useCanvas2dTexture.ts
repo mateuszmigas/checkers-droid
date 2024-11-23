@@ -1,9 +1,12 @@
+import { extend } from "@react-three/fiber";
 import { useCallback, useMemo, useRef } from "react";
 import {
   CanvasTexture,
-  MagnificationTextureFilter,
-  MinificationTextureFilter,
+  type MagnificationTextureFilter,
+  type MinificationTextureFilter,
 } from "three";
+
+extend({ CanvasTexture });
 
 type Canvas2dTextureOptions = {
   minFilter: MinificationTextureFilter;
@@ -39,3 +42,4 @@ export const useCanvas2dTexture = (
 
   return { textureRef, updateTexture };
 };
+

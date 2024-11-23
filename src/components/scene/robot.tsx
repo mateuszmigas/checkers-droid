@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Group } from "three";
-import { useFrame } from "@react-three/fiber";
-import { Box, RoundedBox, Html } from "@react-three/drei";
+import { extend, useFrame } from "@react-three/fiber";
 import { PlayerType } from "@/game-logic/types";
 import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
 import { renderRobotFace } from "./texture-renderers/renderRobotFace";
@@ -9,6 +7,12 @@ import { RobotSpeechBubble } from "../ui/robotSpeechBubble";
 import { constants } from "./constants";
 import { useGameSessionContext } from "@/hooks/useGameSessionContext";
 import { useEventListener } from "@/hooks/useEventListener";
+import { Group } from "three";
+import { Html } from "@react-three/drei/web/Html";
+import { RoundedBox } from "@react-three/drei/core/RoundedBox";
+import { Box } from "@react-three/drei/core/shapes";
+
+extend({ Group });
 
 type RobotProps = { playerType: PlayerType };
 const textureSize = 512;

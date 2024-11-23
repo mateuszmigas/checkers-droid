@@ -2,7 +2,6 @@ import { CheckerGrid } from "./checkerGrid";
 import { Checker } from "./checker";
 import { MoveIndicator } from "./moveIndicator";
 import { Robot } from "./robot";
-import { OrbitControls, Stats } from "@react-three/drei";
 import { Room } from "./room";
 import {
   CheckerPosition,
@@ -18,6 +17,8 @@ import { PlayerScoreBoard } from "./playerScoreBoard";
 import { constants } from "./constants";
 import { useSelectableCheckerTexture } from "./hooks/useSelectableCheckerTexture";
 import { useSelectedCheckerTexture } from "./hooks/useSelectedCheckerTexture";
+import { OrbitControls } from "@react-three/drei/core/OrbitControls";
+import { Stats } from "@react-three/drei/core/Stats";
 
 const getCheckerValidMoves = (
   allValidMoves: CheckerValidMoveMap | null,
@@ -105,3 +106,4 @@ export const GameScene = memo(() => {
     </>
   );
 });
+

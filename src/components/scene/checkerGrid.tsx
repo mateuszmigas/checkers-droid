@@ -3,6 +3,9 @@ import { NearestFilter } from "three";
 import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
 import { renderCheckerGrid } from "./texture-renderers/renderCheckerGrid";
 import { constants } from "./constants";
+import { extend } from "@react-three/fiber";
+
+extend({ NearestFilter });
 
 export const CheckerGrid = () => {
   const { updateTexture, textureRef } = useCanvas2dTexture(

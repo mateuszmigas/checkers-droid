@@ -27,10 +27,7 @@ export const App = () => {
 
   useEffect(() => {
     chromeApi.isAvailable().then((isAvailable) => {
-      setPage("ai-not-supported");
-      // delay(1000).then(() => {
-      // setPage(isAvailable ? "select-game-mode" : "ai-not-supported");
-      // });
+      setPage(isAvailable ? "select-game-mode" : "ai-not-supported");
     });
   }, []);
 
