@@ -108,6 +108,8 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
   }
 
   private async handleEvents(events: GameEvent[]) {
+    let shouldTriggerAutomaticMoves = false;
+
     for (const event of events) {
       switch (event.type) {
         case "PIECE_CROWNED":
@@ -115,13 +117,17 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
         case "PIECE_CAPTURED":
         case "TURN_CHANGED":
           if (this.getCurrentPlayer()?.type === "AI") {
-            this.triggerAutomaticMoves();
+            shouldTriggerAutomaticMoves = true;
           } else {
             this.selectedCheckerPosition = null;
             this.emit({ type: "stateChanged" });
           }
           break;
       }
+    }
+
+    if (shouldTriggerAutomaticMoves) {
+      this.triggerAutomaticMoves();
     }
   }
 
@@ -130,7 +136,6 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     if (!currentPlayer || currentPlayer.type !== "AI") return;
 
     const agentMove = await currentPlayer.getInstance().getMove(this.gameState);
-
     if (agentMove) {
       this.invokeGameAction({ type: "MOVE_PIECE", ...agentMove });
     }
@@ -166,4 +171,3 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     };
   }
 }
-
