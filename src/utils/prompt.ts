@@ -1,7 +1,16 @@
 import { z } from "zod";
 import { ChromeAiSession } from "@/chromeAI";
 
-const cleanJSONString = (json: string) => json.replace(/```json|```/g, "");
+export const cleanStructuredOutput = (json: string) => {
+  // Remove the markers
+  const withoutMarkers = json.replace(/```json|```/g, "").trim();
+
+  // Find the first JSON object in the string
+  const match = withoutMarkers.match(/(\{[\s\S]*\})/);
+  if (!match) return withoutMarkers;
+
+  return match[0].trim();
+};
 
 type PromptRequest<T extends z.ZodType> = {
   prompt: string;
@@ -17,7 +26,7 @@ export const runWithStructuredOutput = async <T extends z.ZodType>(
   const { prompt, resultSchema, defaultValue, validator } = promptRequest;
   try {
     const result = await session.prompt(prompt);
-    const parsed = JSON.parse(cleanJSONString(result));
+    const parsed = JSON.parse(cleanStructuredOutput(result));
     const validated = resultSchema.safeParse(parsed);
 
     if (validated.success && (!validator || validator(validated.data))) {

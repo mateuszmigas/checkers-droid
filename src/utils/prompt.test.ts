@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  cleanStructuredOutput,
   createSection,
   createStructuredResponse,
   runWithStructuredOutput,
@@ -100,17 +101,26 @@ describe("runWithStructuredOutput", () => {
     expect(response.success).toBe(false);
     expect(response.data.name).toBe("John");
   });
+});
 
-  it("should clean the JSON response", async () => {
-    const fakeSession = createFakeSession('```json\n{"name": "Ted"}```');
-    const response = await runWithStructuredOutput(fakeSession, {
-      prompt: "Hello",
-      resultSchema: z.object({ name: z.string() }),
-      defaultValue: { name: "John" },
-    });
+describe("cleanStructuredOutput", () => {
+  it("should clean the JSON marking with ```json", () => {
+    const cleaned = cleanStructuredOutput('```json{"name": "Ted"}```');
+    expect(cleaned).toBe('{"name": "Ted"}');
+  });
 
-    expect(response.success).toBe(true);
-    expect(response.data.name).toBe("Ted");
+  it("should clean the JSON marking with ```", () => {
+    const cleaned = cleanStructuredOutput('```{"name": "Ted"}```');
+    expect(cleaned).toBe('{"name": "Ted"}');
+  });
+
+  it("should clean additional text", () => {
+    const cleaned = cleanStructuredOutput(`
+    {"name": "Ted"}
+
+    This is some additional text
+    `);
+    expect(cleaned).toBe('{"name": "Ted"}');
   });
 });
 
