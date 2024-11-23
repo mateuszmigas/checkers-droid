@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const stringToNumber = z
+export const coerceToNumber = z
   .union([z.string(), z.number()])
   .transform((value) => {
     if (typeof value === "string") {
@@ -13,7 +13,7 @@ export const stringToNumber = z
     return value;
   });
 
-export const stringToEnum = <T extends readonly [string, ...string[]]>(
+export const coerceToEnum = <T extends readonly [string, ...string[]]>(
   values: T
 ) =>
   z

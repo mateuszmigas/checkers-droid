@@ -4,6 +4,8 @@ import { renderScoreScreen } from "./texture-renderers/renderScoreScreen";
 import { useEffect, useRef } from "react";
 import { useGameSessionContext } from "@/components/ui/hooks/useGameSessionContext";
 import { useEventListener } from "@/components/ui/hooks/useEventListener";
+import { translateEvent } from "@/utils/translator";
+import { GameEvent } from "@/game-logic/gameEvent";
 
 const MAX_EVENTS = 8;
 const RATIO = 4;
@@ -28,7 +30,10 @@ export const PlayerScoreBoard = (props: { playerType: PlayerType }) => {
       "GAME_OVER",
     ],
     (event) => {
-      eventsRef.current = [...eventsRef.current, event.type].slice(-MAX_EVENTS);
+      eventsRef.current = [
+        ...eventsRef.current,
+        translateEvent(event as GameEvent, playerType),
+      ].slice(-MAX_EVENTS);
       updateTexture((context) =>
         renderScoreScreen(context, [...eventsRef.current])
       );
@@ -39,16 +44,15 @@ export const PlayerScoreBoard = (props: { playerType: PlayerType }) => {
     updateTexture((context) =>
       renderScoreScreen(context, [...eventsRef.current])
     );
-  }, []);
+  }, [updateTexture]);
 
   return (
     <mesh
-      position={[0, 3.05, playerType === "PLAYER_ONE" ? 5 : -5]}
-      rotation={[-Math.PI / 2, 0, playerType === "PLAYER_ONE" ? 0 : Math.PI]}
+      position={[0, 3.05, playerType === "PLAYER_ONE" ? -5 : 5]}
+      rotation={[-Math.PI / 2, 0, playerType === "PLAYER_ONE" ? Math.PI : 0]}
     >
       <planeGeometry args={[RATIO * 1, 1]} />
       <meshStandardMaterial transparent={true} map={textureRef.current} />
     </mesh>
   );
 };
-

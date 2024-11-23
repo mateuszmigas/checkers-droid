@@ -405,7 +405,6 @@ describe("capturing rules", () => {
     expect(validMove.events).toContainEqual({
       type: "PIECE_CAPTURED",
       position: { row: 4, col: 4 },
-      piece: playerTwoPiece,
       player: "PLAYER_ONE",
     });
     expect(validMove.state.grid[4][4]).toBeNull(); // Captured piece should be removed
@@ -444,7 +443,6 @@ describe("capturing rules", () => {
     expect(result.events).toContainEqual({
       type: "PIECE_CAPTURED",
       position: { row: 3, col: 3 },
-      piece: playerTwoPiece,
       player: "PLAYER_ONE",
     });
   });
@@ -497,7 +495,6 @@ describe("capturing rules", () => {
       expect(validMove.events).toContainEqual({
         type: "PIECE_CAPTURED",
         position: { row: 5, col: 5 },
-        piece: playerTwoPieces[0],
         player: "PLAYER_ONE",
       });
       expect(validMove.state.grid[5][5]).toBeNull(); // Captured piece should be removed
@@ -546,7 +543,6 @@ describe("capturing rules", () => {
       expect(backwardCapture.events).toContainEqual({
         type: "PIECE_CAPTURED",
         position: { row: 3, col: 3 },
-        piece: opponentPieces[0],
         player: "PLAYER_ONE",
       });
 
@@ -569,7 +565,6 @@ describe("capturing rules", () => {
       expect(forwardCapture.events).toContainEqual({
         type: "PIECE_CAPTURED",
         position: { row: 5, col: 3 },
-        piece: opponentPieces[1],
         player: "PLAYER_ONE",
       });
     });
@@ -621,7 +616,6 @@ describe("capturing rules", () => {
       expect(firstCapture.events).toContainEqual({
         type: "PIECE_CAPTURED",
         position: { row: 3, col: 3 },
-        piece: opponentPieces[0],
         player: "PLAYER_ONE",
       });
 
@@ -641,7 +635,6 @@ describe("capturing rules", () => {
       expect(secondCapture.events).toContainEqual({
         type: "PIECE_CAPTURED",
         position: { row: 5, col: 5 },
-        piece: opponentPieces[1],
         player: "PLAYER_ONE",
       });
       expect(secondCapture.state.gameStatus).toBe("PLAYER_TWO"); // Turn should change after all captures
@@ -708,7 +701,6 @@ describe("capturing rules", () => {
     expect(firstSequence.events).toContainEqual({
       type: "PIECE_CAPTURED",
       position: { row: 4, col: 4 },
-      piece: playerTwoPieces[0],
       player: "PLAYER_ONE",
     });
 
@@ -723,7 +715,6 @@ describe("capturing rules", () => {
     expect(secondSequence.events).toContainEqual({
       type: "PIECE_CAPTURED",
       position: { row: 4, col: 2 },
-      piece: playerTwoPieces[1],
       player: "PLAYER_ONE",
     });
   });
@@ -803,7 +794,6 @@ describe("capturing rules", () => {
       expect(firstCapture.events).toContainEqual({
         type: "PIECE_CAPTURED",
         position: { row: 3, col: 3 },
-        piece: playerTwoPieces[0],
         player: "PLAYER_ONE",
       });
       expect(firstCapture.state.gameStatus).toBe("PLAYER_ONE"); // Turn shouldn't change yet
@@ -822,7 +812,6 @@ describe("capturing rules", () => {
       expect(secondCapture.events).toContainEqual({
         type: "PIECE_CAPTURED",
         position: { row: 5, col: 3 },
-        piece: playerTwoPieces[1],
         player: "PLAYER_ONE",
       });
       expect(secondCapture.state.gameStatus).toBe("PLAYER_TWO"); // Turn should change after all captures
@@ -909,7 +898,6 @@ describe("promotion to king", () => {
     expect(result.events).toContainEqual({
       type: "PIECE_CAPTURED",
       position: { row: 6, col: 2 },
-      piece: expect.objectContaining({ player: "PLAYER_TWO" }),
       player: "PLAYER_ONE",
     });
     expect(result.events).toContainEqual({
@@ -1073,4 +1061,3 @@ describe("draw conditions", () => {
     expect(hasCaptures).toBe(false);
   });
 });
-

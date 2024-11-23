@@ -350,7 +350,6 @@ export const updateGameState = (
           events.push({
             type: "PIECE_CAPTURED",
             position: { row: jumpedRow, col: jumpedCol },
-            piece: jumpedPiece,
             player: state.gameStatus,
           });
         }
@@ -502,4 +501,3 @@ const checkForNoMoves = (state: GameState): GameStateUpdate => {
 
   return { state, events: [{ type: "INVALID_MOVE" }] };
 };
-

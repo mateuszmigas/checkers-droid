@@ -2,10 +2,10 @@ import { CheckerPosition } from "@/game-logic/types";
 import { MoveConsequence } from "@/game-logic/players/aiPlayer";
 import { z } from "zod";
 import { createSection, createStructuredResponse } from "@/utils/prompt";
-import { stringToNumber } from "@/utils/zod";
+import { coerceToNumber } from "@/utils/zod";
 
 const resultSchema = z.object({
-  shot: stringToNumber.describe("best move index"),
+  shot: coerceToNumber.describe("best move index"),
 });
 
 const consequenceMap: Record<MoveConsequence, string> = {
@@ -63,40 +63,3 @@ export const createMovePromptRequest = (
   defaultValue,
   validator,
 });
-
-// const systemPrompt = `;
-// You're a billiards bot playing as a skilled but casual player. Given a set of possible shots, each with:
-// - Type: direct, wall-first, double wall hit
-// - Chance to score (percentage)
-// - Risk of illegal shot (e.g., white ball foul)
-// - Positioning advantage for the opponent after shot
-
-// Choose the best shot based on these factors, and add a brief, player-style comment.
-
-// <Examples>
-// Shot: Direct | Chance: 85% | Risk: Low | Position: Neutral
-// Message: 'Nice and easy—this one's practically in the bag!'
-// Shot: Wall-first | Chance: 60% | Risk: Moderate | Position: Slight advantage
-// Message: 'Tricky, but let's give it a shot. Might just surprise us both!'
-// Shot: Double wall hit | Chance: 30% | Risk: High | Position: Strong advantage
-// Message: 'Oof, this one's risky, but hey, go big or go home!'
-// </Examples>
-
-// <Response Format>
-// Shot: [index]
-// Message: [message]
-// </Response Format>
-// `;
-
-// const aiTest = async () => {
-//   const ai = (window as any).ai;
-//   const session = await ai.assistant.create({systemPrompt});
-//   console.time("aiTest");
-//   const result = await session.prompt(`
-// 1.Direct | Chance: 85% | Risk: Low | Position: Neutral
-// 2.Wall-first | Chance: 60% | Risk: Moderate | Position: Slight advantage
-// 3.Double wall hit | Chance: 30% | Risk: High | Position: Strong advantage
-//     `);
-//   console.timeEnd("aiTest");
-//   console.log("aiTest", result);
-// }

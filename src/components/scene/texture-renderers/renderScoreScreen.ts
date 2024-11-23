@@ -70,7 +70,7 @@ const drawEventsRect = (
 
 export const renderScoreScreen = (
   context: OffscreenCanvasRenderingContext2D,
-  _events: string[]
+  events: string[]
 ) => {
   const { width, height } = context.canvas;
 
@@ -120,14 +120,5 @@ export const renderScoreScreen = (
     eventsRect.width,
     eventsRect.height
   );
-  drawEventsRect(context, eventsRect, [
-    "Player 1 draws a card",
-    "Robot plays Ace of Spades",
-    "Player 1 wins the trick",
-    "Robot shuffles the deck",
-    "New round begins",
-    "Player 1 leads with King of Hearts",
-    "Robot follows with Queen of Hearts",
-    "Player 1 takes the lead",
-  ]);
+  drawEventsRect(context, eventsRect, events);
 };
