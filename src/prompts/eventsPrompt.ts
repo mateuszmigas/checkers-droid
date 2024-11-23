@@ -5,14 +5,12 @@ import {
   PlayerType,
 } from "@/game-logic/types";
 import { z } from "zod";
+import { stringToEnum } from "@/utils/zod";
 
 const resultSchema = z
   .object({
     message: z.string(),
-    emotion: z
-      .string()
-      .transform((val) => val.toLowerCase())
-      .pipe(z.enum(aiPlayerEmotions)),
+    emotion: stringToEnum(aiPlayerEmotions),
   })
   .partial();
 
@@ -106,4 +104,3 @@ export const createEventsPromptRequest = (
   resultSchema,
   defaultValue,
 });
-

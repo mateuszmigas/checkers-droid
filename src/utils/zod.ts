@@ -13,3 +13,11 @@ export const stringToNumber = z
     return value;
   });
 
+export const stringToEnum = <T extends readonly [string, ...string[]]>(
+  values: T
+) =>
+  z
+    .string()
+    .transform((value) => value.toLowerCase())
+    .pipe(z.enum(values));
+

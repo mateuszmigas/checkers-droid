@@ -23,7 +23,6 @@ describe("createStructuredResponse", () => {
         age: z.number().describe("The age of the person"),
       })
     );
-    console.log(response);
     expect(response).toBe(
       `<Response Format>
 {
