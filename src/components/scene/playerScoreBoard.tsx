@@ -2,8 +2,8 @@ import { PlayerType } from "@/game-logic/types";
 import { useCanvas2dTexture } from "./hooks/useCanvas2dTexture";
 import { renderScoreScreen } from "./texture-renderers/renderScoreScreen";
 import { useEffect, useRef } from "react";
-import { useGameSessionContext } from "@/hooks/useGameSessionContext";
-import { useEventListener } from "@/hooks/useEventListener";
+import { useGameSessionContext } from "@/components/ui/hooks/useGameSessionContext";
+import { useEventListener } from "@/components/ui/hooks/useEventListener";
 
 const MAX_EVENTS = 8;
 const RATIO = 4;
@@ -51,3 +51,4 @@ export const PlayerScoreBoard = (props: { playerType: PlayerType }) => {
     </mesh>
   );
 };
+

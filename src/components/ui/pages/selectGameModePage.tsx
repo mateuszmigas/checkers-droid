@@ -30,12 +30,13 @@ const renderModeCard = (
 };
 
 export const SelectGameModePage = (props: {
+  aiAvailable: boolean;
   onSelect: (gameMode: GameMode) => void;
 }) => {
-  const { onSelect } = props;
+  const { aiAvailable, onSelect } = props;
   return (
-    <div className="size-full absolute inset-0 z-20 flex items-center justify-center">
-      <div className="flex flex-wrap gap-6 justify-center items-center py-12 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 gap-6">
+      <div className="flex flex-wrap gap-6 justify-center items-center">
         {renderModeCard("Human vs AI", "human_vs_ai.webp", () =>
           onSelect("HUMAN_VS_AI")
         )}
@@ -46,6 +47,17 @@ export const SelectGameModePage = (props: {
           onSelect("AI_VS_AI")
         )}
       </div>
+      {!aiAvailable && (
+        <div className="text-white text-center">
+          <p className="text-lg font-semibold">
+            Looks like this browser doesn't support Chrome AI or it's not
+            enabled.
+          </p>
+          <p className="text-lg font-semibold">
+            You can still play the game, but it won't have any AI features.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

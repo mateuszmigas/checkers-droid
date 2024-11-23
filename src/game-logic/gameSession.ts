@@ -9,7 +9,7 @@ import { CheckerPosition, CheckerValidMoveMap, PlayerType } from "./types";
 import { GameEvent } from "./gameEvent";
 import { EventEmitter } from "../utils/eventEmitter";
 import {
-  createAIPlayer,
+  createAiPlayer,
   createHumanPlayer,
   GamePlayer,
 } from "./players/gamePlayer";
@@ -23,19 +23,19 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
   private playerOne: GamePlayer;
   private playerTwo: GamePlayer;
 
-  constructor(gameMode: GameMode) {
+  constructor(gameMode: GameMode, aiAvailable: boolean) {
     super();
 
     this.gameState = createInitialGameState();
 
     switch (gameMode) {
       case "AI_VS_AI":
-        this.playerOne = createAIPlayer("PLAYER_ONE");
-        this.playerTwo = createAIPlayer("PLAYER_TWO");
+        this.playerOne = createAiPlayer("PLAYER_ONE", aiAvailable);
+        this.playerTwo = createAiPlayer("PLAYER_TWO", aiAvailable);
         break;
       case "HUMAN_VS_AI":
         this.playerOne = createHumanPlayer();
-        this.playerTwo = createAIPlayer("PLAYER_TWO");
+        this.playerTwo = createAiPlayer("PLAYER_TWO", aiAvailable);
         break;
       case "HUMAN_VS_HUMAN":
         this.playerOne = createHumanPlayer();

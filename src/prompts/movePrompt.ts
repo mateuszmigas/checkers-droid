@@ -1,5 +1,5 @@
 import { CheckerPosition } from "@/game-logic/types";
-import { MoveConsequence } from "../aiPlayer";
+import { MoveConsequence } from "@/game-logic/players/aiPlayer";
 import { z } from "zod";
 
 const resultSchema = z.object({

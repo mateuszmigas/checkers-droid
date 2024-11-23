@@ -3,11 +3,11 @@ import { AIPlayerEmotion, CheckerPosition, PlayerType } from "../types";
 import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
 import { chromeApi, ChromeAiSession } from "@/chromeAI";
-import { createMovePromptRequest } from "./prompts/movePrompt";
-import { createSystemPrompt } from "./prompts/systemPrompt";
-import { createWelcomePrompt } from "./prompts/welcomePrompt";
+import { createMovePromptRequest } from "@/prompts/movePrompt";
+import { createSystemPrompt } from "@/prompts/systemPrompt";
+import { createWelcomePrompt } from "@/prompts/welcomePrompt";
 import { runWithStructuredOutput } from "@/utils/prompt";
-import { createEventsPromptRequest } from "./prompts/eventsPrompt";
+import { createEventsPromptRequest } from "@/prompts/eventsPrompt";
 
 export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
@@ -45,7 +45,7 @@ const simulateMoveConsequences = (
   return consequences;
 };
 
-export class AIPlayer extends EventEmitter<AIPlayerEvents> {
+export class AiPlayer extends EventEmitter<AIPlayerEvents> {
   private session: ChromeAiSession | undefined;
 
   constructor(private readonly playerType: PlayerType) {
@@ -117,8 +117,6 @@ export class AIPlayer extends EventEmitter<AIPlayerEvents> {
       this.session!,
       promptRequest
     );
-
-    console.log(response);
 
     this.emit({ type: "MESSAGE_CHANGED", message: response.data.message! });
     this.emit({ type: "EMOTION_CHANGED", emotion: response.data.emotion! });

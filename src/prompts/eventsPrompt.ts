@@ -1,5 +1,9 @@
-import { GameEvent } from "../../gameEvent";
-import { aiPlayerEmotions, CheckerPosition, PlayerType } from "../../types";
+import { GameEvent } from "@/game-logic/gameEvent";
+import {
+  aiPlayerEmotions,
+  CheckerPosition,
+  PlayerType,
+} from "@/game-logic/types";
 import { z } from "zod";
 
 const resultSchema = z

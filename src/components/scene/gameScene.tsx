@@ -8,9 +8,9 @@ import {
   CheckerPossibleTarget,
   CheckerValidMoveMap,
 } from "@/game-logic/types";
-import { useGameSessionContext } from "../../hooks/useGameSessionContext";
-import { useEventListener } from "@/hooks/useEventListener";
-import { useTriggerRender } from "@/hooks/useTriggerRender";
+import { useGameSessionContext } from "@/components/ui/hooks/useGameSessionContext";
+import { useEventListener } from "@/components/ui/hooks/useEventListener";
+import { useTriggerRender } from "@/components/ui/hooks/useTriggerRender";
 import { mapPieces } from "@/utils/board";
 import { memo } from "react";
 import { PlayerScoreBoard } from "./playerScoreBoard";

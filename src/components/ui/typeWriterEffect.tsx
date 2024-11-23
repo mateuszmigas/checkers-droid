@@ -1,5 +1,5 @@
 import { memo, useEffect, useState } from "react";
-import { useIsMounted } from "../../hooks/useIsMounted";
+import { useIsMounted } from "@/components/ui/hooks/useIsMounted";
 import { createTypingStream } from "@/utils/stream";
 
 export const TypewriterEffect = memo(
