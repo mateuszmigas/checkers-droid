@@ -34,7 +34,7 @@ export const SelectGameModePage = (props: {
 }) => {
   const { onSelect } = props;
   return (
-    <div className="absolute inset-0 z-20 flex items-center justify-center">
+    <div className="size-full absolute inset-0 z-20 flex items-center justify-center">
       <div className="flex flex-wrap gap-6 justify-center items-center py-12 p-4">
         {renderModeCard("Human vs AI", "human_vs_ai.webp", () =>
           onSelect("HUMAN_VS_AI")
@@ -49,3 +49,4 @@ export const SelectGameModePage = (props: {
     </div>
   );
 };
+

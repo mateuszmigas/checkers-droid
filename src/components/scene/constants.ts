@@ -1,5 +1,12 @@
 import { CheckerPosition } from "@/game-logic/types";
 
+/*
+#E4EFF0
+#78CCE2
+#4F7988
+#005066
+#002439
+*/
 export const constants = {
   playerOneColor: "#0DE8E9", //"#78CCE2",
   playerTwoColor: "#f0f0f0",
@@ -28,10 +35,3 @@ export const mapCheckerPosition = (
   return [x, y, z];
 };
 
-/*
-#E4EFF0
-#78CCE2
-#4F7988
-#005066
-#002439
-*/

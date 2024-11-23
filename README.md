@@ -2,6 +2,6 @@
 
 Todo:
 
-- face expressions
-- refactor robot
-- game over dialog
+- face expressions - test all
+- fix layout shift
+

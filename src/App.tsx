@@ -3,71 +3,73 @@ import { GameScene } from "./components/scene/gameScene";
 import { useEffect, useState } from "react";
 import { GameSession } from "./game-logic/gameSession";
 import { GameSessionContext } from "./hooks/useGameSessionContext";
-import { SelectGameModePage } from "./components/ui/selectGameModePage";
+import { SelectGameModePage } from "./components/ui/pages/selectGameModePage";
 import { chromeApi } from "./chromeAI";
+import { AiNotSupportedPage } from "./components/ui/pages/aiNotSupportedPage";
+import { Button } from "./components/ui/button";
+import { LoadingPage } from "./components/ui/pages/loadingPage";
 
 export const App = () => {
   const [gameSession, setGameSession] = useState<GameSession | null>(null);
-  const [loadingState, setLoadingState] = useState<
-    "loading" | "ready" | "browser-not-supported"
+  const [page, setPage] = useState<
+    "loading" | "select-game-mode" | "ai-not-supported" | "playing-game"
   >("loading");
 
   // //temp
-  useEffect(() => {
-    const gs = new GameSession("HUMAN_VS_AI");
-    setGameSession(gs);
+  // useEffect(() => {
+  //   const gs = new GameSession("HUMAN_VS_AI");
+  //   setGameSession(gs);
 
-    gs.on("GAME_OVER", () => {
-      gs.restart();
-    });
-  }, []);
+  //   gs.on("GAME_OVER", () => {
+  //     gs.restart();
+  //   });
+  // }, []);
 
   useEffect(() => {
     chromeApi.isAvailable().then((isAvailable) => {
-      setLoadingState(isAvailable ? "ready" : "browser-not-supported");
+      setPage("ai-not-supported");
+      // delay(1000).then(() => {
+      // setPage(isAvailable ? "select-game-mode" : "ai-not-supported");
+      // });
     });
   }, []);
 
   return (
     <GameSessionContext.Provider value={gameSession}>
       <div className="size-full bg-black">
-        {loadingState !== "loading" ? (
-          <div className="relative size-full">
-            {gameSession ? (
-              <div className="absolute size-full z-10">
-                <Canvas
-                  camera={
-                    gameSession.getPlayer("PLAYER_ONE").type === "HUMAN"
-                      ? { position: [0, 7, -7.5] }
-                      : { position: [-7.5, 7, 0] }
-                  }
-                >
-                  <GameScene />
-                </Canvas>
-              </div>
-            ) : (
-              <div className="absolute inset-0 z-20 flex items-center justify-center">
-                {loadingState === "ready" ? (
-                  <SelectGameModePage
-                    onSelect={(gameMode) =>
-                      setGameSession(new GameSession(gameMode))
-                    }
-                  />
-                ) : (
-                  <div className="text-white text-2xl absolute inset-0 z-20 flex items-center justify-center">
-                    Looks like this browser doesn't support Chrome AI or it's
-                    not enabled.
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="size-full flex items-center justify-center">
-            <div className="text-white text-2xl">Loading...</div>
+        {page === "loading" && <LoadingPage />}
+        {page === "select-game-mode" && (
+          <SelectGameModePage
+            onSelect={(gameMode) => {
+              setGameSession(new GameSession(gameMode));
+              setPage("playing-game");
+            }}
+          />
+        )}
+        {page === "ai-not-supported" && (
+          <AiNotSupportedPage onContinue={() => setPage("select-game-mode")} />
+        )}
+        {page === "playing-game" && gameSession && (
+          <div className="absolute size-full z-10">
+            <Canvas
+              camera={
+                gameSession.getPlayer("PLAYER_ONE").type === "HUMAN"
+                  ? { position: [0, 7, -7.5] }
+                  : { position: [-7.5, 7, 0] }
+              }
+            >
+              <GameScene />
+            </Canvas>
+            <Button
+              className="absolute top-4 left-4"
+              onClick={() => setGameSession(null)}
+            >
+              Main Menu
+            </Button>
           </div>
         )}
       </div>
     </GameSessionContext.Provider>
   );
 };
+
