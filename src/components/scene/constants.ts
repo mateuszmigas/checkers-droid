@@ -5,6 +5,7 @@ export const constants = {
   playerTwoColor: "#f0f0f0",
   checkerGridBlackColor: "#000000",
   checkerGridWhiteColor: "#ffffff",
+  checkerIndicatorColor: "#18548B",
   tableHeight: 3,
   checkerGridSize: 8,
   roomHeight: 20,

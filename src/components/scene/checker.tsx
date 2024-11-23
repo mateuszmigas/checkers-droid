@@ -2,6 +2,7 @@ import { CheckerPosition, PlayerType } from "@/game-logic/types";
 import { useSpring, animated } from "@react-spring/three";
 import { constants, mapCheckerPosition } from "./constants";
 import { CanvasTexture } from "three";
+import { Piece } from "./piece";
 
 export const Checker = (props: {
   position: CheckerPosition;
@@ -64,20 +65,7 @@ export const Checker = (props: {
           <meshBasicMaterial map={selectableTexture} transparent={true} />
         </mesh>
       )}
-      <mesh>
-        <cylinderGeometry args={[0.4, 0.4, 0.15, 32]} />
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-      <mesh position={[0, 0.075, 0]}>
-        <cylinderGeometry args={[0.35, 0.35, 0.1, 32]} />
-        <meshStandardMaterial {...materialProps} />
-      </mesh>
-      {isKing && (
-        <mesh position={[0, 0.2, 0]}>
-          <sphereGeometry args={[0.15, 32, 32]} />
-          <meshStandardMaterial {...materialProps} />
-        </mesh>
-      )}
+      <Piece isKing={isKing} materialProps={materialProps} />
     </animated.group>
   );
 };
