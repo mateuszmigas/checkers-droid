@@ -1,6 +1,21 @@
 export const delay = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
+export const withMinDuration = async <T>(
+  promise: Promise<T>,
+  delayMs: number
+): Promise<T> => {
+  const startTime = performance.now();
+  const result = await promise;
+  const elapsedTime = performance.now() - startTime;
+
+  if (elapsedTime < delayMs) {
+    await delay(delayMs - elapsedTime);
+  }
+
+  return result;
+};
+
 export class PromiseQueue {
   private promises: (() => Promise<unknown>)[] = [];
   private processing = false;
@@ -40,4 +55,3 @@ export class PromiseQueue {
     });
   }
 }
-

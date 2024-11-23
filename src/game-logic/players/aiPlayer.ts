@@ -8,6 +8,7 @@ import { createSystemPrompt } from "@/prompts/systemPrompt";
 import { createWelcomePrompt } from "@/prompts/welcomePrompt";
 import { runWithStructuredOutput } from "@/utils/prompt";
 import { createEventsPromptRequest } from "@/prompts/eventsPrompt";
+import { withMinDuration } from "@/utils/promise";
 
 export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
@@ -90,15 +91,18 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
       ({ shot }) => shot >= 0 && shot < moves.length
     );
 
-    const response = await runWithStructuredOutput(
-      this.session!,
-      promptRequest
+    const response = await withMinDuration(
+      runWithStructuredOutput(this.session!, promptRequest),
+      1000 // in case the AI is too fast
     );
+
+    console.log(response);
 
     return moves[response.data.shot];
   }
 
   async notify(gameState: GameState, gameEvents: GameEvent[]) {
+    return;
     if (gameState.gameStatus === this.playerType) {
       return;
     }
@@ -142,4 +146,3 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
 //     }
 //   },
 // });
-

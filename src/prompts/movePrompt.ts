@@ -1,9 +1,11 @@
 import { CheckerPosition } from "@/game-logic/types";
 import { MoveConsequence } from "@/game-logic/players/aiPlayer";
 import { z } from "zod";
+import { createSection, createStructuredResponse } from "@/utils/prompt";
+import { stringToNumber } from "@/utils/zod";
 
 const resultSchema = z.object({
-  shot: z.number(),
+  shot: stringToNumber.describe("best move index"),
 });
 
 const consequenceMap: Record<MoveConsequence, string> = {
@@ -40,20 +42,11 @@ export const createMovePrompt = (
     consequences: MoveConsequence[];
   }[]
 ) => `
-Analyze the given set of possible move consequences and select the best move index based on the following criteria:
-- Avoid moves that risk being captured.
-- Prioritize neutral moves over risky ones.
-- Return the index of the best move in the specified response format.
+Analyze the given set of possible move consequences and select the best move index with structured output.
 
-<Moves Consequences>
-${mapMoves(moves)}
-</Moves Consequences>
+${createSection("Moves Consequences", mapMoves(moves))}
 
-<Response Format>
-{
-  "shot": best move index
-}
-</Response Format>
+${createStructuredResponse(resultSchema)}
 `;
 
 export const createMovePromptRequest = (
@@ -107,4 +100,3 @@ export const createMovePromptRequest = (
 //   console.timeEnd("aiTest");
 //   console.log("aiTest", result);
 // }
-

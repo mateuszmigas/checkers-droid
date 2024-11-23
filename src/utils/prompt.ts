@@ -28,8 +28,32 @@ export const runWithStructuredOutput = async <T extends z.ZodType>(
     }
 
     return { success: false, data: defaultValue };
-  } catch (e) {
+  } catch {
     return { success: false, data: defaultValue };
   }
 };
 
+export const createSection = (sectionName: string, content: string) => {
+  return `<${sectionName}>
+${content}
+</${sectionName}>`;
+};
+
+export const createStructuredResponse = (schema: z.ZodType) => {
+  if (schema instanceof z.ZodObject) {
+    const shape = schema._def.shape();
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(shape)) {
+      const zodValue = value as z.ZodType;
+      if ("_def" in zodValue && zodValue._def.description) {
+        result[key] = zodValue._def.description;
+      } else {
+        result[key] = key;
+      }
+    }
+    return `<Response Format>
+${JSON.stringify(result, null, 2)}
+</Response Format>`;
+  }
+  throw new Error("Schema must be an object type");
+};
