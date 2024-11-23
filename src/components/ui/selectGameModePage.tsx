@@ -10,19 +10,19 @@ const renderModeCard = (
     <div
       onClick={onClick}
       className={`
-        cursor-pointer rounded-lg overflow-hidden border border-gray-200 shadow-md hover:shadow-lg transition-shadow
-        flex flex-col w-[250px]
+        group cursor-pointer rounded-lg overflow-hidden border border-background-light hover:border-primary transition-colors
+        flex flex-col
         ${className}
       `}
     >
-      <div className="h-[200px] w-full">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <div className="p-4 text-center bg-white">
+      <img
+        src={imageUrl}
+        alt={title}
+        width={256}
+        height={256}
+        className="object-cover"
+      />
+      <div className="p-4 text-center bg-background-light group-hover:bg-primary transition-colors">
         <h3 className="text-lg font-semibold">{title}</h3>
       </div>
     </div>
@@ -49,4 +49,3 @@ export const SelectGameModePage = (props: {
     </div>
   );
 };
-

@@ -3,7 +3,7 @@ import { GameScene } from "./components/scene/gameScene";
 import { useEffect, useState } from "react";
 import { GameSession } from "./game-logic/gameSession";
 import { GameSessionContext } from "./hooks/useGameSessionContext";
-import { SelectGameModePage } from "./components/ui/selectGameMode";
+import { SelectGameModePage } from "./components/ui/selectGameModePage";
 import { chromeApi } from "./chromeAI";
 
 export const App = () => {
@@ -71,4 +71,3 @@ export const App = () => {
     </GameSessionContext.Provider>
   );
 };
-
