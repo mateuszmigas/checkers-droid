@@ -8,7 +8,7 @@
 
 <div align="center">
 
-  <img src="assets/logo_big.webp" width="200" height="200">
+  <img src="assets/logo_256.png" width="128" height="128">
 
 </div>
 
@@ -40,3 +40,4 @@
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
