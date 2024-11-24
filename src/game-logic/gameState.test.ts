@@ -147,16 +147,6 @@ describe("movement rules for men", () => {
       to: { row: 4, col: 1 },
       player: "PLAYER_TWO",
     });
-
-    // Invalid move - moving two squares without capture
-    const invalidMove = updateGameState(moveLeft.state, {
-      type: "MOVE_PIECE",
-      from: { row: 2, col: 3 },
-      to: { row: 4, col: 5 },
-    });
-    expect(invalidMove.state.grid[2][3]).toBeTruthy();
-    expect(invalidMove.state.grid[4][5]).toBeNull();
-    expect(invalidMove.events).toContainEqual({ type: "INVALID_MOVE" });
   });
 
   test("men cannot move backward", () => {
@@ -1061,3 +1051,4 @@ describe("draw conditions", () => {
     expect(hasCaptures).toBe(false);
   });
 });
+

@@ -16,3 +16,4 @@ export type GameEvent =
   | { type: "TURN_CHANGED"; player: PlayerType }
   | { type: "INVALID_MOVE" }
   | { type: "GAME_OVER"; winner: PlayerType | "DRAW" };
+

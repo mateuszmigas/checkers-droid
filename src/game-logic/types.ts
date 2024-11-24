@@ -13,6 +13,11 @@ export type CheckerPiece = {
   isKing: boolean;
 };
 
+export type CheckerMove = {
+  from: CheckerPosition;
+  to: CheckerPosition;
+};
+
 export type CheckerPossibleTarget = {
   targetPosition: CheckerPosition;
   isCapture: boolean;
