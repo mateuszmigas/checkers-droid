@@ -291,19 +291,28 @@ const calculateGameEvents = (
   const events: GameEvent[] = [];
   const { from, to } = moveAction;
 
-  // Check for captured pieces
-  oldState.grid.forEach((row, rowIndex) => {
-    row.forEach((piece, colIndex) => {
-      if (piece && !newState.grid[rowIndex][colIndex]) {
-        // This piece was removed, must have been captured
+  // Check for captured pieces by comparing opponent pieces count
+  const opponentPlayer = getOpponentPlayer(oldState.currentTurn);
+  const oldOpponentPieces = getRemainingPieces(oldState.grid).filter(
+    (piece) => piece.player === opponentPlayer
+  );
+  const newOpponentPieces = getRemainingPieces(newState.grid).filter(
+    (piece) => piece.player === opponentPlayer
+  );
+
+  // If opponent lost pieces, they were captured
+  if (oldOpponentPieces.length > newOpponentPieces.length) {
+    // Find positions of captured pieces by comparing old and new state
+    oldOpponentPieces.forEach((piece) => {
+      if (!newOpponentPieces.some((newPiece) => newPiece.id === piece.id)) {
         events.push({
           type: "PIECE_CAPTURED",
-          position: { row: rowIndex, col: colIndex },
+          position: piece.position,
           player: oldState.currentTurn,
         });
       }
     });
-  });
+  }
 
   // Check for piece movement
   const movedPiece = newState.grid[to.row][to.col];
@@ -588,4 +597,3 @@ export const calculateScoredPieces = (state: GameState, player: PlayerType) =>
     .filter(
       (cell): cell is CheckerPiece => cell !== null && cell.player !== player
     ).length;
-
