@@ -34,8 +34,8 @@
 ### ☁️ Github Codespaces
 
 1. [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mateuszmigas/checkers-droid)
-2. Install the dependencies using `pnpm install`
-3. Run the app using `pnpm dev`
+2. Install the dependencies using `npm install`
+3. Run the app using `npm run dev`
 
 ## License
 
