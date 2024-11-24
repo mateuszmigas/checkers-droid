@@ -14,7 +14,7 @@
 
 ---
 
-**Checkers Droid** is an online web checkers game powered by Chrome’s built-in AI API and advanced language models, delivering smarter and more engaging gameplay experiences. It supports multiple game modes: Human vs Human, Human vs AI, and AI vs AI simulation.
+**Checkers Droid** is an online web checkers game powered by Chrome’s built-in AI API, delivering smarter and more engaging gameplay experiences. It supports multiple game modes: Human vs Human, Human vs AI, and AI vs AI simulation.
 
 ## Key Features
 
