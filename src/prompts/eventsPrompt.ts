@@ -1,9 +1,10 @@
 import { GameEvent } from "@/game-logic/gameEvent";
 import { aiPlayerEmotions, PlayerType } from "@/game-logic/types";
-import { z } from "zod";
 import { coerceToEnum } from "@/utils/zod";
-import { createSection, createStructuredResponse } from "@/utils/prompt";
+import { createSection } from "@/utils/prompt";
 import { translateEvent } from "@/utils/translator";
+import { z } from "zod";
+import { splitFirstChunk } from "@/utils/stream";
 
 const promptEventTypes: GameEvent["type"][] = [
   "PIECE_MOVED",
@@ -12,14 +13,7 @@ const promptEventTypes: GameEvent["type"][] = [
   "GAME_OVER",
 ];
 
-const resultSchema = z
-  .object({
-    message: z.string().describe("Concise, event-focused comment"),
-    emotion: coerceToEnum(aiPlayerEmotions).describe(
-      "Emotion matching game state"
-    ),
-  })
-  .partial();
+const resultSchema = coerceToEnum(aiPlayerEmotions);
 
 const createEventsPrompt = (events: GameEvent[], aiPlayerType: PlayerType) => {
   const eventDescriptions = events
@@ -34,8 +28,7 @@ ${aiPlayerEmotions.join(", ")}
 
 ${createSection("Events", eventDescriptions)}
 
-${createStructuredResponse(resultSchema)}
-`;
+${createSection("Response Format", "emotion|comment")}`;
 };
 
 export const createEventsPromptRequest = (
@@ -44,6 +37,14 @@ export const createEventsPromptRequest = (
   defaultValue: z.infer<typeof resultSchema>
 ) => ({
   prompt: createEventsPrompt(events, aiPlayerType),
-  resultSchema,
-  defaultValue,
+  pipeWithFirstChunkHandler: (
+    stream: ReadableStream<string>,
+    handler: (chunk: z.infer<typeof resultSchema>) => void
+  ) =>
+    stream.pipeThrough(
+      splitFirstChunk((chunk) => {
+        const parsed = resultSchema.safeParse(chunk);
+        handler(parsed.success ? parsed.data : defaultValue);
+      }, "|")
+    ),
 });

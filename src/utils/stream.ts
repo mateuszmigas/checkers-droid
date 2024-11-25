@@ -46,7 +46,7 @@ export const createTypingStream = (
   });
 };
 
-export const quickFirstChunk = (
+export const splitFirstChunk = (
   callback: (chunk: string) => void,
   delimiter: string
 ) => {

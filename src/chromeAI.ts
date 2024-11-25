@@ -10,7 +10,7 @@ export type ChromeAiManagedSession = {
 
 const useLogMiddleware = import.meta.env.mode === "development";
 
-const logMiddleware = (execute: (prompt: string) => Promise<string>) => {
+const logPrompt = (execute: (prompt: string) => Promise<string>) => {
   return async (prompt: string) => {
     console.log("🤖 Prompt:", prompt);
     const startTime = performance.now();
@@ -21,6 +21,24 @@ const logMiddleware = (execute: (prompt: string) => Promise<string>) => {
     const response = await promise;
     console.log("🤖 Response:", response);
     return response;
+  };
+};
+
+const logStream = (
+  execute: (prompt: string) => Promise<ReadableStream<string>>
+) => {
+  let buffer = "";
+  return async (prompt: string) => {
+    const stream = await execute(prompt);
+    return stream.pipeThrough(
+      new TransformStream({
+        transform: (chunk, controller) => {
+          console.log("🤖 Stream buffer:", chunk.slice(buffer.length));
+          controller.enqueue(chunk);
+          buffer = chunk;
+        },
+      })
+    );
   };
 };
 
@@ -63,8 +81,10 @@ export const chromeApi = {
     const destroy = () => languageModel.destroy();
 
     return {
-      prompt: useLogMiddleware ? logMiddleware(prompt) : prompt,
-      promptStreaming,
+      prompt: useLogMiddleware ? logPrompt(prompt) : prompt,
+      promptStreaming: useLogMiddleware
+        ? logStream(promptStreaming)
+        : promptStreaming,
       destroy,
     };
   },

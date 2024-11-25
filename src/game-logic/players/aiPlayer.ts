@@ -136,15 +136,21 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
     const promptRequest = createEventsPromptRequest(
       filteredEvents,
       this.playerType,
-      { message: "...", emotion: "joy" }
+      "joy"
     );
 
-    const response = await runWithStructuredOutput(
-      this.reactionSession,
-      promptRequest
+    const response = await this.reactionSession.promptStreaming(
+      promptRequest.prompt
     );
 
-    this.emit({ type: "MESSAGE_CHANGED", message: response.data.message! });
-    this.emit({ type: "EMOTION_CHANGED", emotion: response.data.emotion! });
+    const messageStream = promptRequest.pipeWithFirstChunkHandler(
+      response,
+      (emotion) => this.emit({ type: "EMOTION_CHANGED", emotion })
+    );
+
+    this.emit({
+      type: "MESSAGE_CHANGED",
+      message: messageStream,
+    });
   }
 }
