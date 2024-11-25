@@ -1,12 +1,28 @@
-import { PromiseQueue } from "./utils/promise";
+// import { PromiseQueue } from "./utils/promise";
 
-export type ChromeAiSession = {
+export type ChromeAiManagedSession = {
   prompt: (prompt: string) => Promise<string>;
-  promptStreaming: (prompt: string) => ReadableStream<string>;
+  promptStreaming: (prompt: string) => Promise<ReadableStream<string>>;
   destroy: () => void;
 };
 
-const promiseQueue = new PromiseQueue();
+// const _promiseQueue = new PromiseQueue();
+
+const useLogMiddleware = import.meta.env.mode === "development";
+
+const logMiddleware = (execute: (prompt: string) => Promise<string>) => {
+  return async (prompt: string) => {
+    console.log("🤖 Prompt:", prompt);
+    const startTime = performance.now();
+    const promise = await execute(prompt);
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+    console.log(`⏱️ Prompt duration: ${duration.toFixed(2)}ms`);
+    const response = await promise;
+    console.log("🤖 Response:", response);
+    return response;
+  };
+};
 
 export const chromeApi = {
   isAvailable: async () => {
@@ -17,30 +33,39 @@ export const chromeApi = {
       return false;
     }
   },
-  createSession: async (systemPrompt: string): Promise<ChromeAiSession> => {
-    const languageModel = await window.ai.languageModel.create({
-      systemPrompt,
-    });
 
-    const session = {
-      prompt: async (prompt: string) => {
-        console.log("🤖 Prompt:", prompt);
-        const startTime = performance.now();
-        const promise = await promiseQueue.push(() =>
-          languageModel.prompt(prompt)
-        );
-        const endTime = performance.now();
-        const duration = endTime - startTime;
-        console.log(`⏱️ Prompt duration: ${duration.toFixed(2)}ms`);
-        const response = await promise;
-        console.log("🤖 Response:", response);
-        return response;
-      },
-      promptStreaming: (prompt: string) =>
-        languageModel.promptStreaming(prompt),
-      destroy: () => languageModel.destroy(),
+  createManagedSession: async (options: {
+    systemPrompt: string;
+    topK?: number;
+    temperature?: number;
+  }): Promise<ChromeAiManagedSession> => {
+    const createModel = () => window.ai.languageModel.create(options);
+    let languageModel = await createModel();
+
+    const getModel = async () => {
+      // recreate the model if it's low on tokens
+      if (languageModel.tokensLeft < 1000) {
+        languageModel.destroy();
+        languageModel = await createModel();
+      }
+
+      return languageModel;
     };
 
-    return session;
+    const prompt = async (prompt: string) => {
+      const model = await getModel();
+      return model.prompt(prompt);
+    };
+    const promptStreaming = async (prompt: string) => {
+      const model = await getModel();
+      return model.promptStreaming(prompt);
+    };
+    const destroy = () => languageModel.destroy();
+
+    return {
+      prompt: useLogMiddleware ? logMiddleware(prompt) : prompt,
+      promptStreaming,
+      destroy,
+    };
   },
 };

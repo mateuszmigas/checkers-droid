@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ChromeAiSession } from "@/chromeAI";
+import { ChromeAiManagedSession } from "@/chromeAI";
 
 export const cleanStructuredOutput = (json: string) => {
   // Remove the markers
@@ -20,7 +20,7 @@ type PromptRequest<T extends z.ZodType> = {
 };
 
 export const runWithStructuredOutput = async <T extends z.ZodType>(
-  session: ChromeAiSession,
+  session: ChromeAiManagedSession,
   promptRequest: PromptRequest<T>
 ): Promise<{ success: boolean; data: z.infer<T> }> => {
   const { prompt, resultSchema, defaultValue, validator } = promptRequest;

@@ -6,7 +6,7 @@ import {
   runWithStructuredOutput,
 } from "./prompt";
 import { z } from "zod";
-import { ChromeAiSession } from "@/chromeAI";
+import { ChromeAiManagedSession } from "@/chromeAI";
 
 describe("createSection", () => {
   it("should create a section with the given name and content", () => {
@@ -51,7 +51,7 @@ describe("createStructuredResponse", () => {
 
 describe("runWithStructuredOutput", () => {
   const createFakeSession = (result: string) =>
-    ({ prompt: async () => result } as unknown as ChromeAiSession);
+    ({ prompt: async () => result } as unknown as ChromeAiManagedSession);
 
   it("should run with structured output", async () => {
     const fakeSession = createFakeSession('{"name": "Ted"}');

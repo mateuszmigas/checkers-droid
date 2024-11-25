@@ -46,3 +46,25 @@ export const createTypingStream = (
   });
 };
 
+export const quickFirstChunk = (
+  callback: (chunk: string) => void,
+  delimiter: string
+) => {
+  let buffer = "";
+  return new TransformStream({
+    transform: (chunk, controller) => {
+      // = instead of + because of bug
+      buffer = chunk.toString();
+
+      if (buffer.includes(delimiter)) {
+        const [firstChunk, rest] = buffer.split(delimiter);
+        if (firstChunk) {
+          callback(firstChunk);
+        }
+        controller.enqueue(rest);
+      } else {
+        controller.enqueue(buffer);
+      }
+    },
+  });
+};

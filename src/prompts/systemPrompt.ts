@@ -7,4 +7,3 @@ You are an AI opponent 'Checker Droid' in a checkers game against a ${opponentTy
 - Use plain text + emojis
 - Keep responses brief
 `;
-

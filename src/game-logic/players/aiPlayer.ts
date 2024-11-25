@@ -2,7 +2,7 @@ import { GameState, getPlayerValidMoves, updateGameState } from "../gameState";
 import { AIPlayerEmotion, CheckerPosition, PlayerType } from "../types";
 import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
-import { chromeApi, ChromeAiSession } from "@/chromeAI";
+import { chromeApi, ChromeAiManagedSession } from "@/chromeAI";
 import { createMovePromptRequest } from "@/prompts/movePrompt";
 import { createSystemPrompt } from "@/prompts/systemPrompt";
 import { createWelcomePrompt } from "@/prompts/welcomePrompt";
@@ -18,6 +18,14 @@ export type MoveConsequence =
   | "TURN_DIDNT_CHANGE"
   | "PROMOTED_TO_KING"
   | "EXPOSES_TO_OPPONENT_CAPTURE";
+
+const reactionEvents = [
+  "PIECE_MOVED",
+  "PIECE_CAPTURED",
+  "PIECE_CROWNED",
+  "TURN_CHANGED",
+  "GAME_OVER",
+];
 
 const simulateMoveConsequences = (
   gameState: GameState,
@@ -47,27 +55,44 @@ const simulateMoveConsequences = (
 };
 
 export class AiPlayer extends EventEmitter<AIPlayerEvents> {
-  private session: ChromeAiSession | undefined;
+  private selectMoveSession!: ChromeAiManagedSession;
+  private reactionSession!: ChromeAiManagedSession;
 
   constructor(private readonly playerType: PlayerType) {
     super();
 
     const systemPrompt = createSystemPrompt("AI");
-    chromeApi.createSession(systemPrompt).then((session) => {
-      this.session = session;
-      const promptStream = this.session.promptStreaming(createWelcomePrompt());
 
-      setTimeout(() => {
-        this.emit({
-          type: "MESSAGE_CHANGED",
-          message: promptStream,
+    const init = async () => {
+      const createSessions = async () => {
+        this.selectMoveSession = await chromeApi.createManagedSession({
+          systemPrompt,
+          topK: 1,
+          temperature: 1,
         });
-        this.emit({
-          type: "EMOTION_CHANGED",
-          emotion: "joy",
+        this.reactionSession = await chromeApi.createManagedSession({
+          systemPrompt,
+          // default values
         });
-      }, 100);
-    });
+      };
+
+      await withMinDuration(createSessions(), 500);
+
+      const promptStream = await this.reactionSession.promptStreaming(
+        createWelcomePrompt()
+      );
+
+      this.emit({
+        type: "MESSAGE_CHANGED",
+        message: promptStream,
+      });
+      this.emit({
+        type: "EMOTION_CHANGED",
+        emotion: "joy",
+      });
+    };
+
+    init();
   }
 
   async getMove(gameState: GameState) {
@@ -92,11 +117,9 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
     );
 
     const response = await withMinDuration(
-      runWithStructuredOutput(this.session!, promptRequest),
+      runWithStructuredOutput(this.selectMoveSession, promptRequest),
       1000 // in case the AI is too fast
     );
-
-    console.log(response);
 
     return moves[response.data.shot];
   }
@@ -106,8 +129,8 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
       return;
     }
 
-    const filteredEvents = gameEvents.filter(
-      (event) => event.type !== "GAME_OVER"
+    const filteredEvents = gameEvents.filter((event) =>
+      reactionEvents.includes(event.type)
     );
 
     const promptRequest = createEventsPromptRequest(
@@ -117,7 +140,7 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
     );
 
     const response = await runWithStructuredOutput(
-      this.session!,
+      this.reactionSession,
       promptRequest
     );
 
@@ -125,23 +148,3 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
     this.emit({ type: "EMOTION_CHANGED", emotion: response.data.emotion! });
   }
 }
-// // Create a TransformStream to process the emotion and message
-// const transformStream = new TransformStream({
-//   transform: (chunk, controller) => {
-//     const text = chunk.toString();
-//     if (text.includes("|")) {
-//       const [emotion, message] = text.split("|");
-//       // Emit emotion change if it's a valid AIPlayerEmotion
-//       if (emotion.trim() as AIPlayerEmotion) {
-//         console.log("emotion", emotion.trim());
-//         // this.emit({
-//         //   type: "EMOTION_CHANGED",
-//         //   emotion: emotion.trim() as AIPlayerEmotion,
-//         // });
-//       }
-//       controller.enqueue(message);
-//     } else {
-//       controller.enqueue(chunk);
-//     }
-//   },
-// });
