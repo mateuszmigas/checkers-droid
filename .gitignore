@@ -28,3 +28,7 @@ dist-ssr
 
 # TypeScript build info
 tsconfig.app.tsbuildinfo
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
