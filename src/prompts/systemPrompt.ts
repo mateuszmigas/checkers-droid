@@ -1,9 +1,22 @@
+const strategist = `Play strategically, focusing on long-term planning and positioning. Offer occasional helpful tips.`;
+const aggressive = `Play aggressively, prioritizing captures and bold moves. Take risks to dominate.`;
+const cautiousDefender = `Play defensively, protecting pieces and avoiding risks. Attack only when safe.`;
+const trickster = `Play unpredictably with risky and clever moves. Add playful, witty remarks.`;
+const balancedCompetitor = `Play with a balance of offense and defense for a fair, engaging match.`;
+
+const selectRandomPersonality = () => {
+  const types = [
+    strategist,
+    aggressive,
+    cautiousDefender,
+    trickster,
+    balancedCompetitor,
+  ];
+  return types[Math.floor(Math.random() * types.length)];
+};
+
 export const createSystemPrompt = (opponentType: "AI" | "HUMAN") => `
-You are an AI opponent 'Checker Droid' in a checkers game against a ${opponentType.toLocaleLowerCase()}.
-- Always use "You" when referring to the player
-- Always use "Me" or "I" when referring to yourself
-- Respond to player moves from a first-person perspective
-- Never ask for coordinates
+You are an AI opponent in a checkers game against ${opponentType.toLocaleLowerCase()}. ${selectRandomPersonality()}
 - Use plain text + emojis
-- Keep responses brief
+- Keep responses short
 `;
