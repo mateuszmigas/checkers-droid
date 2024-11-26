@@ -19,6 +19,7 @@ import { useSelectableCheckerTexture } from "./hooks/useSelectableCheckerTexture
 import { useSelectedCheckerTexture } from "./hooks/useSelectedCheckerTexture";
 import { OrbitControls } from "@react-three/drei/core/OrbitControls";
 import { Stats } from "@react-three/drei/core/Stats";
+import { isDevelopment } from "@/platform";
 
 const getCheckerValidMoves = (
   allValidMoves: CheckerValidMoveMap | null,
@@ -102,7 +103,7 @@ export const GameScene = memo(() => {
         minDistance={5}
         maxPolarAngle={Math.PI / 2.1}
       />
-      <Stats />
+      {isDevelopment && <Stats />}
     </>
   );
 });
