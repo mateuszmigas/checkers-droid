@@ -46,7 +46,7 @@ export const createTypingStream = (
   });
 };
 
-export const splitFirstChunk = (
+export const withFirstChunkHandler = (
   callback: (chunk: string) => void,
   delimiter: string
 ) => {
@@ -68,3 +68,15 @@ export const splitFirstChunk = (
     },
   });
 };
+
+export const withCompletionTracking = (onComplete: () => void) => {
+  return new TransformStream({
+    transform(chunk, controller) {
+      controller.enqueue(chunk);
+    },
+    flush() {
+      onComplete();
+    },
+  });
+};
+

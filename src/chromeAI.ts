@@ -1,5 +1,3 @@
-// import { PromiseQueue } from "./utils/promise";
-
 import { isDevelopment } from "./platform";
 
 export type ChromeAiManagedSession = {
@@ -7,8 +5,6 @@ export type ChromeAiManagedSession = {
   promptStreaming: (prompt: string) => Promise<ReadableStream<string>>;
   destroy: () => void;
 };
-
-// const _promiseQueue = new PromiseQueue();
 
 const useLogMiddleware = isDevelopment;
 
@@ -91,3 +87,4 @@ export const chromeApi = {
     };
   },
 };
+

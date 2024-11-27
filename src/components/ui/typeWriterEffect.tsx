@@ -27,7 +27,10 @@ export const TypewriterEffect = memo(
 
       typeText();
 
-      return () => abortController.abort();
+      return () => {
+        reader.cancel();
+        return abortController.abort();
+      };
     }, [text, getIsMounted]);
 
     return (
