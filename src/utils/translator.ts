@@ -1,7 +1,8 @@
 import { GameEvent } from "@/game-logic/gameEvent";
-import { CheckerPosition, PlayerType } from "@/game-logic/types";
+import { CheckerMove, CheckerPosition, PlayerType } from "@/game-logic/types";
 import { assertNever } from "./typeGuards";
 import { GameState } from "@/game-logic/gameState";
+import { MoveConsequence } from "@/game-logic/moveConsequence";
 
 export const translateEvent = (event: GameEvent, player: PlayerType) => {
   const isSamePlayer = (eventPlayer: PlayerType) => player === eventPlayer;
@@ -53,5 +54,25 @@ export const translatePlayerTurn = (
   return `${
     player === gameState.currentTurn ? "Your Turn" : "Opponent's\nTurn"
   }`;
+};
+
+export const translateCheckerMove = (move: CheckerMove) =>
+  `(${move.from.col}, ${move.from.row}) -> (${move.to.col}, ${move.to.row})`;
+
+export const translateMoveConsequence = (consequence: MoveConsequence) => {
+  switch (consequence) {
+    case "CAPTURE_RISK":
+      return "Risk of capture";
+    case "CAPTURE_OPPORTUNITY":
+      return "Capture chance";
+    case "OPPONENT_BLOCK":
+      return "Blocks opponent";
+    case "KING_PROMOTION":
+      return "Promotes to king";
+    case "WINNING_MOVE":
+      return "Winning move";
+    default:
+      return assertNever(consequence);
+  }
 };
 

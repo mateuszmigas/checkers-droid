@@ -1,39 +1,27 @@
 import { CheckerPosition } from "@/game-logic/types";
-import { MoveConsequence } from "@/game-logic/players/aiPlayer";
 import { z } from "zod";
 import { createSection, createStructuredResponse } from "@/utils/prompt";
 import { coerceToNumber } from "@/utils/zod";
+import { MoveConsequence } from "@/game-logic/moveConsequence";
+import { translateMoveConsequence } from "@/utils/translator";
 
 const resultSchema = z.object({
-  shot: coerceToNumber.describe("best move index"),
+  shot: coerceToNumber.describe("chosen move index"),
 });
 
-const consequenceMap: Record<MoveConsequence, string> = {
-  TURN_DIDNT_CHANGE: "I keep my turn",
-  PROMOTED_TO_KING: "My piece became king",
-  EXPOSES_TO_OPPONENT_CAPTURE: "I risk being captured",
-};
-
-const mapConsequences = (consequences: MoveConsequence[]) => {
-  if (consequences.length === 0) return "Neutral move";
-  return consequences
-    .map((consequence) => consequenceMap[consequence])
-    .join(", ");
-};
-
-const mapMove = (move: {
-  from: CheckerPosition;
-  to: CheckerPosition;
-  consequences: MoveConsequence[];
-}) => `${mapConsequences(move.consequences)}`;
-
-const mapMoves = (
+const movesToString = (
   moves: {
     from: CheckerPosition;
     to: CheckerPosition;
     consequences: MoveConsequence[];
   }[]
-) => moves.map((m, i) => `${i}. ${mapMove(m)}`).join("\n");
+) =>
+  moves
+    .map(
+      (m, i) =>
+        `${i}. ${m.consequences.map(translateMoveConsequence).join(", ")}`
+    )
+    .join("\n");
 
 export const createMovePrompt = (
   moves: {
@@ -42,9 +30,9 @@ export const createMovePrompt = (
     consequences: MoveConsequence[];
   }[]
 ) => `
-Analyze the given set of possible move consequences and select the best move index with structured output.
+Given the set of possible move consequences, select the best move. Avoid moves that lead to risk being captured.
 
-${createSection("Moves Consequences", mapMoves(moves))}
+${createSection("Moves Consequences", movesToString(moves))}
 
 ${createStructuredResponse(resultSchema)}
 `;
@@ -63,3 +51,23 @@ export const createMovePromptRequest = (
   defaultValue,
   validator,
 });
+
+/* Example
+Given the set of possible move consequences, select the best move. Avoid moves that lead to risk being captured.
+
+<Moves Consequences>
+0. Risk of capture
+1. Risk of capture, Capture chance
+2. Risk of capture, Capture chance
+3. Risk of capture
+4. Blocks opponent
+5. Risk of capture
+6. Risk of capture
+</Moves Consequences>
+
+<Response Format>
+{
+  "shot": "chosen move index"
+}
+</Response Format>
+*/

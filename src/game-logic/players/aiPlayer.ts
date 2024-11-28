@@ -1,5 +1,5 @@
-import { GameState, getPlayerValidMoves, updateGameState } from "../gameState";
-import { AIPlayerEmotion, CheckerPosition, PlayerType } from "../types";
+import { GameState, getPlayerValidMoves } from "../gameState";
+import { AIPlayerEmotion, PlayerType } from "../types";
 import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
 import { chromeApi, ChromeAiManagedSession } from "@/chromeAI";
@@ -10,42 +10,11 @@ import { runWithStructuredOutput } from "@/utils/prompt";
 import { createEventsPromptRequest } from "@/prompts/eventsPrompt";
 import { withMinDuration } from "@/utils/promise";
 import { withCompletionTracking } from "@/utils/stream";
+import { analyzeMoveConsequences } from "../moveConsequence";
 
 export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
   | { type: "MESSAGE_CHANGED"; message: string | ReadableStream<string> };
-
-export type MoveConsequence =
-  | "TURN_DIDNT_CHANGE"
-  | "PROMOTED_TO_KING"
-  | "EXPOSES_TO_OPPONENT_CAPTURE";
-
-const simulateMoveConsequences = (
-  gameState: GameState,
-  move: { from: CheckerPosition; to: CheckerPosition }
-): MoveConsequence[] => {
-  const me = gameState.currentTurn as PlayerType;
-  const { state, events } = updateGameState(gameState, {
-    type: "MOVE_PIECE",
-    ...move,
-  });
-  const opponent = me === "PLAYER_ONE" ? "PLAYER_TWO" : "PLAYER_ONE";
-
-  const exposesToOpponentCapture = getPlayerValidMoves(opponent, state)
-    .entries()
-    .some((e) => e[1].some((m) => m.isCapture));
-  const turnDidntChange = events.every(
-    (event) => event.type !== "TURN_CHANGED"
-  );
-  const promotedToKing = events.some((event) => event.type === "PIECE_CROWNED");
-
-  const consequences: MoveConsequence[] = [];
-  if (promotedToKing) consequences.push("PROMOTED_TO_KING");
-  if (turnDidntChange) consequences.push("TURN_DIDNT_CHANGE");
-  if (exposesToOpponentCapture)
-    consequences.push("EXPOSES_TO_OPPONENT_CAPTURE");
-  return consequences;
-};
 
 export class AiPlayer extends EventEmitter<AIPlayerEvents> {
   private selectMoveSession: ChromeAiManagedSession | null = null;
@@ -100,13 +69,11 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
   async getMove(gameState: GameState) {
     const moves = getPlayerValidMoves(this.playerType, gameState)
       .entries()
-      .flatMap(([position, moves]) =>
-        moves.map((move) => {
-          const consequences = simulateMoveConsequences(gameState, {
-            from: position,
-            to: move.targetPosition,
-          });
-          return { from: position, to: move.targetPosition, consequences };
+      .flatMap(([position, targets]) =>
+        targets.map((target) => {
+          const move = { from: position, to: target.targetPosition };
+          const consequences = analyzeMoveConsequences(gameState, move);
+          return { ...move, consequences };
         })
       );
 
