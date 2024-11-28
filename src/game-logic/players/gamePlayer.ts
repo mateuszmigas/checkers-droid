@@ -12,12 +12,12 @@ export const createHumanPlayer = (): GamePlayer => ({
 
 export const createAiPlayer = (
   playerType: PlayerType,
+  opponentType: "HUMAN" | "AI",
   aiAvailable: boolean
 ): GamePlayer => {
   const aiPlayer = aiAvailable
-    ? new AiPlayer(playerType)
+    ? new AiPlayer(playerType, opponentType)
     : new FakeAiPlayer(playerType);
 
   return { type: "AI", getInstance: () => aiPlayer };
 };
-

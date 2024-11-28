@@ -10,6 +10,7 @@ const promptEventTypes: GameEvent["type"][] = [
   "PIECE_MOVED",
   "PIECE_CAPTURED",
   "PIECE_CROWNED",
+  "TURN_CHANGED",
   "GAME_OVER",
 ];
 
@@ -51,4 +52,3 @@ export const createEventsPromptRequest = (
       )
       .pipeThrough(withCompletionTracking(onComplete)),
 });
-

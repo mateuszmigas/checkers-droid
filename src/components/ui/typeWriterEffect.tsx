@@ -20,6 +20,8 @@ export const TypewriterEffect = memo(
             if (done || !getIsMounted()) break;
             setDisplayedText((current) => current + value);
           }
+        } catch (error) {
+          console.error(error);
         } finally {
           reader.releaseLock();
         }
@@ -28,8 +30,7 @@ export const TypewriterEffect = memo(
       typeText();
 
       return () => {
-        reader.cancel();
-        return abortController.abort();
+        abortController.abort();
       };
     }, [text, getIsMounted]);
 
@@ -40,4 +41,3 @@ export const TypewriterEffect = memo(
     );
   }
 );
-

@@ -9,6 +9,7 @@ import { createWelcomePrompt } from "@/prompts/welcomePrompt";
 import { runWithStructuredOutput } from "@/utils/prompt";
 import { createEventsPromptRequest } from "@/prompts/eventsPrompt";
 import { withMinDuration } from "@/utils/promise";
+import { withCompletionTracking } from "@/utils/stream";
 
 export type AIPlayerEvents =
   | { type: "EMOTION_CHANGED"; emotion: AIPlayerEmotion }
@@ -18,14 +19,6 @@ export type MoveConsequence =
   | "TURN_DIDNT_CHANGE"
   | "PROMOTED_TO_KING"
   | "EXPOSES_TO_OPPONENT_CAPTURE";
-
-const reactionEvents = [
-  "PIECE_MOVED",
-  "PIECE_CAPTURED",
-  "PIECE_CROWNED",
-  "TURN_CHANGED",
-  "GAME_OVER",
-];
 
 const simulateMoveConsequences = (
   gameState: GameState,
@@ -55,14 +48,17 @@ const simulateMoveConsequences = (
 };
 
 export class AiPlayer extends EventEmitter<AIPlayerEvents> {
-  private selectMoveSession!: ChromeAiManagedSession;
-  private reactionSession!: ChromeAiManagedSession;
+  private selectMoveSession: ChromeAiManagedSession | null = null;
+  private reactionSession: ChromeAiManagedSession | null = null;
   private isMessageStreamInProgress = false;
 
-  constructor(private readonly playerType: PlayerType) {
+  constructor(
+    private readonly playerType: PlayerType,
+    opponentType: "HUMAN" | "AI"
+  ) {
     super();
 
-    const systemPrompt = createSystemPrompt("AI");
+    const systemPrompt = createSystemPrompt(opponentType);
 
     const init = async () => {
       const createSessions = async () => {
@@ -71,33 +67,37 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
           topK: 1,
           temperature: 1,
         });
-        this.reactionSession = await chromeApi.createManagedSession({
-          systemPrompt,
-          // default values
-        });
+        if (opponentType === "HUMAN") {
+          this.reactionSession = await chromeApi.createManagedSession({
+            systemPrompt,
+            // default values
+          });
+        }
       };
 
       await withMinDuration(createSessions(), 500);
 
-      const promptStream = await this.reactionSession.promptStreaming(
-        createWelcomePrompt()
-      );
-
-      this.emit({
-        type: "MESSAGE_CHANGED",
-        message: promptStream,
-      });
-      this.emit({
-        type: "EMOTION_CHANGED",
-        emotion: "joy",
-      });
+      if (this.reactionSession) {
+        const welcomeStream = await this.reactionSession.promptStreaming(
+          createWelcomePrompt()
+        );
+        this.isMessageStreamInProgress = true;
+        this.emit({
+          type: "MESSAGE_CHANGED",
+          message: welcomeStream.pipeThrough(
+            withCompletionTracking(() => {
+              this.isMessageStreamInProgress = false;
+            })
+          ),
+        });
+      }
+      this.emit({ type: "EMOTION_CHANGED", emotion: "joy" });
     };
 
     init();
   }
 
   async getMove(gameState: GameState) {
-    console.log("_______getting moves");
     const moves = getPlayerValidMoves(this.playerType, gameState)
       .entries()
       .flatMap(([position, moves]) =>
@@ -114,35 +114,29 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
 
     const promptRequest = createMovePromptRequest(
       moves,
-      { shot: 0 },
+      { shot: 0 }, // default value
       ({ shot }) => shot >= 0 && shot < moves.length
     );
 
     const response = await withMinDuration(
-      runWithStructuredOutput(this.selectMoveSession, promptRequest),
+      runWithStructuredOutput(this.selectMoveSession!, promptRequest),
       1000 // in case the AI is too fast
     );
 
-    console.log("_______finishing shot");
     return moves[response.data.shot];
   }
 
   async notify(gameState: GameState, gameEvents: GameEvent[]) {
-    console.log("_______notifying", this.isMessageStreamInProgress);
     if (
+      !this.reactionSession ||
       gameState.currentTurn === this.playerType ||
       this.isMessageStreamInProgress
     ) {
       return;
     }
 
-    console.log("_______notifying execute");
-    const filteredEvents = gameEvents.filter((event) =>
-      reactionEvents.includes(event.type)
-    );
-
     const promptRequest = createEventsPromptRequest(
-      filteredEvents,
+      gameEvents,
       this.playerType,
       "joy"
     );
@@ -152,7 +146,6 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
     );
 
     this.isMessageStreamInProgress = true;
-
     const messageStream = promptRequest.handleEmotionThenStreamMessage(
       response,
       (emotion) => this.emit({ type: "EMOTION_CHANGED", emotion }),
@@ -167,4 +160,3 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
     });
   }
 }
-

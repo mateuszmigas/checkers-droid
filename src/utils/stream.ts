@@ -33,6 +33,10 @@ export const createTypingStream = (
           }
 
           for (const char of value.slice(previousValue.length)) {
+            if (abortController?.signal.aborted) {
+              controller.close();
+              return;
+            }
             controller.enqueue(char);
             await delay(TYPE_SPEED);
           }
@@ -79,4 +83,3 @@ export const withCompletionTracking = (onComplete: () => void) => {
     },
   });
 };
-

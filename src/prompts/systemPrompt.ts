@@ -17,6 +17,6 @@ const selectRandomPersonality = () => {
 
 export const createSystemPrompt = (opponentType: "AI" | "HUMAN") => `
 You are a checkers player against ${opponentType}. ${selectRandomPersonality()}
-- Keep responses very short and engaging.
+- Keep responses very short and engaging
 - Use plain text with emojis
 `;

@@ -10,16 +10,6 @@ export const App = (props: { aiAvailable: boolean }) => {
   const { aiAvailable } = props;
   const [gameSession, setGameSession] = useState<GameSession | null>(null);
 
-  // //temp
-  // useEffect(() => {
-  //   const gs = new GameSession("HUMAN_VS_AI", aiAvailable);
-  //   setGameSession(gs);
-
-  //   gs.on("GAME_OVER", () => {
-  //     gs.restart();
-  //   });
-  // }, []);
-
   return (
     <GameSessionContext.Provider value={gameSession}>
       {gameSession ? (
@@ -37,6 +27,7 @@ export const App = (props: { aiAvailable: boolean }) => {
           <Button
             className="absolute top-4 left-4"
             onClick={() => {
+              gameSession?.stop();
               setGameSession(null);
             }}
           >
