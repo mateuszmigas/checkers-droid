@@ -126,4 +126,9 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
       message: messageStream,
     });
   }
+
+  dispose() {
+    this.selectMoveSession?.destroy();
+    this.reactionSession?.destroy();
+  }
 }

@@ -159,6 +159,10 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
 
   stop() {
     this.clear();
+
+    if (this.playerOne.type === "AI") this.playerOne.getInstance().dispose();
+    if (this.playerTwo.type === "AI") this.playerTwo.getInstance().dispose();
+
     this.gameState = createInitialGameState();
     this.selectedCheckerPosition = null;
   }

@@ -53,4 +53,6 @@ export class FakeAiPlayer extends EventEmitter<AIPlayerEvents> {
       }
     }
   }
+
+  dispose() {}
 }
