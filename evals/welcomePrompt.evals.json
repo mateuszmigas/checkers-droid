@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "eventPrompt3",
+      "prompt": "say hello",
+      "criteria": [
+        { "type": "includes", "value": "event" },
+        { "type": "notIncludes", "value": "event" }
+      ]
+    }
+  ]
+}
