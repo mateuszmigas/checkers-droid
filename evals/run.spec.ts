@@ -3,6 +3,11 @@ import path from "path";
 import { expect } from "@playwright/test";
 import { test, chromium, Page } from "@playwright/test";
 
+/*
+1. Open Chrome with remote debugging --remote-debugging-port=9222
+2. Run tests with: pnpm test:evals
+*/
+
 type TestDefinition = {
   name: string;
   prompt: string;
@@ -34,15 +39,25 @@ const loadEvals = () => {
 
   return files.map((file) => {
     const filePath = path.join(path.resolve("./evals"), file);
-    return JSON.parse(fs.readFileSync(filePath, "utf-8")) as {
+    const evals = JSON.parse(fs.readFileSync(filePath, "utf-8")) as {
       tests: TestDefinition[];
+    };
+    const nameWithoutExtension = path.basename(file, ".evals.json");
+
+    const formattedName = nameWithoutExtension
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/^./, (str) => str.toUpperCase());
+
+    return {
+      name: formattedName,
+      evals,
     };
   });
 };
 
-loadEvals().forEach((evals) => {
+loadEvals().forEach(({ name, evals }) => {
   evals.tests.forEach((testDef: TestDefinition) => {
-    evalTest(`Eval Test: ${testDef.name}`, async ({ page }) => {
+    evalTest(`${name} - ${testDef.name}`, async ({ page }) => {
       const response = await page.evaluate(async (prompt) => {
         const session = await window.ai.languageModel.create();
         const result = await session.prompt(prompt);
