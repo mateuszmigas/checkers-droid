@@ -25,7 +25,7 @@
 ## Overview
 
 <div align="center">
-  <img src="assets/arch.svg" alt="Checker Droid Architecture">
+  <img src="assets/arch.png" alt="Checker Droid Architecture">
 </div>
 
 ## How to run
