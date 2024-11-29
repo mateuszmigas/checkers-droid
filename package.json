@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "test:eval": "vite preview --port 5010 & sleep 1 && playwright test"
+    "test:eval": "vite preview --port 5010 & sleep 1 && playwright test && pkill vite"
   },
   "dependencies": {
     "@react-spring/three": "^9.7.5",

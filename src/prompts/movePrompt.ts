@@ -52,6 +52,11 @@ export const createMovePromptRequest = (
   validator,
 });
 
+export const sessionOptions = {
+  topK: 1,
+  temperature: 1,
+};
+
 /* Example
 Given the set of possible move consequences, select the best move. Avoid moves that lead to risk being captured.
 
@@ -71,3 +76,4 @@ Given the set of possible move consequences, select the best move. Avoid moves t
 }
 </Response Format>
 */
+

@@ -25,7 +25,7 @@ export const runWithStructuredOutput = async <T extends z.ZodType>(
 ): Promise<{ success: boolean; data: z.infer<T> }> => {
   const { prompt, resultSchema, defaultValue, validator } = promptRequest;
   try {
-    const result = await session.prompt(prompt);
+    const result = await session.prompt!(prompt);
     const parsed = JSON.parse(cleanStructuredOutput(result));
     const validated = resultSchema.safeParse(parsed);
 
@@ -66,3 +66,4 @@ ${JSON.stringify(result, null, 2)}
   }
   throw new Error("Schema must be an object type");
 };
+
