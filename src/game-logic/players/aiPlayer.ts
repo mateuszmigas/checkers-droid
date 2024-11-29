@@ -3,7 +3,7 @@ import { AIPlayerEmotion, PlayerType } from "../types";
 import { EventEmitter } from "@/utils/eventEmitter";
 import { GameEvent } from "../gameEvent";
 import { chromeApi, ChromeAiManagedSession } from "@/chromeAI";
-import { createMovePromptRequest } from "@/prompts/movePrompt";
+import { createMovePromptRequest, sessionOptions } from "@/prompts/movePrompt";
 import { createSystemPrompt } from "@/prompts/systemPrompt";
 import { createWelcomePrompt } from "@/prompts/welcomePrompt";
 import { runWithStructuredOutput } from "@/utils/prompt";
@@ -28,13 +28,11 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
     super();
 
     const systemPrompt = createSystemPrompt(opponentType);
-
     const init = async () => {
       const createSessions = async () => {
         this.selectMoveSession = await chromeApi.createManagedSession({
           systemPrompt,
-          topK: 1,
-          temperature: 1,
+          ...sessionOptions,
         });
         if (opponentType === "HUMAN") {
           this.reactionSession = await chromeApi.createManagedSession({
@@ -132,3 +130,4 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
     this.reactionSession?.destroy();
   }
 }
+

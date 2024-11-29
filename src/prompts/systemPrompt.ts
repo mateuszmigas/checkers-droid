@@ -18,7 +18,7 @@ export const createSystemPrompt = (
   personality?: Personality
 ) => `
 You are a checkers player against ${opponentType}. ${
-  personality ? personalities[personality] : selectRandomPersonality()
+  personalities[personality ?? selectRandomPersonality()]
 }
 - Keep responses very short and engaging
 - Use plain text with emojis

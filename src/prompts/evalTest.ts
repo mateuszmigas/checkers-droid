@@ -51,6 +51,12 @@ export const evalTest = test.extend<TestFixtures>({
             const session = await window.ai.languageModel.create({
               ...options,
             });
+            console.log(
+              "🤖 Session:",
+              session.topK,
+              session.temperature,
+              options?.systemPrompt
+            );
             return await session.prompt(promptText);
           },
           [prompt, options] as [string, PromptOptions | undefined]

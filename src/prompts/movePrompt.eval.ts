@@ -5,7 +5,7 @@ import { createMovePromptRequest, sessionOptions } from "./movePrompt";
 import { runWithStructuredOutput } from "@/utils/prompt";
 import { ChromeAiManagedSession } from "@/chromeAI";
 
-const systemPrompt = createSystemPrompt("HUMAN", "strategist");
+const systemPrompt = createSystemPrompt("HUMAN", "trickster");
 
 const createSession = (
   prompt: (input: string, options: PromptOptions) => Promise<string>
@@ -15,7 +15,7 @@ const createSession = (
       prompt(input, { systemPrompt, ...sessionOptions }),
   } as ChromeAiManagedSession);
 
-evalTest("can create session and send prompt", async ({ prompt }) => {
+evalTest(`should select move with capture opportunity`, async ({ prompt }) => {
   const movePromptRequest = createMovePromptRequest(
     [
       {
@@ -29,7 +29,7 @@ evalTest("can create session and send prompt", async ({ prompt }) => {
         consequences: ["CAPTURE_OPPORTUNITY"],
       },
     ],
-    { shot: 0 }
+    { shot: 2 }
   );
   const response = await runWithStructuredOutput(
     createSession(prompt),
