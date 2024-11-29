@@ -9,12 +9,15 @@ export class FakeAiPlayer extends EventEmitter<AIPlayerEvents> {
   constructor(private readonly playerType: PlayerType) {
     super();
 
-    setTimeout(() => {
+    const init = async () => {
+      await delay(500);
       this.emit({
         type: "MESSAGE_CHANGED",
         message: "Hello, I'm your fake AI opponent!",
       });
-    }, 100);
+      this.emit({ type: "EMOTION_CHANGED", emotion: "joy" });
+    };
+    init();
   }
 
   async getMove(gameState: GameState) {
@@ -33,6 +36,23 @@ export class FakeAiPlayer extends EventEmitter<AIPlayerEvents> {
     return moves[Math.floor(Math.random() * moves.length)];
   }
 
-  async notify(_gameState: GameState, _gameEvents: GameEvent[]) {}
-}
+  async notify(gameState: GameState, events: GameEvent[]) {
+    if (events.some((e) => e.type === "GAME_OVER")) {
+      if (gameState.winner === this.playerType) {
+        this.emit({ type: "EMOTION_CHANGED", emotion: "joy" });
+        this.emit({
+          type: "MESSAGE_CHANGED",
+          message: "I won the game! Great job!",
+        });
+      } else {
+        this.emit({ type: "EMOTION_CHANGED", emotion: "sadness" });
+        this.emit({
+          type: "MESSAGE_CHANGED",
+          message: "I'm sorry, I lost the game. Better luck next time!",
+        });
+      }
+    }
+  }
 
+  dispose() {}
+}

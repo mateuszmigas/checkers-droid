@@ -4,12 +4,13 @@ import { coerceToEnum } from "@/utils/zod";
 import { createSection } from "@/utils/prompt";
 import { translateEvent } from "@/utils/translator";
 import { z } from "zod";
-import { splitFirstChunk } from "@/utils/stream";
+import { withCompletionTracking, withFirstChunkHandler } from "@/utils/stream";
 
 const promptEventTypes: GameEvent["type"][] = [
   "PIECE_MOVED",
   "PIECE_CAPTURED",
   "PIECE_CROWNED",
+  "TURN_CHANGED",
   "GAME_OVER",
 ];
 
@@ -37,14 +38,17 @@ export const createEventsPromptRequest = (
   defaultValue: z.infer<typeof resultSchema>
 ) => ({
   prompt: createEventsPrompt(events, aiPlayerType),
-  pipeWithFirstChunkHandler: (
+  handleEmotionThenStreamMessage: (
     stream: ReadableStream<string>,
-    handler: (chunk: z.infer<typeof resultSchema>) => void
+    emotionHandler: (chunk: z.infer<typeof resultSchema>) => void,
+    onComplete: () => void
   ) =>
-    stream.pipeThrough(
-      splitFirstChunk((chunk) => {
-        const parsed = resultSchema.safeParse(chunk);
-        handler(parsed.success ? parsed.data : defaultValue);
-      }, "|")
-    ),
+    stream
+      .pipeThrough(
+        withFirstChunkHandler((chunk) => {
+          const parsed = resultSchema.safeParse(chunk);
+          emotionHandler(parsed.success ? parsed.data : defaultValue);
+        }, "|")
+      )
+      .pipeThrough(withCompletionTracking(onComplete)),
 });

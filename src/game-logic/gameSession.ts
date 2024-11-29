@@ -30,12 +30,12 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
 
     switch (gameMode) {
       case "AI_VS_AI":
-        this.playerOne = createAiPlayer("PLAYER_ONE", aiAvailable);
-        this.playerTwo = createAiPlayer("PLAYER_TWO", aiAvailable);
+        this.playerOne = createAiPlayer("PLAYER_ONE", "AI", aiAvailable);
+        this.playerTwo = createAiPlayer("PLAYER_TWO", "AI", aiAvailable);
         break;
       case "HUMAN_VS_AI":
         this.playerOne = createHumanPlayer();
-        this.playerTwo = createAiPlayer("PLAYER_TWO", aiAvailable);
+        this.playerTwo = createAiPlayer("PLAYER_TWO", "HUMAN", aiAvailable);
         break;
       case "HUMAN_VS_HUMAN":
         this.playerOne = createHumanPlayer();
@@ -157,12 +157,15 @@ export class GameSession extends EventEmitter<GameSessionEvent> {
     throw new Error("Invalid player type");
   }
 
-  restart = () => {
+  stop() {
+    this.clear();
+
+    if (this.playerOne.type === "AI") this.playerOne.getInstance().dispose();
+    if (this.playerTwo.type === "AI") this.playerTwo.getInstance().dispose();
+
     this.gameState = createInitialGameState();
     this.selectedCheckerPosition = null;
-    this.triggerAutomaticMoves();
-    this.emit({ type: "stateChanged" });
-  };
+  }
 
   getState() {
     return {

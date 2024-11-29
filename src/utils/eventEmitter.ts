@@ -22,5 +22,8 @@ export class EventEmitter<T extends { type: string }> {
     const eventListeners = this.listeners.get(event.type) || [];
     eventListeners.forEach((listener) => listener(event));
   }
-}
 
+  clear() {
+    this.listeners.clear();
+  }
+}

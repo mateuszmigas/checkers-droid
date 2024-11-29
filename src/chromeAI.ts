@@ -1,4 +1,4 @@
-// import { PromiseQueue } from "./utils/promise";
+import { isDevelopment } from "./platform";
 
 export type ChromeAiManagedSession = {
   prompt: (prompt: string) => Promise<string>;
@@ -6,9 +6,7 @@ export type ChromeAiManagedSession = {
   destroy: () => void;
 };
 
-// const _promiseQueue = new PromiseQueue();
-
-const useLogMiddleware = import.meta.env.mode === "development";
+const useLogMiddleware = isDevelopment;
 
 const logPrompt = (execute: (prompt: string) => Promise<string>) => {
   return async (prompt: string) => {
