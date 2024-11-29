@@ -22,6 +22,12 @@
 2. **AI Reactions:** Dynamic facial expressions reflecting the current game state.
 3. **AI Comments:** Engaging commentary on the game state powered by a language model.
 
+## Overview
+
+<div align="center">
+  <img src="assets/arch.svg" alt="Checker Droid Architecture">
+</div>
+
 ## How to run
 
 ### 🖥️ Local Machine
@@ -40,4 +46,6 @@
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+**Checkers Droid** is an online web checkers game powered by Chrome's built-in AI API, delivering smarter and more engaging gameplay experiences. It supports multiple game modes: Human vs Human, Human vs AI, and AI vs AI simulation.
 
