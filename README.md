@@ -44,12 +44,11 @@
 
 ### 🧪 Testing
 
-1. Start Chrome instance with AI enabled and remote debugging: `--remote-debugging-port=9222`
-2. Run tests with: `npm run test:eval`
+1. Start Chrome instance with AI enabled and remote debugging `--remote-debugging-port=9222`
+2. Run tests with `npm run test:eval`
 
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
 
 **Checkers Droid** is an online web checkers game powered by Chrome's built-in AI API, delivering smarter and more engaging gameplay experiences. It supports multiple game modes: Human vs Human, Human vs AI, and AI vs AI simulation.
-
