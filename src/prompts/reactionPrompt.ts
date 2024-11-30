@@ -22,10 +22,9 @@ const createReactionPrompt = (events: GameEvent[], aiPlayerType: PlayerType) => 
     .map((event) => translateEvent(event, aiPlayerType))
     .join("\n");
 
-  return `Based on the recent game events described below, generate:
-message: short, vivid message that captures the essence of the events
-emotion: authentically reflects the game state, one of:
-${aiPlayerEmotions.join(", ")}
+  return `Based on the recent game events described below, react as the player and generate:
+message: extremely short message, no explanations. (e.g., "Oh no! 😢", "Looks good! 🎉")
+emotion: just text, no emotes. Choose ONLY from this list: ${aiPlayerEmotions.join(", ")}.
 
 ${createSection("Events", eventDescriptions)}
 
