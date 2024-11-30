@@ -32,16 +32,20 @@
 
 ### 🖥️ Local Machine
 
-1. Install [pnpm](https://pnpm.io/installation)
-2. Clone the repository
-3. Install the dependencies using `pnpm install`
-4. Run the app using `pnpm dev`
+1. Clone the repository
+2. Install the dependencies using `npm install`
+3. Run the app using `npm run dev`
 
 ### ☁️ Github Codespaces
 
 1. [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mateuszmigas/checkers-droid)
 2. Install the dependencies using `npm install`
 3. Run the app using `npm run dev`
+
+### 🧪 Testing
+
+1. Start Chrome instance with AI enabled and remote debugging: `--remote-debugging-port=9222`
+2. Run tests with: `npm run test:eval`
 
 ## License
 

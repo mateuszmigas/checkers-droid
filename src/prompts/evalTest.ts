@@ -2,7 +2,7 @@ import { test, chromium, Page } from "@playwright/test";
 
 /*
 1. Open Chrome with remote debugging --remote-debugging-port=9222
-2. Run tests with: pnpm test:evals
+2. Run tests with: npm run test:evals
 */
 
 type TestFixtures = {
@@ -23,7 +23,7 @@ export const evalTest = test.extend<TestFixtures>({
     const page = await context.newPage();
 
     try {
-      await page.goto("http://localhost:5010/");
+      await page.goto("https://checkers-droid.vercel.app/");
       await use(page);
     } finally {
       await page.close();
