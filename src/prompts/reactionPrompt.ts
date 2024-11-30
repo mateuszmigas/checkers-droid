@@ -16,7 +16,7 @@ const promptEventTypes: GameEvent["type"][] = [
 
 const resultSchema = coerceToEnum(aiPlayerEmotions);
 
-const createEventsPrompt = (events: GameEvent[], aiPlayerType: PlayerType) => {
+const createReactionPrompt = (events: GameEvent[], aiPlayerType: PlayerType) => {
   const eventDescriptions = events
     .filter((event) => promptEventTypes.includes(event.type))
     .map((event) => translateEvent(event, aiPlayerType))
@@ -32,12 +32,12 @@ ${createSection("Events", eventDescriptions)}
 ${createSection("Response Format", "emotion|comment")}`;
 };
 
-export const createEventsPromptRequest = (
+export const createReactionPromptRequest = (
   events: GameEvent[],
   aiPlayerType: PlayerType,
   defaultValue: z.infer<typeof resultSchema>
 ) => ({
-  prompt: createEventsPrompt(events, aiPlayerType),
+  prompt: createReactionPrompt(events, aiPlayerType),
   handleEmotionThenStreamMessage: (
     stream: ReadableStream<string>,
     emotionHandler: (chunk: z.infer<typeof resultSchema>) => void,

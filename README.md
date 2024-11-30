@@ -47,6 +47,10 @@
 1. Start Chrome instance with AI enabled and remote debugging `--remote-debugging-port=9222`
 2. Run tests with `npm run test:eval`
 
+⚠️ **Note**: The evaluation tests are not meant to pass in a traditional sense. They serve as benchmarks to evaluate the AI model's performance.
+
+
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

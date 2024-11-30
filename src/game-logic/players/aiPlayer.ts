@@ -7,7 +7,7 @@ import { createMovePromptRequest, sessionOptions } from "@/prompts/movePrompt";
 import { createSystemPrompt } from "@/prompts/systemPrompt";
 import { createWelcomePrompt } from "@/prompts/welcomePrompt";
 import { runWithStructuredOutput } from "@/utils/prompt";
-import { createEventsPromptRequest } from "@/prompts/eventsPrompt";
+import { createReactionPromptRequest } from "@/prompts/reactionPrompt";
 import { withMinDuration } from "@/utils/promise";
 import { withCompletionTracking } from "@/utils/stream";
 import { analyzeMoveConsequences } from "../moveConsequence";
@@ -100,7 +100,7 @@ export class AiPlayer extends EventEmitter<AIPlayerEvents> {
       return;
     }
 
-    const promptRequest = createEventsPromptRequest(
+    const promptRequest = createReactionPromptRequest(
       gameEvents,
       this.playerType,
       "joy"
